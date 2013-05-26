@@ -28,6 +28,55 @@ from narro.evenementConcret import *
 from narro.pnj import *
 from narro.constantes import *
 from narro import directions
+import os
+
+class LanceurFleches(Evenement):
+    def __init__(self, jeu, gestionnaire):
+        super().__init__(jeu, gestionnaire)
+        self._fleches, self._positionSources, self._nombreFlechesTotal = dict(), dict(), 0
+        Horloge.initialiser(id(self), "Cooldown", 1)
+        self._positionSources["Gauche"] = Rect(0, 0, 42, 11)
+        self._positionSources["Droite"] = Rect(0, 11, 42, 11)
+        self._positionSources["Haut"] = Rect(0, 21, 42, 42)
+        self._positionSources["Bas"] = Rect(0, 63, 42, 42)
+
+    def traiter(self):
+        if self._gestionnaire.appuiTir and Horloge.sonner(id(self), "Cooldown"):
+            self._nombreFlechesTotal += 1
+            nomFleche, direction, sensDirection = "Fleche" + str(self._nombreFlechesTotal), self._boiteOutils.directionJoueurReelle, 1
+            positionFleche = self._boiteOutils.positionCarteJoueur.copy()
+            self._bougerPositionCarte(positionFleche, direction, 0, initialisation=True)
+            self._jeu.carteActuelle.poserPNJ(positionFleche, self._boiteOutils.coucheJoueur-1, self._positionSources[direction], "Arrow.png", (0,0,0), nomFleche)
+            tempsActuel = pygame.time.get_ticks()
+            self._fleches[nomFleche] = [positionFleche, direction, tempsActuel, VITESSE_DEPLACEMENT_FLECHE]
+            self._boiteOutils.jouerSon("Whip", "Whip Action Joueur", volume=VOLUME_MUSIQUE/1.5)
+            Horloge.initialiser(id(self), "Cooldown", 300)
+        tempsActuel = pygame.time.get_ticks()
+        for nomFleche in self._fleches.keys():
+            avancee, deltaTimer = self._calculerNouvellesCoordonnees(tempsActuel, self._fleches[nomFleche][2], self._fleches[nomFleche][3])
+            if avancee >= 1.0:
+                self._fleches[nomFleche][2], direction = tempsActuel, self._fleches[nomFleche][1]
+                self._bougerPositionCarte(self._fleches[nomFleche][0], direction, avancee)
+                positionFleche = self._fleches[nomFleche][0]
+                self._jeu.carteActuelle.poserPNJ(positionFleche, self._boiteOutils.coucheJoueur-1, self._positionSources[direction], "Arrow.png", (0,0,0), nomFleche)
+
+    def _calculerNouvellesCoordonnees(self, tempsActuel, tempsPrecedent, vitesseDeplacement):
+        deltaTimer = (tempsActuel - tempsPrecedent) / 1000
+        avancee = (vitesseDeplacement * deltaTimer)
+        return (avancee, deltaTimer)
+
+    def _bougerPositionCarte(self, positionFleche, direction, avancee, initialisation=False):
+        if initialisation and (direction == "Gauche" or direction == "Droite"):
+            avancee = self._positionSources["Gauche"].width
+        if initialisation and (direction == "Haut" or direction == "Bas"):
+            avancee = self._positionSources["Gauche"].height
+        sensDirection = 1
+        if direction == "Gauche" or direction == "Haut":
+            sensDirection = -1
+        if direction == "Gauche" or direction == "Droite":
+            positionFleche.move_ip(sensDirection * self._positionSources["Gauche"].width, 0)
+        elif direction == "Haut" or direction == "Bas":
+            positionFleche.move_ip(0, sensDirection * self._positionSources["Haut"].height)
 
 class Narrateur(Evenement):
     def __init__(self, jeu, gestionnaire):
@@ -39,6 +88,8 @@ class Narrateur(Evenement):
         x, y = self._gestionnaire.xJoueur, self._gestionnaire._yJoueur
         if self._boiteOutils.nomCarte == "Clairiere":
             if self._etape == 0:
+                self._coordonneesJoueur = self._boiteOutils.getCoordonneesJoueur()
+                self._boiteOutils.jouerSon("sonsForet", "boucleSonsForet", nombreEcoutes=0)
                 self._boiteOutils.ajouterTransformation(True, "Alpha", alpha=self._coefNoircisseur)
                 Horloge.initialiser(id(self), "Alpha", 100)
                 self._etape += 1
@@ -49,6 +100,11 @@ class Narrateur(Evenement):
                 self._boiteOutils.ajouterTransformation(True, "Alpha", alpha=self._coefNoircisseur)
                 if self._coefNoircisseur == 255:
                     self._boiteOutils.retirerTransformation(True, "Alpha")
+                    self._coordonneesJoueur = self._boiteOutils.getCoordonneesJoueur()
+                    Horloge.initialiser(id(self), "tempsDecouverte", 20000)
                     self._etape += 1
                 else:
                     Horloge.initialiser(id(self), "Alpha", 100)
+            if self._etape == 2 and (Horloge.sonner(id(self), "tempsDecouverte") is True or self._boiteOutils.deplacementConsequentJoueur(self._coordonneesJoueur, 10) is True):
+                self._boiteOutils.ajouterPensee("Test de la police")
+                self._etape += 1
