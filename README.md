@@ -1,10 +1,30 @@
 A-Humble-Hunter
-===============
-* A short interactive story written by @Rastagong (http://rastagong.net)  
-* Made with Python 3, Pygame and my own RPG engine, the Narro Engine (v0.3). Repo: https://github.com/Rastagong/narro)
+=====================
+A short interactive story written by @Rastagong (http://rastagong.net)  
+Made with Python 3, Pygame and my own RPG engine, the Narro Engine (v0.3). Repo: https://github.com/Rastagong/narro
+
+
+How to play?
+----------------------
+* Use the arrow keys to move.
+* Press W to interact with the characters and the environment (Z on QWERTY keyboards).
+* Press X to shoot an arrow.
+* Press Escape to leave at anytime.
+
+Building  the game from the sources
+----------------------
+1. Requirements  
+   Make sure Python 3, Pygame 1.9.2 or higher and Numpy are installed.  
+   As of May 26, 2013, there are only pre-releases of Pygame 1.9.2. You will find them on the Pygame website: http://www.pygame.org/download.shtml.  
+   If you don't find them there, you may try here for Windows: http://www.lfd.uci.edu/~gohlke/pythonlibs/#pygame.  
+   For Linux, you'll have to look in the Mercurial repo: https://bitbucket.org/pygame/pygame/downloads.  
+
+2. Download a source release from the _Releases_ folder (coming soon).  
+
+3. Run "python play.py" to launch the game.
 
 License and attribution
-----------------
+---------------------
 * The source code of the program is licensed under the GNU GPL (refer to COPYING). Some assets and dependencies used by the program are published under the terms of different licenses.
 * The Write Feather icon (Narro.ico) is a work by Double-J Design (http://www.doublejdesign.co.uk) published under the terms of the Creative Commons Attribution 3.0 license.
 * The Riven font (Riven.ttf) is a freeware made by Michael Bower (Riven2000@aol.com).
