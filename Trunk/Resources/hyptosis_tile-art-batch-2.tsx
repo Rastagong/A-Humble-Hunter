@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tileset name="Hyptosis 2" tileheight="32" tilewidth="32">
-    <image height="960" source="hyptosis_til-art-batch-2.png" width="960"/>
+    <image height="960" source="hyptosis_tile-art-batch-2.png" width="960"/>
     <tile id="0">
         <properties>
             <property name="Praticabilite" value="True"/>
