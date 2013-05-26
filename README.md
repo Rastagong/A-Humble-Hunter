@@ -28,6 +28,7 @@ License and attribution
 * The source code of the program is licensed under the GNU GPL (refer to COPYING). Some assets and dependencies used by the program are published under the terms of different licenses.
 * The Write Feather icon (Narro.ico) is a work by Double-J Design (http://www.doublejdesign.co.uk) published under the terms of the Creative Commons Attribution 3.0 license.
 * The Riven font (Riven.ttf) is a freeware made by Michael Bower (Riven2000@aol.com).
+* The forest sounds were recorded by dobroide and are licensed under the Creative Commons Attribution 3.0 (CC-BY). You can find them on this page from the much useful freesound.org database: http://www.freesound.org/people/dobroide/sounds/54699/.
 * Hyptosis' tiles are published under the terms of the Creative Commons Attribution 3.0 license. You can find them here: http://opengameart.org/content/lots-of-free-2d-tiles-and-sprites-by-hyptosis
 * The Liberated Pixel Cup assets (base\_out\_atlas.png, terrain\_atlas.png) were made for OpenGameArt.org by a bunch of awesome people I can't thank enough.  
   For the base assets: Lanea Zimmerman, Stephen Challener, Charles Sanchez, Manuel Riecke and Daniel Armstrong.  
