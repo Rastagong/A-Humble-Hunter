@@ -12,7 +12,7 @@ License and attribution
 * The Liberated Pixel Cup assets (base\_out\_atlas.png, terrain\_atlas.png) were made for OpenGameArt.org by a bunch of awesome people I can't thank enough:  
   Lanea Zimmerman, Stephen Challener, Charles Sanchez, Manuel Riecke and Daniel Armstrong for the base assets.  
   For the additional images:  
-  Daniel Eddeland, Johann Charlot, Chris Phillips, Robert Colladay, Joshua Taylor, Jonas Klinger, Leo Villeveygoux, Barbara Rivera, Anamaris, Krusmira and Casper Nilsson.
+  Daniel Eddeland, Johann Charlot, Chris Phillips, Robert Colladay, Joshua Taylor, Jonas Klinger, Leo Villeveygoux, Barbara Rivera, Anamaris, Krusmira and Casper Nilsson.  
   These assets are published under the terms of both the GNU GPL 3.0 and the Creative Commons Attribution-ShareAlike 3.0 Unported (CC-BY-SA).  
   You can find them here (http://opengameart.org/content/lpc-tile-atlas) and there (http://opengameart.org/content/lpc-tile-atlas2).  
   Refer to the "Liberated Pixel Cup Attribution" file for more details.
