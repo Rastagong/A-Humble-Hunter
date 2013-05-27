@@ -46,19 +46,28 @@ class LanceurFleches(Evenement):
             nomFleche, direction, sensDirection = "Fleche" + str(self._nombreFlechesTotal), self._boiteOutils.directionJoueurReelle, 1
             positionFleche = self._boiteOutils.positionCarteJoueur.copy()
             self._bougerPositionCarte(positionFleche, direction, 0, initialisation=True)
-            self._jeu.carteActuelle.poserPNJ(positionFleche, self._boiteOutils.coucheJoueur-1, self._positionSources[direction], "Arrow.png", (0,0,0), nomFleche)
+            self._jeu.carteActuelle.poserPNJ(positionFleche, self._boiteOutils.coucheJoueur, self._positionSources[direction], "Arrow.png", (0,0,0), nomFleche)
             tempsActuel = pygame.time.get_ticks()
             self._fleches[nomFleche] = [positionFleche, direction, tempsActuel, VITESSE_DEPLACEMENT_FLECHE]
             self._boiteOutils.jouerSon("Whip", "Whip Action Joueur", volume=VOLUME_MUSIQUE/1.5)
             Horloge.initialiser(id(self), "Cooldown", 300)
         tempsActuel = pygame.time.get_ticks()
+        flechesASupprimer = []
         for nomFleche in self._fleches.keys():
             avancee, deltaTimer = self._calculerNouvellesCoordonnees(tempsActuel, self._fleches[nomFleche][2], self._fleches[nomFleche][3])
             if avancee >= 1.0:
                 self._fleches[nomFleche][2], direction = tempsActuel, self._fleches[nomFleche][1]
                 self._bougerPositionCarte(self._fleches[nomFleche][0], direction, avancee)
                 positionFleche = self._fleches[nomFleche][0]
-                self._jeu.carteActuelle.poserPNJ(positionFleche, self._boiteOutils.coucheJoueur-1, self._positionSources[direction], "Arrow.png", (0,0,0), nomFleche)
+                carte = self._jeu.carteActuelle
+                if carte.deplacementPossible(positionFleche, self._boiteOutils.coucheJoueur, nomFleche) and (carte._ecranVisible.contains(positionFleche) or carte._ecranVisible.colliderect(positionFleche)):
+                    self._jeu.carteActuelle.poserPNJ(positionFleche, self._boiteOutils.coucheJoueur, self._positionSources[direction], "Arrow.png", (0,0,0), nomFleche)
+                else:
+                    self._jeu.carteActuelle.supprimerPNJ(nomFleche, self._boiteOutils.coucheJoueur)
+                    flechesASupprimer.append(nomFleche)
+        for nomFleche in flechesASupprimer:
+            self._fleches.pop(nomFleche)
+        del flechesASupprimer[:]
 
     def _calculerNouvellesCoordonnees(self, tempsActuel, tempsPrecedent, vitesseDeplacement):
         deltaTimer = (tempsActuel - tempsPrecedent) / 1000
