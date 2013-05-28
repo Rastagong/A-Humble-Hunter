@@ -28,7 +28,7 @@ from narro.evenementConcret import *
 from narro.pnj import *
 from narro.constantes import *
 from narro import directions
-import os
+import os, random
 
 class LanceurFleches(Evenement):
     def __init__(self, jeu, gestionnaire):
@@ -87,10 +87,30 @@ class LanceurFleches(Evenement):
         elif direction == "Haut" or direction == "Bas":
             positionFleche.move_ip(0, sensDirection * self._positionSources["Haut"].height)
 
+class GestionnaireAnimaux(Evenement):
+    def __init__(self, jeu, gestionnaire):
+        super().__init__(jeu, gestionnaire)
+        self._etape = 0
+
+    def traiter(self):
+        if self._etape == 0:
+            nombreSquirrels = 6
+            position, x, y, longueur, largeur = -1, -1, -1, self._jeu.carteActuelle.longueur, self._jeu.carteActuelle.largeur
+            i, positionsDepart, c = 1, [], 2
+            i = 1
+            while i <= nombreSquirrels:
+                while position in positionsDepart or (x,y) == (-1,-1) or self._jeu.carteActuelle.tilePraticable(x,y,c) is False or self._boiteOutils.tileProcheDe(position, positionsDepart, 5):
+                    position = Rect(random.randint(0, self._jeu.carteActuelle._longueur) * 32, random.randint(0, self._jeu.carteActuelle._largeur) * 32, 32, 32)
+                    x,y = int(position.left/32), int(position.top/32)
+                positionsDepart.append(position)
+                self._gestionnaire.evenements["concrets"][self._jeu.carteActuelle.nom]["Squirrel"+str(i)] = [Squirrel(self._jeu, self._gestionnaire, x, y, c, i), (x,y), "Bas"]
+                i += 1
+            self._etape += 1
+
 class Narrateur(Evenement):
     def __init__(self, jeu, gestionnaire):
         super().__init__(jeu, gestionnaire)
-        self._penseePossible, self._etape, self._coefNoircisseur = InterrupteurInverse(self._boiteOutils.penseeAGerer), 0, 0
+        self._penseePossible, self._etape, self._coefNoircisseur, self._alpha = InterrupteurInverse(self._boiteOutils.penseeAGerer), 0, 0, 255
         self._debut = False
     
     def traiter(self):
@@ -115,5 +135,32 @@ class Narrateur(Evenement):
                 else:
                     Horloge.initialiser(id(self), "Alpha", 100)
             if self._etape == 2 and (Horloge.sonner(id(self), "tempsDecouverte") is True or self._boiteOutils.deplacementConsequentJoueur(self._coordonneesJoueur, 10) is True):
-                self._boiteOutils.ajouterPensee("Test de la police")
+                self._boiteOutils.ajouterTransformation(True, "SplashText Arrow", texte="Press X to shoot an arrow", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=self._alpha)
+                Horloge.initialiser(id(self), "Alpha transition", 100)
                 self._etape += 1
+
+class Squirrel(PNJ):
+    def __init__(self, jeu, gestionnaire, x, y, c, numero):
+        fichier, couleurTransparente, persoCharset, vitesseDeplacement = "SquirrelMoving.png", (0,0,0), (0,0), 150
+        repetitionActions, directionDepart, listeActions = False, "Bas", []
+        super().__init__(jeu, gestionnaire, "Squirrel"+str(numero), x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement, fuyard=True)
+        self._penseePossible, self._trajetAleatoire = InterrupteurInverse(self._boiteOutils.penseeAGerer), False
+
+    def _gererEtape(self):
+        if self._etapeTraitement == 1 and self._deplacementBoucle is False:
+            self._genererLancerTrajetAleatoire(2, 5)
+
+    def _genererLancerTrajetAleatoire(self, longueurMin, longueurMax):
+        self._longueurMin, self._longueurMax, self._trajetAleatoire, i, actions = longueurMin, longueurMax, True, 0, []
+        longueurTrajet, direction = random.randint(longueurMin, longueurMax), self._boiteOutils.getDirectionAuHasard()
+        actions = [direction for i in range(longueurTrajet)]
+
+        i, nombreRegards, directionRegard = 0, random.randint(1,3), actions[len(actions)-2]
+        while i < nombreRegards:
+            while directionRegard == actions[len(actions)-2]:
+                directionRegard = "R" + self._boiteOutils.getDirectionAuHasard()
+            actions.append(directionRegard)
+            actions.append(500)
+            i += 1
+        self._listeActions, self._etapeAction, self._pixelsParcourus, self._repetitionActions, self._deplacementBoucle = actions, 0, 0, False, True
+        Horloge.initialiser(id(self), 1, 1)
