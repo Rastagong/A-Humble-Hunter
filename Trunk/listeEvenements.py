@@ -46,9 +46,12 @@ class LanceurFleches(Evenement):
             nomFleche, direction, sensDirection = "Fleche" + str(self._nombreFlechesTotal), self._boiteOutils.directionJoueurReelle, 1
             positionFleche = self._boiteOutils.positionCarteJoueur.copy()
             self._bougerPositionCarte(positionFleche, direction, 0, initialisation=True)
-            self._jeu.carteActuelle.poserPNJ(positionFleche, self._boiteOutils.coucheJoueur, self._positionSources[direction], "Arrow.png", (0,0,0), nomFleche)
             tempsActuel = pygame.time.get_ticks()
             self._fleches[nomFleche] = [positionFleche, direction, tempsActuel, VITESSE_DEPLACEMENT_FLECHE]
+            positionFlecheFinale = positionFleche.copy()
+            if "Gauche" in direction or "Droite" in direction:
+                positionFlecheFinale.move_ip(0, 12)
+            self._jeu.carteActuelle.poserPNJ(positionFlecheFinale, self._boiteOutils.coucheJoueur, self._positionSources[direction], "Arrow.png", (0,0,0), nomFleche)
             self._boiteOutils.jouerSon("Whip", "Whip Action Joueur", volume=VOLUME_MUSIQUE/1.5)
             Horloge.initialiser(id(self), "Cooldown", 300)
         tempsActuel = pygame.time.get_ticks()
@@ -58,7 +61,9 @@ class LanceurFleches(Evenement):
             if avancee >= 1.0:
                 self._fleches[nomFleche][2], direction = tempsActuel, self._fleches[nomFleche][1]
                 self._bougerPositionCarte(self._fleches[nomFleche][0], direction, avancee)
-                positionFleche = self._fleches[nomFleche][0]
+                positionFleche = self._fleches[nomFleche][0].copy()
+                if "Gauche" in direction or "Droite" in direction:
+                    positionFleche.move_ip(0, 12)
                 carte = self._jeu.carteActuelle
                 if carte.deplacementPossible(positionFleche, self._boiteOutils.coucheJoueur, nomFleche) and (carte._ecranVisible.contains(positionFleche) or carte._ecranVisible.colliderect(positionFleche)):
                     self._jeu.carteActuelle.poserPNJ(positionFleche, self._boiteOutils.coucheJoueur, self._positionSources[direction], "Arrow.png", (0,0,0), nomFleche)
@@ -94,12 +99,12 @@ class GestionnaireAnimaux(Evenement):
 
     def traiter(self):
         if self._etape == 0:
-            nombreSquirrels = 6
+            nombreSquirrels = 5
             position, x, y, longueur, largeur = -1, -1, -1, self._jeu.carteActuelle.longueur, self._jeu.carteActuelle.largeur
             i, positionsDepart, c = 1, [], 2
             i = 1
             while i <= nombreSquirrels:
-                while position in positionsDepart or (x,y) == (-1,-1) or self._jeu.carteActuelle.tilePraticable(x,y,c) is False or self._boiteOutils.tileProcheDe(position, positionsDepart, 5):
+                while position in positionsDepart or (x,y) == (-1,-1) or self._jeu.carteActuelle.tilePraticable(x,y,c) is False or self._boiteOutils.tileProcheDe(position, positionsDepart, 10):
                     position = Rect(random.randint(0, self._jeu.carteActuelle._longueur) * 32, random.randint(0, self._jeu.carteActuelle._largeur) * 32, 32, 32)
                     x,y = int(position.left/32), int(position.top/32)
                 positionsDepart.append(position)
@@ -143,24 +148,81 @@ class Squirrel(PNJ):
     def __init__(self, jeu, gestionnaire, x, y, c, numero):
         fichier, couleurTransparente, persoCharset, vitesseDeplacement = "SquirrelMoving.png", (0,0,0), (0,0), 150
         repetitionActions, directionDepart, listeActions = False, "Bas", []
-        super().__init__(jeu, gestionnaire, "Squirrel"+str(numero), x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement, fuyard=True)
-        self._penseePossible, self._trajetAleatoire = InterrupteurInverse(self._boiteOutils.penseeAGerer), False
+        super().__init__(jeu, gestionnaire, "Squirrel"+str(numero), x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement, fuyard=True, dureeAnimationSP=160)
+        self._penseePossible, self._surPlace = InterrupteurInverse(self._boiteOutils.penseeAGerer), False
+        self._nomTilesetMouvement, self._nomTilesetSurPlace = fichier, "SquirrelEating.png"
 
     def _gererEtape(self):
         if self._etapeTraitement == 1 and self._deplacementBoucle is False:
-            self._genererLancerTrajetAleatoire(2, 5)
+            self._genererLancerTrajetAleatoire(4, 8)
 
     def _genererLancerTrajetAleatoire(self, longueurMin, longueurMax):
-        self._longueurMin, self._longueurMax, self._trajetAleatoire, i, actions = longueurMin, longueurMax, True, 0, []
-        longueurTrajet, direction = random.randint(longueurMin, longueurMax), self._boiteOutils.getDirectionAuHasard()
-        actions = [direction for i in range(longueurTrajet)]
-
-        i, nombreRegards, directionRegard = 0, random.randint(1,3), actions[len(actions)-2]
+        self._longueurMin, self._longueurMax, i, actions = longueurMin, longueurMax, 0, []
+        longueurTrajet, direction1, direction2 = random.randint(longueurMin, longueurMax), self._boiteOutils.getDirectionAuHasard(), self._boiteOutils.getDirectionAuHasard()
+        while direction2 == directions.directionContraire(direction1):
+            direction2 = self._boiteOutils.getDirectionAuHasard()
+        seuilDirection = int(longueurTrajet/2)
+        while i < longueurTrajet:
+            if i < seuilDirection:
+                actions.append(direction1)
+            else:
+                actions.append(direction2)
+            i += 1
+        i, nombreRegards, directionRegard = 0, random.randint(1,2), actions[len(actions)-1]
         while i < nombreRegards:
-            while directionRegard == actions[len(actions)-2]:
-                directionRegard = "R" + self._boiteOutils.getDirectionAuHasard()
+            while directionRegard == actions[len(actions)-1]:
+                directionRegard = "V" + self._boiteOutils.getDirectionAuHasard() + str(2500)
             actions.append(directionRegard)
-            actions.append(500)
             i += 1
         self._listeActions, self._etapeAction, self._pixelsParcourus, self._repetitionActions, self._deplacementBoucle = actions, 0, 0, False, True
         Horloge.initialiser(id(self), 1, 1)
+
+    def _determinerAnimation(self, surPlace=False):
+        """Adapte le pied actuel et le fait d'être en marche à l'étape d'animation actuelle s'il est temps de changer d'animation (selon l'horloge n°2). 
+        <surPlace> doit valoir <True> quand on est en animation sur place.
+        Retourne <True> quand un changement d'animation est nécessaire."""
+        if surPlace != self._surPlace:
+            self._surPlace = surPlace
+            self._etapeAnimation, self._sensAnimation = 1, 1
+        if Horloge.sonner(id(self), 2) is True and self._surPlace is False:
+            if self._etapeAnimation <= 1:
+                self._etapeAnimation, self._sensAnimation = 1, 1
+            elif self._etapeAnimation >= 3:
+                self._etapeAnimation, self._sensAnimation = 3, -1
+            self._etapeAnimation += self._sensAnimation
+            Horloge.initialiser(id(self), 2, self._dureeAnimation)
+            return True
+        elif self._surPlace is True:
+            self._surPlace = True
+            self._etapeAnimation += self._sensAnimation
+            if self._etapeAnimation >= 8:
+                self._sensAnimation = -1
+            if self._etapeAnimation <= 1:
+                self._sensAnimation = 1
+        else:
+            return False
+
+    def _ajusterPositionSource(self, enMarche, direction):
+        """Donne la position source du PNJ en marche ou en fin de parcours, en fonction de la direction"""
+        hauteurTile = self._jeu.carteActuelle.hauteurTile
+        if not self._surPlace:
+            self._nomTileset = self._nomTilesetMouvement
+            self._positionSource.left, self._positionSource.top = 0, 0
+            self._positionSource.move_ip(self._persoCharset[0] * self._positionSource.width * 3, self._persoCharset[1] * self._positionSource.height * 4)
+            if "Bas" in direction:
+                pass
+            elif "Gauche" in direction:
+                self._positionSource.move_ip(0, 1 * self._positionSource.height)
+            elif "Droite" in direction:
+                self._positionSource.move_ip(0, 2 * self._positionSource.height)
+            elif "Haut" in direction:
+                self._positionSource.move_ip(0, 3 * self._positionSource.height)
+            self._positionSource.move_ip(32 * (self._etapeAnimation-1), 0)
+            if direction[0] == "V" or direction[0] == "R":
+                direction = direction[1:]
+            self._directionRegard = str(direction)  
+        else:
+            self._nomTileset, avanceeSelonDirection = self._nomTilesetSurPlace, {"Droite":0, "Gauche":32, "Bas":64, "Haut":96}
+            self._positionSource.left, self._positionSource.top = 0, 0
+            self._positionSource.move_ip(0, avanceeSelonDirection[self._boiteOutils.getDirectionBase(direction)])
+            self._positionSource.move_ip(32 * (self._etapeAnimation - 1), 0)
