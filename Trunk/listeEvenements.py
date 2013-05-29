@@ -37,35 +37,40 @@ class LanceurFleches(Evenement):
         Horloge.initialiser(id(self), "Cooldown", 1)
         self._positionSources["Gauche"] = Rect(0, 0, 42, 11)
         self._positionSources["Droite"] = Rect(0, 11, 42, 11)
-        self._positionSources["Haut"] = Rect(0, 21, 42, 42)
-        self._positionSources["Bas"] = Rect(0, 63, 42, 42)
+        self._positionSources["Haut"] = Rect(13, 21, 13, 42)
+        self._positionSources["Bas"] = Rect(13, 63, 13, 42)
 
     def traiter(self):
-        if self._gestionnaire.appuiTir and Horloge.sonner(id(self), "Cooldown"):
+        tempsActuel = pygame.time.get_ticks()
+        if self._gestionnaire.appuiTir and Horloge.sonner(id(self), "Cooldown", arretApresSonnerie=False):
             self._nombreFlechesTotal += 1
             nomFleche, direction, sensDirection = "Fleche" + str(self._nombreFlechesTotal), self._boiteOutils.directionJoueurReelle, 1
             positionFleche = self._boiteOutils.positionCarteJoueur.copy()
-            self._bougerPositionCarte(positionFleche, direction, 0, initialisation=True)
-            tempsActuel = pygame.time.get_ticks()
-            self._fleches[nomFleche] = [positionFleche, direction, tempsActuel, VITESSE_DEPLACEMENT_FLECHE]
-            positionFlecheFinale = positionFleche.copy()
+            positionCollision, positionVisible = Rect(0, 0, 0, 0), Rect(0, 0, 0, 0)
             if "Gauche" in direction or "Droite" in direction:
-                positionFlecheFinale.move_ip(0, 12)
-            self._jeu.carteActuelle.poserPNJ(positionFlecheFinale, self._boiteOutils.coucheJoueur, self._positionSources[direction], "Arrow.png", (0,0,0), nomFleche)
-            self._boiteOutils.jouerSon("Whip", "Whip Action Joueur", volume=VOLUME_MUSIQUE/1.5)
-            Horloge.initialiser(id(self), "Cooldown", 300)
-        tempsActuel = pygame.time.get_ticks()
+                positionCollision.width, positionCollision.height, positionCollision.left, positionCollision.top = 13, 11, 13, 0 
+            elif "Haut" in direction or "Bas" in direction:
+                positionCollision.width, positionCollision.height, positionCollision.left, positionCollision.top = 13, 42, 0, 0 
+            if "Gauche" in direction or "Droite" in direction:
+                positionVisible.top = 12
+            elif "Haut" in direction or "Bas" in direction:
+                positionVisible.left = 12
+            self._bougerPositionCarte(positionFleche, direction, 0, initialisation=True, positionCollision=positionCollision)
+            if self._jeu.carteActuelle.deplacementPossible(positionFleche, self._boiteOutils.coucheJoueur, nomFleche, positionCollision=positionCollision, positionVisible=positionVisible, verifPrecise=True, ecranVisible=True, exclusionCollision=["Joueur"]):
+                self._fleches[nomFleche] = [positionFleche, direction, tempsActuel, VITESSE_DEPLACEMENT_FLECHE, positionCollision, positionVisible]
+                self._jeu.carteActuelle.poserPNJ(positionFleche, self._boiteOutils.coucheJoueur, self._positionSources[direction], "Arrow.png", (0,0,0), nomFleche, positionCollision=positionCollision, positionVisible=positionVisible)
+                self._boiteOutils.jouerSon("Whip", "Whip Action Joueur", volume=VOLUME_MUSIQUE/1.5)
+                Horloge.arreterSonnerie(id(self), "Cooldown")
+                Horloge.initialiser(id(self), "Cooldown", 300)
         flechesASupprimer = []
         for nomFleche in self._fleches.keys():
             avancee, deltaTimer = self._calculerNouvellesCoordonnees(tempsActuel, self._fleches[nomFleche][2], self._fleches[nomFleche][3])
             if avancee >= 1.0:
                 self._fleches[nomFleche][2], direction = tempsActuel, self._fleches[nomFleche][1]
                 self._bougerPositionCarte(self._fleches[nomFleche][0], direction, avancee)
-                positionFleche = self._fleches[nomFleche][0].copy()
-                if "Gauche" in direction or "Droite" in direction:
-                    positionFleche.move_ip(0, 12)
+                positionFleche, positionCollision, positionVisible = self._fleches[nomFleche][0], self._fleches[nomFleche][4], self._fleches[nomFleche][5]
                 carte = self._jeu.carteActuelle
-                if carte.deplacementPossible(positionFleche, self._boiteOutils.coucheJoueur, nomFleche) and (carte._ecranVisible.contains(positionFleche) or carte._ecranVisible.colliderect(positionFleche)):
+                if carte.deplacementPossible(positionFleche, self._boiteOutils.coucheJoueur, nomFleche, positionCollision=positionCollision, positionVisible=positionVisible, verifPrecise=True, ecranVisible=True, exclusionCollision=["Joueur"]):
                     self._jeu.carteActuelle.poserPNJ(positionFleche, self._boiteOutils.coucheJoueur, self._positionSources[direction], "Arrow.png", (0,0,0), nomFleche)
                 else:
                     self._jeu.carteActuelle.supprimerPNJ(nomFleche, self._boiteOutils.coucheJoueur)
@@ -79,18 +84,18 @@ class LanceurFleches(Evenement):
         avancee = (vitesseDeplacement * deltaTimer)
         return (avancee, deltaTimer)
 
-    def _bougerPositionCarte(self, positionFleche, direction, avancee, initialisation=False):
-        if initialisation and (direction == "Gauche" or direction == "Droite"):
-            avancee = self._positionSources["Gauche"].width
-        if initialisation and (direction == "Haut" or direction == "Bas"):
-            avancee = self._positionSources["Gauche"].height
+    def _bougerPositionCarte(self, positionFleche, direction, avancee, initialisation=False, positionCollision=False):
+        if initialisation and ("Gauche" in direction or "Droite" in direction):
+            avancee = 10
+        elif initialisation and ("Haut" in direction or "Bas" in direction):
+            avancee = 10
         sensDirection = 1
         if direction == "Gauche" or direction == "Haut":
             sensDirection = -1
         if direction == "Gauche" or direction == "Droite":
-            positionFleche.move_ip(sensDirection * self._positionSources["Gauche"].width, 0)
+            positionFleche.move_ip(sensDirection * avancee, 0)
         elif direction == "Haut" or direction == "Bas":
-            positionFleche.move_ip(0, sensDirection * self._positionSources["Haut"].height)
+            positionFleche.move_ip(0, sensDirection * avancee)
 
 class GestionnaireAnimaux(Evenement):
     def __init__(self, jeu, gestionnaire):
@@ -99,7 +104,7 @@ class GestionnaireAnimaux(Evenement):
 
     def traiter(self):
         if self._etape == 0:
-            nombreSquirrels = 5
+            nombreSquirrels = 10
             position, x, y, longueur, largeur = -1, -1, -1, self._jeu.carteActuelle.longueur, self._jeu.carteActuelle.largeur
             i, positionsDepart, c = 1, [], 2
             i = 1
