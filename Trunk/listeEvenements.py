@@ -56,7 +56,7 @@ class LanceurFleches(Evenement):
             elif "Haut" in direction or "Bas" in direction:
                 positionVisible.left = 12
             self._bougerPositionCarte(positionFleche, direction, 0, initialisation=True, positionCollision=positionCollision)
-            if self._jeu.carteActuelle.deplacementPossible(positionFleche, self._boiteOutils.coucheJoueur, nomFleche, positionCollision=positionCollision, positionVisible=positionVisible, verifPrecise=True, ecranVisible=True, exclusionCollision=["Joueur"]):
+            if self._jeu.carteActuelle.deplacementPossible(positionFleche, self._boiteOutils.coucheJoueur, nomFleche, positionCollision=positionCollision, positionVisible=positionVisible, verifPrecise=True, ecranVisible=True, exclusionCollision=["Joueur"], collisionEffective=True):
                 self._fleches[nomFleche] = [positionFleche, direction, tempsActuel, VITESSE_DEPLACEMENT_FLECHE, positionCollision, positionVisible]
                 self._jeu.carteActuelle.poserPNJ(positionFleche, self._boiteOutils.coucheJoueur, self._positionSources[direction], "Arrow.png", (0,0,0), nomFleche, positionCollision=positionCollision, positionVisible=positionVisible)
                 self._boiteOutils.jouerSon("Whip", "Whip Action Joueur", volume=VOLUME_MUSIQUE/1.5)
@@ -70,7 +70,7 @@ class LanceurFleches(Evenement):
                 self._bougerPositionCarte(self._fleches[nomFleche][0], direction, avancee)
                 positionFleche, positionCollision, positionVisible = self._fleches[nomFleche][0], self._fleches[nomFleche][4], self._fleches[nomFleche][5]
                 carte = self._jeu.carteActuelle
-                if carte.deplacementPossible(positionFleche, self._boiteOutils.coucheJoueur, nomFleche, positionCollision=positionCollision, positionVisible=positionVisible, verifPrecise=True, ecranVisible=True, exclusionCollision=["Joueur"]):
+                if carte.deplacementPossible(positionFleche, self._boiteOutils.coucheJoueur, nomFleche, positionCollision=positionCollision, positionVisible=positionVisible, verifPrecise=True, ecranVisible=True, exclusionCollision=["Joueur"], collisionEffective=True):
                     self._jeu.carteActuelle.poserPNJ(positionFleche, self._boiteOutils.coucheJoueur, self._positionSources[direction], "Arrow.png", (0,0,0), nomFleche)
                 else:
                     self._jeu.carteActuelle.supprimerPNJ(nomFleche, self._boiteOutils.coucheJoueur)
@@ -86,9 +86,9 @@ class LanceurFleches(Evenement):
 
     def _bougerPositionCarte(self, positionFleche, direction, avancee, initialisation=False, positionCollision=False):
         if initialisation and ("Gauche" in direction or "Droite" in direction):
-            avancee = 10
+            avancee = 0
         elif initialisation and ("Haut" in direction or "Bas" in direction):
-            avancee = 10
+            avancee = 0
         sensDirection = 1
         if direction == "Gauche" or direction == "Haut":
             sensDirection = -1
@@ -96,26 +96,6 @@ class LanceurFleches(Evenement):
             positionFleche.move_ip(sensDirection * avancee, 0)
         elif direction == "Haut" or direction == "Bas":
             positionFleche.move_ip(0, sensDirection * avancee)
-
-class GestionnaireAnimaux(Evenement):
-    def __init__(self, jeu, gestionnaire):
-        super().__init__(jeu, gestionnaire)
-        self._etape = 0
-
-    def traiter(self):
-        if self._etape == 0:
-            nombreSquirrels = 10
-            position, x, y, longueur, largeur = -1, -1, -1, self._jeu.carteActuelle.longueur, self._jeu.carteActuelle.largeur
-            i, positionsDepart, c = 1, [], 2
-            i = 1
-            while i <= nombreSquirrels:
-                while position in positionsDepart or (x,y) == (-1,-1) or self._jeu.carteActuelle.tilePraticable(x,y,c) is False or self._boiteOutils.tileProcheDe(position, positionsDepart, 10):
-                    position = Rect(random.randint(0, self._jeu.carteActuelle._longueur) * 32, random.randint(0, self._jeu.carteActuelle._largeur) * 32, 32, 32)
-                    x,y = int(position.left/32), int(position.top/32)
-                positionsDepart.append(position)
-                self._gestionnaire.evenements["concrets"][self._jeu.carteActuelle.nom]["Squirrel"+str(i)] = [Squirrel(self._jeu, self._gestionnaire, x, y, c, i), (x,y), "Bas"]
-                i += 1
-            self._etape += 1
 
 class Narrateur(Evenement):
     def __init__(self, jeu, gestionnaire):
@@ -149,17 +129,61 @@ class Narrateur(Evenement):
                 Horloge.initialiser(id(self), "Alpha transition", 100)
                 self._etape += 1
 
+class GestionnaireAnimaux(Evenement):
+    def __init__(self, jeu, gestionnaire):
+        super().__init__(jeu, gestionnaire)
+        self._etape = 0
+
+    def traiter(self):
+        if self._etape == 0:
+            x, y, positionsArbres = 0, 0, []
+            while x < self._jeu.carteActuelle.longueur:
+                y = 0
+                while y < self._jeu.carteActuelle.largeur:
+                    tile = self._jeu.carteActuelle.tiles[x][y].bloc[2]
+                    if not tile.vide:
+                        if tile.nomTileset == "base_out_atlas.png" and tile.positionSource == (832, 672, 32, 32):
+                            positionsArbres.append((x,y))
+                    y += 1
+                x += 1
+            nombreSquirrels = 10
+            position, x, y, longueur, largeur = -1, -1, -1, self._jeu.carteActuelle.longueur, self._jeu.carteActuelle.largeur
+            i, positionsDepart, c = 1, [], 2
+            i = 1
+            while i <= nombreSquirrels:
+                while position in positionsDepart or (x,y) == (-1,-1) or self._jeu.carteActuelle.tilePraticable(x,y,c) is False or len([positionActuelle for positionActuelle in positionsDepart if self._boiteOutils.tileProcheDe(position, positionActuelle, 10) is True]) > 0:
+                    position = (random.randint(0, self._jeu.carteActuelle.longueur), random.randint(0, self._jeu.carteActuelle.largeur))
+                    x,y = position[0], position[1]
+                positionsDepart.append(position)
+                self._gestionnaire.evenements["concrets"][self._jeu.carteActuelle.nom]["Squirrel"+str(i)] = [Squirrel(self._jeu,self._gestionnaire,x,y,c,i,positionsArbres), (x,y), "Bas"]
+                i += 1
+            self._positionsArbres = positionsArbres
+            self._etape += 1
+
 class Squirrel(PNJ):
-    def __init__(self, jeu, gestionnaire, x, y, c, numero):
+    def __init__(self, jeu, gestionnaire, x, y, c, numero, positionsArbres):
         fichier, couleurTransparente, persoCharset, vitesseDeplacement = "SquirrelMoving.png", (0,0,0), (0,0), 150
         repetitionActions, directionDepart, listeActions = False, "Bas", []
         super().__init__(jeu, gestionnaire, "Squirrel"+str(numero), x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement, fuyard=True, dureeAnimationSP=160)
         self._penseePossible, self._surPlace = InterrupteurInverse(self._boiteOutils.penseeAGerer), False
-        self._nomTilesetMouvement, self._nomTilesetSurPlace = fichier, "SquirrelEating.png"
+        self._nomTilesetMouvement, self._nomTilesetSurPlace, self._vie, self._fuite, self._positionsArbres = fichier, "SquirrelEating.png", 3, False, positionsArbres
+        Horloge.initialiser(id(self), "Rouge clignotant", 1)
 
     def _gererEtape(self):
-        if self._etapeTraitement == 1 and self._deplacementBoucle is False:
+        if self._fuite is False and self._deplacementBoucle is False:
             self._genererLancerTrajetAleatoire(4, 8)
+        elif self._fuite:
+            if self._etapeTraitement == 1 and Horloge.sonner(id(self), "Rouge clignotant"):
+                self._boiteOutils.ajouterTransformation(False, "Rouge/"+self._nom, nom=self._nom)
+                Horloge.initialiser(id(self), "Rouge clignotant", 200)
+                self._etapeTraitement += 1
+            if self._etapeTraitement == 2 and Horloge.sonner(id(self), "Rouge clignotant"):
+                self._boiteOutils.retirerTransformation(False, "Rouge/"+self._nom)
+                if Horloge.sonner(id(self), "Fin clignotant"):
+                    self._etapeTraitement += 1
+                else:
+                    Horloge.initialiser(id(self), "Rouge clignotant", 200)
+                    self._etapeTraitement -= 1
 
     def _genererLancerTrajetAleatoire(self, longueurMin, longueurMax):
         self._longueurMin, self._longueurMax, i, actions = longueurMin, longueurMax, 0, []
@@ -231,3 +255,24 @@ class Squirrel(PNJ):
             self._positionSource.left, self._positionSource.top = 0, 0
             self._positionSource.move_ip(0, avanceeSelonDirection[self._boiteOutils.getDirectionBase(direction)])
             self._positionSource.move_ip(32 * (self._etapeAnimation - 1), 0)
+
+    def onCollision(self, nomPNJ, positionCarte):
+        super().onCollision(nomPNJ, positionCarte)
+        if "Fleche" in nomPNJ:
+            self._vie -= 1
+            self._fuite = True
+            Horloge.initialiser(id(self), "Fin clignotant", 3000)
+            self._positionsArbres = sorted(self._positionsArbres, key=lambda position: self._boiteOutils.estimationDistanceRestante((self._xTile, self._yTile), position))
+            i, positionIdealeTrouvee = 0, False
+            positionJoueur = Rect(self._gestionnaire.xJoueur*32, self._gestionnaire.yJoueur*32, 32, 32)
+            while i < len(self._positionsArbres) and not positionIdealeTrouvee:
+                distanceArbreJoueur = self._boiteOutils.estimationDistanceRestante((self._gestionnaire.xJoueur, self._gestionnaire.yJoueur), self._positionsArbres[i])
+                distanceArbreSquirrel = self._boiteOutils.estimationDistanceRestante((self._xTile, self._yTile), self._positionsArbres[i])
+                if not self._boiteOutils.tileProcheDe(self._positionsArbres[i], positionJoueur, 4) and distanceArbreSquirrel <= distanceArbreJoueur:
+                    self._finirDeplacementSP()
+                    self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, self._positionsArbres[i][0], self._positionsArbres[i][1])
+                    positionIdealeTrouvee = True
+                i += 1
+        if self._vie == 0:
+            self._boiteOutils.supprimerPNJ(self._nom, self._c)
+            self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
