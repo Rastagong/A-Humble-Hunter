@@ -48,13 +48,13 @@ class LanceurFleches(Evenement):
             positionFleche = self._boiteOutils.positionCarteJoueur.copy()
             positionCollision, positionVisible = Rect(0, 0, 0, 0), Rect(0, 0, 0, 0)
             if "Gauche" in direction or "Droite" in direction:
-                positionCollision.width, positionCollision.height, positionCollision.left, positionCollision.top = 13, 11, 13, 0 
+                positionCollision.width, positionCollision.height, positionCollision.left, positionCollision.top = 32, 32, 0, 0 
             elif "Haut" in direction or "Bas" in direction:
-                positionCollision.width, positionCollision.height, positionCollision.left, positionCollision.top = 13, 42, 0, 0 
+                positionCollision.width, positionCollision.height, positionCollision.left, positionCollision.top = 32, 42, 0, 0 
             if "Gauche" in direction or "Droite" in direction:
                 positionVisible.top = 12
             elif "Haut" in direction or "Bas" in direction:
-                positionVisible.left = 12
+                positionVisible.left = 10
             self._bougerPositionCarte(positionFleche, direction, 0, initialisation=True, positionCollision=positionCollision)
             if self._jeu.carteActuelle.deplacementPossible(positionFleche, self._boiteOutils.coucheJoueur, nomFleche, positionCollision=positionCollision, positionVisible=positionVisible, verifPrecise=True, ecranVisible=True, exclusionCollision=["Joueur"], collisionEffective=True):
                 self._fleches[nomFleche] = [positionFleche, direction, tempsActuel, VITESSE_DEPLACEMENT_FLECHE, positionCollision, positionVisible]
@@ -73,6 +73,7 @@ class LanceurFleches(Evenement):
                 if carte.deplacementPossible(positionFleche, self._boiteOutils.coucheJoueur, nomFleche, positionCollision=positionCollision, positionVisible=positionVisible, verifPrecise=True, ecranVisible=True, exclusionCollision=["Joueur"], collisionEffective=True):
                     self._jeu.carteActuelle.poserPNJ(positionFleche, self._boiteOutils.coucheJoueur, self._positionSources[direction], "Arrow.png", (0,0,0), nomFleche)
                 else:
+                    print(nomFleche,"collid")
                     self._jeu.carteActuelle.supprimerPNJ(nomFleche, self._boiteOutils.coucheJoueur)
                     flechesASupprimer.append(nomFleche)
         for nomFleche in flechesASupprimer:
@@ -133,6 +134,8 @@ class GestionnaireAnimaux(Evenement):
     def __init__(self, jeu, gestionnaire):
         super().__init__(jeu, gestionnaire)
         self._etape = 0
+        self._nombreSquirrels, self._nombreSquirrelsMinimal = 10, 6
+        self._nombreSquirrelsTotal = self._nombreSquirrels
 
     def traiter(self):
         if self._etape == 0:
@@ -146,28 +149,44 @@ class GestionnaireAnimaux(Evenement):
                             positionsArbres.append((x,y))
                     y += 1
                 x += 1
-            nombreSquirrels = 10
             position, x, y, longueur, largeur = -1, -1, -1, self._jeu.carteActuelle.longueur, self._jeu.carteActuelle.largeur
-            i, positionsDepart, c = 1, [], 2
+            i, positionsDepart, self._c = 1, [], 2
             i = 1
-            while i <= nombreSquirrels:
-                while position in positionsDepart or (x,y) == (-1,-1) or self._jeu.carteActuelle.tilePraticable(x,y,c) is False or len([positionActuelle for positionActuelle in positionsDepart if self._boiteOutils.tileProcheDe(position, positionActuelle, 10) is True]) > 0:
+            while i <= self._nombreSquirrels:
+                while position in positionsDepart or (x,y) == (-1,-1) or self._jeu.carteActuelle.tilePraticable(x,y,self._c) is False or len([positionActuelle for positionActuelle in positionsDepart if self._boiteOutils.tileProcheDe(position, positionActuelle, 10) is True]) > 0:
                     position = (random.randint(0, self._jeu.carteActuelle.longueur), random.randint(0, self._jeu.carteActuelle.largeur))
                     x,y = position[0], position[1]
                 positionsDepart.append(position)
-                self._gestionnaire.evenements["concrets"][self._jeu.carteActuelle.nom]["Squirrel"+str(i)] = [Squirrel(self._jeu,self._gestionnaire,x,y,c,i,positionsArbres), (x,y), "Bas"]
+                objetSquirrel = Squirrel(self._jeu, self._gestionnaire, x, y, self._c, i, positionsArbres, self)
+                self._gestionnaire.evenements["concrets"][self._jeu.carteActuelle.nom]["Squirrel"+str(i)] = [objetSquirrel, (x,y), "Bas"]
+                print("Parmi les squirrels d'origine, il y a Squirrel{0}".format(i))
                 i += 1
             self._positionsArbres = positionsArbres
             self._etape += 1
+        if self._etape == 1:
+            if self._nombreSquirrels < self._nombreSquirrelsMinimal:
+                self._nombreSquirrelsTotal += 1
+                self._nombreSquirrels += 1
+                positionCarte, nomSquirrel = Rect(0, 0, 32, 32), "Squirrel"+str(self._nombreSquirrelsTotal)
+                while (positionCarte.left,positionCarte.top) == (0,0) or self._jeu.carteActuelle.deplacementPossible(positionCarte, self._c, nomSquirrel) is False or self._jeu.carteActuelle._ecranVisible.contains(positionCarte) is True:
+                    positionCarte.left, positionCarte.top = random.randint(0, self._jeu.carteActuelle.longueur*32), random.randint(0, self._jeu.carteActuelle.largeur*32)
+                objetSquirrel = Squirrel(self._jeu, self._gestionnaire, positionCarte.left/32, positionCarte.top/32, self._c, self._nombreSquirrelsTotal, self._positionsArbres, self)
+                self._gestionnaire.evenements["concrets"][self._jeu.carteActuelle.nom][nomSquirrel] = [objetSquirrel, (positionCarte.left/32, positionCarte.top/32), "Bas"]
+                print("Plus assez de squirrels, on ajoute {0}".format(nomSquirrel))
+
+    def onMortAnimal(self, nom):
+        if "Squirrel" in nom:
+            self._nombreSquirrels -= 1
+            print("{0} est mort".format(nom))
 
 class Squirrel(PNJ):
-    def __init__(self, jeu, gestionnaire, x, y, c, numero, positionsArbres):
+    def __init__(self, jeu, gestionnaire, x, y, c, numero, positionsArbres, gestionnaireAnimaux):
         fichier, couleurTransparente, persoCharset, vitesseDeplacement = "SquirrelMoving.png", (0,0,0), (0,0), 150
         repetitionActions, directionDepart, listeActions = False, "Bas", []
         super().__init__(jeu, gestionnaire, "Squirrel"+str(numero), x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement, fuyard=True, dureeAnimationSP=160)
         self._penseePossible, self._surPlace = InterrupteurInverse(self._boiteOutils.penseeAGerer), False
         self._nomTilesetMouvement, self._nomTilesetSurPlace, self._vie, self._fuite, self._positionsArbres = fichier, "SquirrelEating.png", 3, False, positionsArbres
-        self._xArrivee, self._yArrivee, self._vulnerable = -1, -1, True
+        self._xArrivee, self._yArrivee, self._vulnerable, self._monteeArbre, self._gestionnaireAnimaux = -1, -1, True, False, gestionnaireAnimaux
         Horloge.initialiser(id(self), "Rouge clignotant", 1)
 
     def _gererEtape(self):
@@ -188,6 +207,41 @@ class Squirrel(PNJ):
             if self._deplacementBoucle is False and self._xTile == self._xArrivee and self._yTile == self._yArrivee:
                 self._vulnerable = False
                 self._lancerTrajet("Haut","Haut",False, deplacementLibre=True)
+                self._boiteOutils.retirerTransformation(False, "Rouge/"+self._nom)
+                self._monteeArbre = True
+        if self._monteeArbre:
+            if self._deplacementBoucle is False:
+                self._boiteOutils.supprimerPNJ(self._nom, self._c)
+                self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
+                self._gestionnaireAnimaux.onMortAnimal(self._nom)
+
+    def onCollision(self, nomPNJ, positionCarte):
+        super().onCollision(nomPNJ, positionCarte)
+        if "Fleche" in nomPNJ and self._vulnerable:
+            self._vie -= 1
+            print(self._nom, self._vie + 1, self._vie)
+            self._etapeTraitement = 1
+            Horloge.initialiser(id(self), "Fin clignotant", 2000)
+            Horloge.initialiser(id(self), "Rouge clignotant", 1)
+            if not self._fuite:
+                self._positionsArbres = sorted(self._positionsArbres, key=lambda position: self._boiteOutils.estimationDistanceRestante((self._xTile, self._yTile), position))
+                i, positionIdealeTrouvee = 0, False
+                while i < len(self._positionsArbres) and not positionIdealeTrouvee:
+                    positionJoueur = (self._gestionnaire.xJoueur, self._gestionnaire.yJoueur)
+                    distanceArbreJoueur = self._boiteOutils.estimationDistanceRestante(positionJoueur, self._positionsArbres[i])
+                    distanceArbreSquirrel = self._boiteOutils.estimationDistanceRestante((self._xTile, self._yTile), self._positionsArbres[i])
+                    if self._boiteOutils.tileProcheDe(self._positionsArbres[i], positionJoueur, 3) is False and distanceArbreSquirrel <= distanceArbreJoueur:
+                        self._finirDeplacementSP()
+                        self._xArrivee, self._yArrivee = self._positionsArbres[i]
+                        self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, self._positionsArbres[i][0], self._positionsArbres[i][1])
+                        positionIdealeTrouvee = True
+                    i += 1
+                self._fuite = True
+        if self._vie == 0:
+            self._boiteOutils.retirerTransformation(False, "Rouge/"+self._nom)
+            self._boiteOutils.supprimerPNJ(self._nom, self._c)
+            self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
+            self._gestionnaireAnimaux.onMortAnimal(self._nom)
 
     def _genererLancerTrajetAleatoire(self, longueurMin, longueurMax):
         self._longueurMin, self._longueurMax, i, actions = longueurMin, longueurMax, 0, []
@@ -259,25 +313,3 @@ class Squirrel(PNJ):
             self._positionSource.left, self._positionSource.top = 0, 0
             self._positionSource.move_ip(0, avanceeSelonDirection[self._boiteOutils.getDirectionBase(direction)])
             self._positionSource.move_ip(32 * (self._etapeAnimation - 1), 0)
-
-    def onCollision(self, nomPNJ, positionCarte):
-        super().onCollision(nomPNJ, positionCarte)
-        if "Fleche" in nomPNJ and self._vulnerable:
-            self._vie -= 1
-            self._fuite = True
-            Horloge.initialiser(id(self), "Fin clignotant", 3000)
-            self._positionsArbres = sorted(self._positionsArbres, key=lambda position: self._boiteOutils.estimationDistanceRestante((self._xTile, self._yTile), position))
-            i, positionIdealeTrouvee = 0, False
-            positionJoueur = Rect(self._gestionnaire.xJoueur*32, self._gestionnaire.yJoueur*32, 32, 32)
-            while i < len(self._positionsArbres) and not positionIdealeTrouvee:
-                distanceArbreJoueur = self._boiteOutils.estimationDistanceRestante((self._gestionnaire.xJoueur, self._gestionnaire.yJoueur), self._positionsArbres[i])
-                distanceArbreSquirrel = self._boiteOutils.estimationDistanceRestante((self._xTile, self._yTile), self._positionsArbres[i])
-                if not self._boiteOutils.tileProcheDe(self._positionsArbres[i], positionJoueur, 4) and distanceArbreSquirrel <= distanceArbreJoueur:
-                    self._finirDeplacementSP()
-                    self._xArrivee, self._yArrivee = self._positionsArbres[i]
-                    self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, self._positionsArbres[i][0], self._positionsArbres[i][1])
-                    positionIdealeTrouvee = True
-                i += 1
-        if self._vie == 0:
-            self._boiteOutils.supprimerPNJ(self._nom, self._c)
-            self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
