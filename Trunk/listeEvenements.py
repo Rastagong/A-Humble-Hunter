@@ -167,6 +167,7 @@ class Squirrel(PNJ):
         super().__init__(jeu, gestionnaire, "Squirrel"+str(numero), x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement, fuyard=True, dureeAnimationSP=160)
         self._penseePossible, self._surPlace = InterrupteurInverse(self._boiteOutils.penseeAGerer), False
         self._nomTilesetMouvement, self._nomTilesetSurPlace, self._vie, self._fuite, self._positionsArbres = fichier, "SquirrelEating.png", 3, False, positionsArbres
+        self._xArrivee, self._yArrivee, self._vulnerable = -1, -1, True
         Horloge.initialiser(id(self), "Rouge clignotant", 1)
 
     def _gererEtape(self):
@@ -184,6 +185,9 @@ class Squirrel(PNJ):
                 else:
                     Horloge.initialiser(id(self), "Rouge clignotant", 200)
                     self._etapeTraitement -= 1
+            if self._deplacementBoucle is False and self._xTile == self._xArrivee and self._yTile == self._yArrivee:
+                self._vulnerable = False
+                self._lancerTrajet("Haut","Haut",False, deplacementLibre=True)
 
     def _genererLancerTrajetAleatoire(self, longueurMin, longueurMax):
         self._longueurMin, self._longueurMax, i, actions = longueurMin, longueurMax, 0, []
@@ -258,7 +262,7 @@ class Squirrel(PNJ):
 
     def onCollision(self, nomPNJ, positionCarte):
         super().onCollision(nomPNJ, positionCarte)
-        if "Fleche" in nomPNJ:
+        if "Fleche" in nomPNJ and self._vulnerable:
             self._vie -= 1
             self._fuite = True
             Horloge.initialiser(id(self), "Fin clignotant", 3000)
@@ -270,6 +274,7 @@ class Squirrel(PNJ):
                 distanceArbreSquirrel = self._boiteOutils.estimationDistanceRestante((self._xTile, self._yTile), self._positionsArbres[i])
                 if not self._boiteOutils.tileProcheDe(self._positionsArbres[i], positionJoueur, 4) and distanceArbreSquirrel <= distanceArbreJoueur:
                     self._finirDeplacementSP()
+                    self._xArrivee, self._yArrivee = self._positionsArbres[i]
                     self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, self._positionsArbres[i][0], self._positionsArbres[i][1])
                     positionIdealeTrouvee = True
                 i += 1
