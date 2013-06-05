@@ -56,7 +56,7 @@ class LanceurFleches(Evenement):
             elif "Haut" in direction or "Bas" in direction:
                 positionVisible.left = 10
             self._bougerPositionCarte(positionFleche, direction, 0, initialisation=True, positionCollision=positionCollision)
-            if self._jeu.carteActuelle.deplacementPossible(positionFleche, self._boiteOutils.coucheJoueur, nomFleche, positionCollision=positionCollision, positionVisible=positionVisible, verifPrecise=True, ecranVisible=True, exclusionCollision=["Joueur"], collisionEffective=True):
+            if self._jeu.carteActuelle.deplacementPossible(positionFleche, self._boiteOutils.coucheJoueur, nomFleche, positionCollision=positionCollision, positionVisible=positionVisible, verifPrecise=True, ecranVisible=True, exclusionCollision=["Joueur"], collisionEffective=True, axeTiles=False):
                 self._fleches[nomFleche] = [positionFleche, direction, tempsActuel, VITESSE_DEPLACEMENT_FLECHE, positionCollision, positionVisible]
                 self._jeu.carteActuelle.poserPNJ(positionFleche, self._boiteOutils.coucheJoueur, self._positionSources[direction], "Arrow.png", (0,0,0), nomFleche, positionCollision=positionCollision, positionVisible=positionVisible)
                 self._boiteOutils.jouerSon("Whip", "Whip Action Joueur", volume=VOLUME_MUSIQUE/1.5)
@@ -70,7 +70,7 @@ class LanceurFleches(Evenement):
                 self._bougerPositionCarte(self._fleches[nomFleche][0], direction, avancee)
                 positionFleche, positionCollision, positionVisible = self._fleches[nomFleche][0], self._fleches[nomFleche][4], self._fleches[nomFleche][5]
                 carte = self._jeu.carteActuelle
-                if carte.deplacementPossible(positionFleche, self._boiteOutils.coucheJoueur, nomFleche, positionCollision=positionCollision, positionVisible=positionVisible, verifPrecise=True, ecranVisible=True, exclusionCollision=["Joueur"], collisionEffective=True):
+                if carte.deplacementPossible(positionFleche, self._boiteOutils.coucheJoueur, nomFleche, positionCollision=positionCollision, positionVisible=positionVisible, verifPrecise=True, ecranVisible=True, exclusionCollision=["Joueur"], collisionEffective=True, axeTiles=False):
                     self._jeu.carteActuelle.poserPNJ(positionFleche, self._boiteOutils.coucheJoueur, self._positionSources[direction], "Arrow.png", (0,0,0), nomFleche)
                 else:
                     print(nomFleche,"collid")
@@ -217,6 +217,7 @@ class Squirrel(PNJ):
 
     def onCollision(self, nomPNJ, positionCarte):
         super().onCollision(nomPNJ, positionCarte)
+        print(nomPNJ,positionCarte,"Touche par",self._vulnerable)
         if "Fleche" in nomPNJ and self._vulnerable:
             self._vie -= 1
             print(self._nom, self._vie + 1, self._vie)
@@ -238,6 +239,7 @@ class Squirrel(PNJ):
                     i += 1
                 self._fuite = True
         if self._vie == 0:
+            self._finirDeplacementSP()
             self._boiteOutils.retirerTransformation(False, "Rouge/"+self._nom)
             self._boiteOutils.supprimerPNJ(self._nom, self._c)
             self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
