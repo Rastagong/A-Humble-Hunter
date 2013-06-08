@@ -101,6 +101,7 @@ class Narrateur(Evenement):
     def __init__(self, jeu, gestionnaire):
         super().__init__(jeu, gestionnaire)
         self._penseePossible, self._etape, self._coefNoircisseur, self._alpha = InterrupteurInverse(self._boiteOutils.penseeAGerer), 0, 0, 255
+        self._squirrelsTues = 0
         self._debut = False
     
     def traiter(self):
@@ -128,12 +129,18 @@ class Narrateur(Evenement):
                 self._boiteOutils.ajouterTransformation(True, "SplashText Arrow", texte="Press X to shoot an arrow", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=self._alpha)
                 Horloge.initialiser(id(self), "Alpha transition", 100)
                 self._etape += 1
+            if self._etape >= 3:
+                pass
+
+    def onMortAnimal(self, nom):
+        if "Squirrel" in nom:
+            self._squirrelsTues += 1
 
 class GestionnaireAnimaux(Evenement):
     def __init__(self, jeu, gestionnaire):
         super().__init__(jeu, gestionnaire)
         self._etape = 0
-        self._nombreSquirrels, self._nombreSquirrelsMinimal = 10, 6
+        self._nombreSquirrels, self._nombreSquirrelsMinimal = 100, 6
         self._nombreSquirrelsTotal = self._nombreSquirrels
 
     def traiter(self):
@@ -166,12 +173,12 @@ class GestionnaireAnimaux(Evenement):
                 self._nombreSquirrelsTotal += 1
                 self._nombreSquirrels += 1
                 positionCarte, nomSquirrel = Rect(0, 0, 32, 32), "Squirrel"+str(self._nombreSquirrelsTotal)
-                while (positionCarte.left,positionCarte.top) == (0,0) or self._jeu.carteActuelle.deplacementPossible(positionCarte, self._c, nomSquirrel) is False or self._jeu.carteActuelle._ecranVisible.contains(positionCarte) is True:
+                while (positionCarte.left,positionCarte.top) == (0,0) or self._jeu.carteActuelle.deplacementPossible(positionCarte, self._c, nomSquirrel) is False or (self._jeu.carteActuelle._ecranVisible.contains(positionCarte) or self._jeu.carteActuelle._ecranVisible.colliderect(positionCarte)):
                     positionCarte.left, positionCarte.top = random.randint(0, self._jeu.carteActuelle.longueur*32), random.randint(0, self._jeu.carteActuelle.largeur*32)
                 objetSquirrel = Squirrel(self._jeu, self._gestionnaire, positionCarte.left/32, positionCarte.top/32, self._c, self._nombreSquirrelsTotal, self._positionsArbres, self)
                 self._gestionnaire.evenements["concrets"][self._jeu.carteActuelle.nom][nomSquirrel] = [objetSquirrel, (positionCarte.left/32, positionCarte.top/32), "Bas"]
 
-    def onMortAnimal(self, nom):
+    def onMortAnimal(self, nom, viaChasse=False):
         if "Squirrel" in nom:
             self._nombreSquirrels -= 1
 
@@ -180,13 +187,14 @@ class Squirrel(PNJ):
         fichier, couleurTransparente, persoCharset, vitesseDeplacement = "SquirrelMoving.png", (0,0,0), (0,0), 150
         repetitionActions, directionDepart, listeActions = False, "Bas", []
         super().__init__(jeu, gestionnaire, "Squirrel"+str(numero), x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement, fuyard=True, dureeAnimationSP=160)
+        print(self._positionCarte.left/32,self._positionCarte.top/32)
         self._penseePossible, self._surPlace = InterrupteurInverse(self._boiteOutils.penseeAGerer), False
-        self._nomTilesetMouvement, self._nomTilesetSurPlace, self._vie, self._fuite, self._positionsArbres = fichier, "SquirrelEating.png", 3, False, positionsArbres
+        self._nomTilesetMouvement, self._nomTilesetSurPlace, self._vie, self._fuite, self._positionsArbres, self._cadavreEnPlace = fichier, "SquirrelEating.png", 3, False, positionsArbres, False
         self._xArrivee, self._yArrivee, self._vulnerable, self._monteeArbre, self._gestionnaireAnimaux, self._animationMort = -1, -1, True, False, gestionnaireAnimaux, False
         Horloge.initialiser(id(self), "Rouge clignotant", 1)
 
     def _gererEtape(self):
-        if self._fuite is False and self._deplacementBoucle is False:
+        if self._fuite is False and self._deplacementBoucle is False and self._animationMort is False:
             self._genererLancerTrajetAleatoire(4, 8)
         elif self._fuite:
             if self._etapeTraitement == 1 and Horloge.sonner(id(self), "Rouge clignotant"):
@@ -210,15 +218,14 @@ class Squirrel(PNJ):
                 self._boiteOutils.supprimerPNJ(self._nom, self._c)
                 self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
                 self._gestionnaireAnimaux.onMortAnimal(self._nom)
-        if self._animationMort:
-            if self._deplacementBoucle is False:
-                pass
+        if self._animationMort and self._xTile == self._tileCadavre[0] and self._yTile == self._tileCadavre[1] and self._cadavreEnPlace is False:
+            self._cadavreEnPlace = True
 
     def onCollision(self, nomPNJ, positionCarte):
         super().onCollision(nomPNJ, positionCarte)
         if "Fleche" in nomPNJ and self._vulnerable:
             self._vie -= 1
-            self._etapeTraitement = 1
+            self._etapeTraitement, self._intelligence, self._courage, self._fuyard = 1, True, True, False
             Horloge.initialiser(id(self), "Fin clignotant", 2000)
             Horloge.initialiser(id(self), "Rouge clignotant", 1)
             if not self._fuite:
@@ -236,15 +243,20 @@ class Squirrel(PNJ):
                     i += 1
                 self._fuite = True
         if self._vie == 0 and self._animationMort is False:
+            print(self._animationMort)
             self._finirDeplacementSP()
             self._trouverTileCadavre()
+            self._changerCouche(self._c-1)
             self._lancerTrajet(Rect(self._tileCadavre[0]*32, self._tileCadavre[1]*32, 32, 32), False, deplacementLibre=True)
-            self._vulnerable = False
+            self._vulnerable, self._fuite, self._animationMort = False, False, True
             self._boiteOutils.retirerTransformation(False, "Rouge/"+self._nom)
-            self._animationMort = True
-            self._gestionnaireAnimaux.onMortAnimal(self._nom)
-            """self._boiteOutils.supprimerPNJ(self._nom, self._c)
-            self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)"""
+
+    def onJoueurInteractionQuelconque(self, x, y, c, direction):
+        if self._cadavreEnPlace:
+            self._boiteOutils.supprimerPNJ(self._nom, self._c)
+            self._gestionnaireAnimaux.onMortAnimal(self._nom, viaChasse=True)
+            self._gestionnaire.evenements["abstraits"]["Divers"]["Narrateur"][0].onMortAnimal(self._nom)
+            self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
 
     def _trouverTileCadavre(self):
         positionCarte, self._tileCadavre, tiles, tilesVisites = Rect(0,0,32,32), False, [(self._xTile+1,self._yTile+1)], [(self._xTile,self._yTile)]
@@ -252,8 +264,7 @@ class Squirrel(PNJ):
         while self._tileCadavre is False:
             for tile in tiles:
                 positionCarte.left, positionCarte.top = tile[0]*32, tile[1]*32
-                print((self._xTile,self._yTile), tile)
-                if self._jeu.carteActuelle.tilePraticable(tile[0],tile[1],self._c) and self._jeu.carteActuelle.deplacementPossible(positionCarte, self._c, self._nom) and tile not in tilesVisites:
+                if self._jeu.carteActuelle.tilePraticable(tile[0],tile[1],self._c) and self._jeu.carteActuelle.tiles[tile[0]][tile[1]].bloc[self._c+1].vide is True and self._jeu.carteActuelle.deplacementPossible(positionCarte, self._c, self._nom) and tile not in tilesVisites:
                     self._tileCadavre = tile
                     break
                 else:
@@ -264,9 +275,9 @@ class Squirrel(PNJ):
     def _ajouterPositionsAdjacentes(self, tiles, tilesVisites):
         i = len(tiles)-1
         while i >= 0:
-            x,y = 0, 0
+            x,y = -1, -1
             while x <= 1:
-                y = 0
+                y = -1
                 while y <= 1:
                     tileActuel = (tiles[i][0] + x, tiles[i][1] + y)
                     if self._jeu.carteActuelle.tileExistant(*tileActuel) and tileActuel not in tilesVisites:
