@@ -127,21 +127,30 @@ class Narrateur(Evenement):
                     Horloge.initialiser(id(self), "Alpha", 100)
             if self._etape == 2 and (Horloge.sonner(id(self), "tempsDecouverte") is True or self._boiteOutils.deplacementConsequentJoueur(self._coordonneesJoueur, 10) is True):
                 self._boiteOutils.ajouterTransformation(True, "SplashText Arrow", texte="Press X to shoot an arrow", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=self._alpha)
-                Horloge.initialiser(id(self), "Alpha transition", 100)
                 self._etape += 1
-            if self._etape >= 3:
-                pass
+            if self._etape > 3:
+                if self._etape == 4:
+                    self._boiteOutils.ajouterPensee("A squirrel... I won't feed anyone with that. I can merely sell its coat.")
+                    self._etape += 1
+                if self._etape == 6:
+                    self._boiteOutils.ajouterPensee("The old Doug used to hunt squirrels. He starved during the last winter.")
+                    self._etape += 1
+                if self._etape == 8:
+                    self._boiteOutils.ajouterPensee("If only there were some big game to hunt in these damn woods...")
+                    self._etape += 1
 
     def onMortAnimal(self, nom):
         if "Squirrel" in nom:
-            self._squirrelsTues += 1
+            self._boiteOutils.variables["squirrelsTues"] += 1
+            self._etape += 1
 
 class GestionnaireAnimaux(Evenement):
     def __init__(self, jeu, gestionnaire):
         super().__init__(jeu, gestionnaire)
-        self._etape = 0
-        self._nombreSquirrels, self._nombreSquirrelsMinimal = 100, 6
+        self._etape, self._nombreLapins = 0, 0
+        self._nombreSquirrels, self._nombreSquirrelsMinimal = 3, 3
         self._nombreSquirrelsTotal = self._nombreSquirrels
+        Horloge.initialiser(id(self), "SonEating", 1)
 
     def traiter(self):
         if self._etape == 0:
@@ -177,6 +186,8 @@ class GestionnaireAnimaux(Evenement):
                     positionCarte.left, positionCarte.top = random.randint(0, self._jeu.carteActuelle.longueur*32), random.randint(0, self._jeu.carteActuelle.largeur*32)
                 objetSquirrel = Squirrel(self._jeu, self._gestionnaire, positionCarte.left/32, positionCarte.top/32, self._c, self._nombreSquirrelsTotal, self._positionsArbres, self)
                 self._gestionnaire.evenements["concrets"][self._jeu.carteActuelle.nom][nomSquirrel] = [objetSquirrel, (positionCarte.left/32, positionCarte.top/32), "Bas"]
+            if self._boiteOutils.variables["squirrelsTues"] == 3 and self._nombreLapins == 0:
+                pass
 
     def onMortAnimal(self, nom, viaChasse=False):
         if "Squirrel" in nom:
@@ -187,15 +198,20 @@ class Squirrel(PNJ):
         fichier, couleurTransparente, persoCharset, vitesseDeplacement = "SquirrelMoving.png", (0,0,0), (0,0), 150
         repetitionActions, directionDepart, listeActions = False, "Bas", []
         super().__init__(jeu, gestionnaire, "Squirrel"+str(numero), x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement, fuyard=True, dureeAnimationSP=160)
-        print(self._positionCarte.left/32,self._positionCarte.top/32)
         self._penseePossible, self._surPlace = InterrupteurInverse(self._boiteOutils.penseeAGerer), False
         self._nomTilesetMouvement, self._nomTilesetSurPlace, self._vie, self._fuite, self._positionsArbres, self._cadavreEnPlace = fichier, "SquirrelEating.png", 3, False, positionsArbres, False
         self._xArrivee, self._yArrivee, self._vulnerable, self._monteeArbre, self._gestionnaireAnimaux, self._animationMort = -1, -1, True, False, gestionnaireAnimaux, False
+        self._sonMange = False
         Horloge.initialiser(id(self), "Rouge clignotant", 1)
 
     def _gererEtape(self):
         if self._fuite is False and self._deplacementBoucle is False and self._animationMort is False:
             self._genererLancerTrajetAleatoire(4, 8)
+            self._sonMange = False
+        elif self._fuite is False and self._deplacementBoucle is True and self._animationMort is False and self._sonMange is False and self._etapeAction < len(self._listeActions) and isinstance(self._listeActions[self._etapeAction],str) and self._listeActions[self._etapeAction][0] == "V" and Horloge.sonner(id(self._gestionnaireAnimaux), "SonEating", arretApresSonnerie=False):
+            self._boiteOutils.jouerSon("squirrelEating", self._nom + "eating", fixe=True, evenementFixe=self._nom, volume=VOLUME_MUSIQUE/2)
+            Horloge.initialiser(id(self._gestionnaireAnimaux), "SonEating", 1000) 
+            self._sonMange = True
         elif self._fuite:
             if self._etapeTraitement == 1 and Horloge.sonner(id(self), "Rouge clignotant"):
                 self._boiteOutils.ajouterTransformation(False, "Rouge/"+self._nom, nom=self._nom)
@@ -212,13 +228,14 @@ class Squirrel(PNJ):
                 self._vulnerable = False
                 self._lancerTrajet("Haut","Haut",False, deplacementLibre=True)
                 self._boiteOutils.retirerTransformation(False, "Rouge/"+self._nom)
+                self._boiteOutils.jouerSon("squirrelFuite", self._nom + "fuite", fixe=True, xFixe=self._xTile, yFixe=self._yTile)
                 self._monteeArbre = True
         if self._monteeArbre:
             if self._deplacementBoucle is False:
                 self._boiteOutils.supprimerPNJ(self._nom, self._c)
                 self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
                 self._gestionnaireAnimaux.onMortAnimal(self._nom)
-        if self._animationMort and self._xTile == self._tileCadavre[0] and self._yTile == self._tileCadavre[1] and self._cadavreEnPlace is False:
+        if self._animationMort is True and self._xTile == self._tileCadavre[0] and self._yTile == self._tileCadavre[1] and self._cadavreEnPlace is False:
             self._cadavreEnPlace = True
 
     def onCollision(self, nomPNJ, positionCarte):
@@ -226,6 +243,7 @@ class Squirrel(PNJ):
         if "Fleche" in nomPNJ and self._vulnerable:
             self._vie -= 1
             self._etapeTraitement, self._intelligence, self._courage, self._fuyard = 1, True, True, False
+            self._boiteOutils.jouerSon("squirrelBlesse", self._nom + "blesse" + str(self._vie), fixe=True, evenementFixe=self._nom)
             Horloge.initialiser(id(self), "Fin clignotant", 2000)
             Horloge.initialiser(id(self), "Rouge clignotant", 1)
             if not self._fuite:
@@ -243,7 +261,6 @@ class Squirrel(PNJ):
                     i += 1
                 self._fuite = True
         if self._vie == 0 and self._animationMort is False:
-            print(self._animationMort)
             self._finirDeplacementSP()
             self._trouverTileCadavre()
             self._changerCouche(self._c-1)
@@ -251,12 +268,17 @@ class Squirrel(PNJ):
             self._vulnerable, self._fuite, self._animationMort = False, False, True
             self._boiteOutils.retirerTransformation(False, "Rouge/"+self._nom)
 
-    def onJoueurInteractionQuelconque(self, x, y, c, direction):
-        if self._cadavreEnPlace:
+    def _onJoueurInteractionQuelconque(self, x, y, c, direction):
+        if self._cadavreEnPlace is True:
             self._boiteOutils.supprimerPNJ(self._nom, self._c)
             self._gestionnaireAnimaux.onMortAnimal(self._nom, viaChasse=True)
-            self._gestionnaire.evenements["abstraits"]["Divers"]["Narrateur"][0].onMortAnimal(self._nom)
+            self._gestionnaire.evenements["abstraits"]["Divers"]["Narrateur"].onMortAnimal(self._nom)
             self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
+            self._boiteOutils.enleverInstanceSon(self._jeu.carteActuelle.nom, self._nom + "blesse0")
+            self._boiteOutils.enleverInstanceSon(self._jeu.carteActuelle.nom, self._nom + "blesse1")
+            self._boiteOutils.enleverInstanceSon(self._jeu.carteActuelle.nom, self._nom + "blesse2")
+            self._boiteOutils.enleverInstanceSon(self._jeu.carteActuelle.nom, self._nom + "eating")
+            self._boiteOutils.enleverInstanceSon(self._jeu.carteActuelle.nom, self._nom + "fuite")
 
     def _trouverTileCadavre(self):
         positionCarte, self._tileCadavre, tiles, tilesVisites = Rect(0,0,32,32), False, [(self._xTile+1,self._yTile+1)], [(self._xTile,self._yTile)]
