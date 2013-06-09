@@ -31,7 +31,7 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
         return ["Test"]
 
     def _getVariables(self):
-        return [("squirrelsTues", 0)]
+        return [("squirrelsTues", 0), ("lapinsTues", 0)]
 
     def _initialiserEvenements(self):
         self._evenements["concrets"]["Clairiere"] = OrderedDict()

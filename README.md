@@ -25,15 +25,12 @@ Building  the game from the sources
 
 License and attribution
 ---------------------
-* The source code of the program is licensed under the GNU GPL (refer to COPYING). Some assets and dependencies used by the program are published under the terms of different licenses.
-* The Write Feather icon (Narro.ico) is a work by Double-J Design (http://www.doublejdesign.co.uk) published under the terms of the Creative Commons Attribution 3.0 license.
-* The Riven font (Riven.ttf) is a freeware made by Michael Bower (Riven2000@aol.com).
-* The forest sounds (sonsForet.wav) were recorded by dobroide and are licensed under the Creative Commons Attribution 3.0 (CC-BY). You can find them on this page from the much useful freesound.org database: http://www.freesound.org/people/dobroide/sounds/54699/.
-* The squirrel escape sound (squirrelFuite.wav) is a work from the sound design class projects at Carnegie Mellon University School of Drama (http://www.drama.cmu.edu) and is licensed under the Creative Commons Attribution 3.0. http://freesound.org/people/cmusounddesign/sounds/119816/
-* The squirrel wounding sound (squirrelBlesse.wav) is a work from Justin Wasack (http://www.justinwasack.com) licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/JustinBW/sounds/78652/
-* The squirrel eating sound (squirrelEating.wav) is a work from Asovang published in the public domain. http://freesound.org/people/Asovang/sounds/156215/
+The source code of the program is licensed under the GNU GPL (refer to COPYING). Some assets and dependencies used by the program are published under the terms of different licenses.
+
+### Graphics
 * The arrow image comes from this impressive collection of 420 RPG icons by Ails, licensed under the Creative Commons Attribution-ShareAlike 3.0 (CC-BY-SA). http://ails.deviantart.com/art/420-Pixel-Art-Icons-for-RPG-129892453
-* The squirrel is a work from Fother licensed under the GPL 2 and used in the game The Mana World. http://forums.themanaworld.org/viewtopic.php?f=8&t=5990|View, http://forums.themanaworld.org/viewtopic.php?f=8&t=1177
+* The squirrel is a work by Fother licensed under the GNU GPL 2 and used in the online game The Mana World. http://forums.themanaworld.org/viewtopic.php?f=8&t=5990|View, http://forums.themanaworld.org/viewtopic.php?f=8&t=1177
+* The rabbit is a work by Stephen "Redshrike" Challener used in PixelFarm (https://bitbucket.org/tebruno99/pixelfarm), a project from tebruno99. It is published under the terms of both the Creative Commons Attribution 3.0 (CC-BY) and Creative Commons Attribution-ShareAlike 3.0 (CC-BY-SA) licenses. http://opengameart.org/content/bunny-rabbit-lpc-style-for-pixelfarm
 * Hyptosis' tiles are published under the terms of the Creative Commons Attribution 3.0 license. You can find them here: http://opengameart.org/content/lots-of-free-2d-tiles-and-sprites-by-hyptosis. You should also have a look at the games he contribued to, like the "Alice is dead" horror point'n'click. This guy is really talented. http://hyptosis.newgrounds.com/
 * The Liberated Pixel Cup assets (base\_out\_atlas.png, terrain\_atlas.png) were made for OpenGameArt.org by a bunch of awesome people I can't thank enough.  
   For the base assets: Lanea Zimmerman, Stephen Challener, Charles Sanchez, Manuel Riecke and Daniel Armstrong.  
@@ -41,6 +38,22 @@ License and attribution
   These assets are published under the terms of both the GNU GPL 3.0 and the Creative Commons Attribution-ShareAlike 3.0 Unported (CC-BY-SA).  
   You can find them here (http://opengameart.org/content/lpc-tile-atlas) and there (http://opengameart.org/content/lpc-tile-atlas2).  
   Refer to the "Liberated Pixel Cup Attribution" file for more details.
+
+### Sounds
+* The forest sounds (sonsForet.wav) were recorded by dobroide and are licensed under the Creative Commons Attribution 3.0 (CC-BY). You can find them on this page from the much useful freesound.org database: http://www.freesound.org/people/dobroide/sounds/54699/.
+* The squirrel escape sound (squirrelFuite.wav) is a work by the sound design class projects at Carnegie Mellon University School of Drama (http://www.drama.cmu.edu) and is licensed under the Creative Commons Attribution 3.0. http://freesound.org/people/cmusounddesign/sounds/119816/
+* The squirrel moaning sound (squirrelBlesse.wav) is a work by Justin Wasack (http://www.justinwasack.com) licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/JustinBW/sounds/78652/
+* The squirrel eating sound (squirrelEating.wav) is a work by Asovang published in the public domain. http://freesound.org/people/Asovang/sounds/156215/
+* The rabbit eating sound (lapinEating.wav) is a work by Traveler licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/Traveler/sounds/13537/
+* The rabbit escape sound (lapinFuite.wav) is a work by elektroproleter licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/elektroproleter/sounds/157567/
+* The rabbit moaning sound (lapinBlesse.wav) is a work by AntumDeluge published in the public domain. http://opengameart.org/content/mouse-imitation
+
+### Musics
+
+
+### Miscellaneous
+* The Write Feather icon (Narro.ico) is a work by Double-J Design (http://www.doublejdesign.co.uk) published under the terms of the Creative Commons Attribution 3.0 license (CC-BY).
+* The Riven font (Riven.ttf) is a freeware font made by Michael Bower (Riven2000@aol.com). http://www.fonts2u.com/riven-the-font-v30.font
 
 Tools of the trade
 ------------------

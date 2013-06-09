@@ -7521,7 +7521,7 @@
    <tile gid="0"/>
   </data>
  </layer>
- <layer name="Tile Layer 4" width="50" height="50" visible="0">
+ <layer name="Tile Layer 4" width="50" height="50">
   <data>
    <tile gid="0"/>
    <tile gid="0"/>
