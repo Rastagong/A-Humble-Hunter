@@ -320,6 +320,15 @@ class Gibier(PNJ):
             i -= 1
         return tiles
 
+    def _genererRegards(self, actions):
+        i, nombreRegards, directionRegard = 0, random.randint(1,2), actions[len(actions)-1]
+        while i < nombreRegards:
+            while directionRegard == actions[len(actions)-1]:
+                directionRegard = "V" + self._boiteOutils.getDirectionAuHasard() + str(2500)
+            actions.append(directionRegard)
+            i += 1
+        return actions
+
     def _genererLancerTrajetAleatoire(self, longueurMin, longueurMax):
         self._longueurMin, self._longueurMax, i, actions = longueurMin, longueurMax, 0, []
         longueurTrajet, direction1, direction2 = random.randint(longueurMin, longueurMax), self._boiteOutils.getDirectionAuHasard(), self._boiteOutils.getDirectionAuHasard()
@@ -332,12 +341,7 @@ class Gibier(PNJ):
             else:
                 actions.append(direction2)
             i += 1
-        i, nombreRegards, directionRegard = 0, random.randint(1,2), actions[len(actions)-1]
-        while i < nombreRegards:
-            while directionRegard == actions[len(actions)-1]:
-                directionRegard = "V" + self._boiteOutils.getDirectionAuHasard() + str(2500)
-            actions.append(directionRegard)
-            i += 1
+        actions = self._genererRegards(actions)
         self._listeActions, self._etapeAction, self._pixelsParcourus, self._repetitionActions, self._deplacementBoucle = actions, 0, 0, False, True
         Horloge.initialiser(id(self), 1, 1)
 
@@ -416,6 +420,15 @@ class Lapin(Gibier):
                 self._etapeAnimation = 1
         else:
             return False
+
+    def _genererRegards(self, actions):
+        i, nombreRegards, directionRegard = 0, random.randint(1,2), actions[len(actions)-1]
+        while i < nombreRegards:
+            while directionRegard == actions[len(actions)-1] or "Haut" in directionRegard or "Bas" in directionRegard:
+                directionRegard = "V" + self._boiteOutils.getDirectionAuHasard() + str(2500)
+            actions.append(directionRegard)
+            i += 1
+        return actions
 
     def _ajusterPositionSource(self, enMarche, direction):
         """Donne la position source du PNJ en marche ou en fin de parcours, en fonction de la direction"""
