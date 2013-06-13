@@ -214,13 +214,15 @@ class Gibier(PNJ):
         self._xArrivee, self._yArrivee, self._vulnerable, self._monteeArbre, self._gestionnaireAnimaux, self._animationMort = -1, -1, True, False, gestionnaireAnimaux, False
         self._sonMange, self._typeAnimal = False, typeAnimal
         Horloge.initialiser(id(self), "Rouge clignotant", 1)
+        self._numeroBaseSon = 0
 
     def _gererEtape(self):
         if self._fuite is False and self._deplacementBoucle is False and self._animationMort is False:
             self._genererLancerTrajetAleatoire(4, 8)
             self._sonMange = False
         elif self._fuite is False and self._deplacementBoucle is True and self._animationMort is False and self._sonMange is False and self._etapeAction < len(self._listeActions) and isinstance(self._listeActions[self._etapeAction],str) and self._listeActions[self._etapeAction][0] == "V" and Horloge.sonner(id(self._gestionnaireAnimaux), "SonEating"+self._typeAnimal, arretApresSonnerie=False):
-            self._boiteOutils.jouerSon(self._typeAnimal+"Eating", self._nom + "eating", fixe=True, evenementFixe=self._nom, volume=VOLUME_MUSIQUE/2)
+            self._boiteOutils.jouerSon(self._typeAnimal+"Eating", self._nom + "eating" + str(self._numeroBaseSon), fixe=True, evenementFixe=self._nom, volume=VOLUME_MUSIQUE/2)
+            self._numeroBaseSon += 1
             Horloge.initialiser(id(self._gestionnaireAnimaux), "SonEating"+self._typeAnimal, 1000) 
             self._sonMange = True
         elif self._fuite:
@@ -239,7 +241,8 @@ class Gibier(PNJ):
                 self._vulnerable = False
                 self._lancerTrajet("Haut","Haut",False, deplacementLibre=True)
                 self._boiteOutils.retirerTransformation(False, "Rouge/"+self._nom)
-                self._boiteOutils.jouerSon(self._typeAnimal+"Fuite", self._nom + "fuite", fixe=True, xFixe=self._xTile, yFixe=self._yTile)
+                self._boiteOutils.jouerSon(self._typeAnimal+"Fuite", self._nom + "fuite" + str(self._numeroBaseSon), fixe=True, xFixe=self._xTile, yFixe=self._yTile)
+                self._numeroBaseSon += 1
                 self._monteeArbre = True
         if self._monteeArbre:
             if self._deplacementBoucle is False:
@@ -254,7 +257,8 @@ class Gibier(PNJ):
         if "Fleche" in nomPNJ and self._vulnerable:
             self._vie -= 1
             self._etapeTraitement, self._intelligence, self._courage, self._fuyard = 1, True, True, False
-            self._boiteOutils.jouerSon(self._typeAnimal+"Blesse", self._nom + "blesse" + str(self._vie), fixe=True, evenementFixe=self._nom)
+            self._boiteOutils.jouerSon(self._typeAnimal+"Blesse", self._nom + "blesse" + str(self._numeroBaseSon), fixe=True, evenementFixe=self._nom)
+            self._numeroBaseSon += 1
             Horloge.initialiser(id(self), "Fin clignotant", 2000)
             Horloge.initialiser(id(self), "Rouge clignotant", 1)
             if not self._fuite:
@@ -285,11 +289,6 @@ class Gibier(PNJ):
             self._gestionnaireAnimaux.onMortAnimal(self._typeAnimal, viaChasse=True)
             self._gestionnaire.evenements["abstraits"]["Divers"]["Narrateur"].onMortAnimal(self._typeAnimal)
             self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
-            self._boiteOutils.enleverInstanceSon(self._jeu.carteActuelle.nom, self._nom + "blesse0")
-            self._boiteOutils.enleverInstanceSon(self._jeu.carteActuelle.nom, self._nom + "blesse1")
-            self._boiteOutils.enleverInstanceSon(self._jeu.carteActuelle.nom, self._nom + "blesse2")
-            self._boiteOutils.enleverInstanceSon(self._jeu.carteActuelle.nom, self._nom + "eating")
-            self._boiteOutils.enleverInstanceSon(self._jeu.carteActuelle.nom, self._nom + "fuite")
 
     def _trouverTileCadavre(self):
         positionCarte, self._tileCadavre, tiles, tilesVisites = Rect(0,0,32,32), False, [(self._xTile+1,self._yTile+1)], [(self._xTile,self._yTile)]
@@ -454,4 +453,4 @@ class Lapin(Gibier):
                 if direction[0] == "V" or direction[0] == "R":
                     direction = direction[1:]
                 self._directionRegard = str(direction)  
-        print(self._positionSource, direction, self._surPlace, self._etapeAnimation)
+        #print(self._positionSource, direction, self._surPlace, self._etapeAnimation)
