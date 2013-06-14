@@ -181,46 +181,48 @@ class GestionnaireAnimaux(Evenement):
                     position = (random.randint(0, self._jeu.carteActuelle.longueur), random.randint(0, self._jeu.carteActuelle.largeur))
                     x,y = position[0], position[1]
                 positionsDepart.append(position)
-                objetSquirrel = Squirrel(self._jeu, self._gestionnaire, x, y, self._c, i, positionsArbres, self, "Squirrel", 32, 32)
+                objetSquirrel = Squirrel(self._jeu, self._gestionnaire, x, y, self._c, i, positionsArbres, self, "Squirrel", 32, 32, 150)
                 self._gestionnaire.evenements["concrets"][self._jeu.carteActuelle.nom]["Squirrel"+str(i)] = [objetSquirrel, (x,y), "Bas"]
                 i += 1
             self._positionsArbres, self._positionsSapins = positionsArbres, positionsSapins
             self._etape += 1
         if self._etape == 1:
             if self._nombre["Squirrels"] < self._nombre["SquirrelsMinimal"]:
-                self._regenererAnimaux("Squirrels", "Squirrel", Squirrel, self._positionsArbres, 32, 32)
-            if self._boiteOutils.variables["squirrelsTues"] >= 3 and self._nombre["Lapins"] == 0 and self._boiteOutils.variables["lapinsTues"] == 0:
-                self._regenererAnimaux("Lapins", "Lapin", Lapin, self._positionsSapins, 35, 38)
+                self._regenererAnimaux("Squirrels", "Squirrel", Squirrel, self._positionsArbres, 32, 32, 150)
+            if self._nombre["Lapins"] == 0:
+                self._regenererAnimaux("Lapins", "Lapin", Lapin, self._positionsSapins, 32, 32, 100, arretAvant=True, coucheMonteeArbre=1)
     
-    def _regenererAnimaux(self, typeAnimal, typeSingulier, classeAnimal, positionsCachettes, longueurSprite, largeurSprite):
+    def _regenererAnimaux(self, typeAnimal, typeSingulier, classeAnimal, positionsCachettes, longueurSprite, largeurSprite, vitesseDeplacement, arretAvant=True, coucheMonteeArbre=False):
         self._nombre[typeAnimal+"Total"] += 1
         self._nombre[typeAnimal] += 1
         positionCarte, nom = Rect(0, 0, 32, 32), typeAnimal[:len(typeAnimal)-1]+str(self._nombre[typeAnimal+"Total"])
         while (positionCarte.left,positionCarte.top) == (0,0) or self._jeu.carteActuelle.deplacementPossible(positionCarte, self._c, nom) is False or (self._jeu.carteActuelle._ecranVisible.contains(positionCarte) or self._jeu.carteActuelle._ecranVisible.colliderect(positionCarte)):
-            positionCarte.left, positionCarte.top = random.randint(0, self._jeu.carteActuelle.longueur*32), random.randint(0, self._jeu.carteActuelle.largeur*32)
-        objet = classeAnimal(self._jeu, self._gestionnaire, positionCarte.left/32, positionCarte.top/32, self._c, self._nombre[typeAnimal+"Total"], positionsCachettes, self, typeSingulier, longueurSprite, largeurSprite)
+            positionCarte.left, positionCarte.top = random.randrange(0, self._jeu.carteActuelle.longueur*32, 32), random.randrange(0, self._jeu.carteActuelle.largeur*32, 32)
+        objet = classeAnimal(self._jeu, self._gestionnaire, positionCarte.left/32, positionCarte.top/32, self._c, self._nombre[typeAnimal+"Total"], positionsCachettes, self, typeSingulier, longueurSprite, largeurSprite, vitesseDeplacement, arretAvant=arretAvant, coucheMonteeArbre=coucheMonteeArbre)
         self._gestionnaire.evenements["concrets"][self._jeu.carteActuelle.nom][nom] = [objet, (positionCarte.left/32, positionCarte.top/32), "Bas"]
+        print("{0} est en {1},{2}".format(nom, positionCarte.left/32, positionCarte.top/32))
 
     def onMortAnimal(self, nom, viaChasse=False):
         self._nombre[nom+"s"] -= 1
 
 class Gibier(PNJ):
-    def __init__(self, jeu, gestionnaire, x, y, c, numero, positionsArbres, gestionnaireAnimaux, typeAnimal, longueurSprite, largeurSprite):
-        fichier, couleurTransparente, persoCharset, vitesseDeplacement = typeAnimal+"Moving.png", (0,0,0), (0,0), 150
+    def __init__(self, jeu, gestionnaire, x, y, c, numero, positionsArbres, gestionnaireAnimaux, typeAnimal, longueurSprite, largeurSprite, vitesseDeplacement, arretAvant=False, coucheMonteeArbre=False):
+        fichier, couleurTransparente, persoCharset, vitesseDeplacement = typeAnimal+"Moving.png", (0,0,0), (0,0), vitesseDeplacement
         repetitionActions, directionDepart, listeActions = False, "Bas", []
         super().__init__(jeu, gestionnaire, typeAnimal+str(numero), x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement, fuyard=True, dureeAnimationSP=160, longueurSprite=longueurSprite, largeurSprite=largeurSprite)
         self._penseePossible, self._surPlace = InterrupteurInverse(self._boiteOutils.penseeAGerer), False
         self._nomTilesetMouvement, self._nomTilesetSurPlace, self._vie, self._fuite, self._positionsArbres, self._cadavreEnPlace = fichier, typeAnimal+"Eating.png", 3, False, positionsArbres, False
         self._xArrivee, self._yArrivee, self._vulnerable, self._monteeArbre, self._gestionnaireAnimaux, self._animationMort = -1, -1, True, False, gestionnaireAnimaux, False
-        self._sonMange, self._typeAnimal = False, typeAnimal
+        self._sonMange, self._typeAnimal, self._arretAvant = False, typeAnimal, arretAvant
+        self._coucheMonteeArbre = coucheMonteeArbre if coucheMonteeArbre is not False else self._c
         Horloge.initialiser(id(self), "Rouge clignotant", 1)
         self._numeroBaseSon = 0
 
     def _gererEtape(self):
-        if self._fuite is False and self._deplacementBoucle is False and self._animationMort is False:
+        if self._fuite is False and self._deplacementBoucle is False and self._animationMort is False and self._monteeArbre is False:
             self._genererLancerTrajetAleatoire(4, 8)
             self._sonMange = False
-        elif self._fuite is False and self._deplacementBoucle is True and self._animationMort is False and self._sonMange is False and self._etapeAction < len(self._listeActions) and isinstance(self._listeActions[self._etapeAction],str) and self._listeActions[self._etapeAction][0] == "V" and Horloge.sonner(id(self._gestionnaireAnimaux), "SonEating"+self._typeAnimal, arretApresSonnerie=False):
+        elif self._fuite is False and self._deplacementBoucle is True and self._animationMort is False and self._sonMange is False and self._etapeAction < len(self._listeActions) and isinstance(self._listeActions[self._etapeAction],str) and self._listeActions[self._etapeAction][0] == "V" and Horloge.sonner(id(self._gestionnaireAnimaux), "SonEating"+self._typeAnimal, arretApresSonnerie=False) and self._monteeArbre is False:
             self._boiteOutils.jouerSon(self._typeAnimal+"Eating", self._nom + "eating" + str(self._numeroBaseSon), fixe=True, evenementFixe=self._nom, volume=VOLUME_MUSIQUE/2)
             self._numeroBaseSon += 1
             Horloge.initialiser(id(self._gestionnaireAnimaux), "SonEating"+self._typeAnimal, 1000) 
@@ -237,13 +239,15 @@ class Gibier(PNJ):
                 else:
                     Horloge.initialiser(id(self), "Rouge clignotant", 200)
                     self._etapeTraitement -= 1
-            if self._deplacementBoucle is False and self._xTile == self._xArrivee and self._yTile == self._yArrivee:
+            if self._deplacementBoucle is False and ( (self._arretAvant is False and self._xTile == self._xArrivee and self._yTile == self._yArrivee) or (self._arretAvant is True and self._boiteOutils.tileProcheDe((self._xTile,self._yTile), (self._xArrivee, self._yArrivee), 1) is True) ):
                 self._vulnerable = False
+                if self._c != self._coucheMonteeArbre:
+                    self._changerCouche(self._coucheMonteeArbre)
                 self._lancerTrajet("Haut","Haut",False, deplacementLibre=True)
                 self._boiteOutils.retirerTransformation(False, "Rouge/"+self._nom)
                 self._boiteOutils.jouerSon(self._typeAnimal+"Fuite", self._nom + "fuite" + str(self._numeroBaseSon), fixe=True, xFixe=self._xTile, yFixe=self._yTile)
                 self._numeroBaseSon += 1
-                self._monteeArbre = True
+                self._monteeArbre, self._fuite = True, False
         if self._monteeArbre:
             if self._deplacementBoucle is False:
                 self._boiteOutils.supprimerPNJ(self._nom, self._c)
@@ -271,7 +275,7 @@ class Gibier(PNJ):
                     if self._boiteOutils.tileProcheDe(self._positionsArbres[i], positionJoueur, 3) is False and distanceArbreSquirrel <= distanceArbreJoueur:
                         self._finirDeplacementSP()
                         self._xArrivee, self._yArrivee = self._positionsArbres[i]
-                        self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, self._positionsArbres[i][0], self._positionsArbres[i][1])
+                        self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, self._positionsArbres[i][0], self._positionsArbres[i][1], arretAvant=self._arretAvant)
                         positionIdealeTrouvee = True
                     i += 1
                 self._fuite = True
@@ -399,16 +403,25 @@ class Squirrel(Gibier):
                 self._positionSource.move_ip(32 * (self._etapeAnimation - 1), 0)
 
 class Lapin(Gibier):
+    def _genererRegards(self, actions):
+        i, nombreRegards, directionRegard = 0, random.randint(1,2), actions[len(actions)-1]
+        while i < nombreRegards:
+            while directionRegard == actions[len(actions)-1] or "Haut" in directionRegard or "Bas" in directionRegard:
+                directionRegard = "V" + self._boiteOutils.getDirectionAuHasard() + str(2500)
+            actions.append(directionRegard)
+            i += 1
+        return actions
+
     def _determinerAnimation(self, surPlace=False):
         """Adapte le pied actuel et le fait d'être en marche à l'étape d'animation actuelle s'il est temps de changer d'animation (selon l'horloge n°2). 
         <surPlace> doit valoir <True> quand on est en animation sur place.
         Retourne <True> quand un changement d'animation est nécessaire."""
         if surPlace != self._surPlace:
             self._surPlace = surPlace
-            self._etapeAnimation = 1
+            self._etapeAnimation = 0
         if Horloge.sonner(id(self), 2) is True and self._surPlace is False:
-            if self._etapeAnimation <= 1 or self._etapeAnimation >= 4:
-                self._etapeAnimation = 1
+            if self._etapeAnimation < 1 or self._etapeAnimation >= 3:
+                self._etapeAnimation = 0
             self._etapeAnimation += 1
             Horloge.initialiser(id(self), 2, self._dureeAnimation)
             return True
@@ -420,15 +433,6 @@ class Lapin(Gibier):
         else:
             return False
 
-    def _genererRegards(self, actions):
-        i, nombreRegards, directionRegard = 0, random.randint(1,2), actions[len(actions)-1]
-        while i < nombreRegards:
-            while directionRegard == actions[len(actions)-1] or "Haut" in directionRegard or "Bas" in directionRegard:
-                directionRegard = "V" + self._boiteOutils.getDirectionAuHasard() + str(2500)
-            actions.append(directionRegard)
-            i += 1
-        return actions
-
     def _ajusterPositionSource(self, enMarche, direction):
         """Donne la position source du PNJ en marche ou en fin de parcours, en fonction de la direction"""
         hauteurTile = self._jeu.carteActuelle.hauteurTile
@@ -436,7 +440,7 @@ class Lapin(Gibier):
             self._nomTileset, self._positionSource.left, self._positionSource.top, self._positionSource.width, self._positionSource.height = "LapinDead.png", 0, 0, 32, 32
         else:
             self._nomTileset = self._nomTilesetMouvement
-            self._positionSource.left, self._positionSource.top = 0, 0
+            self._positionSource.left, self._positionSource.top = self._positionSource.width * 1, 0
             if "Bas" in direction:
                 pass
             elif "Haut" in direction:
@@ -446,11 +450,10 @@ class Lapin(Gibier):
             elif "Gauche" in direction:
                 self._positionSource.move_ip(0, 3 * self._positionSource.height)
             if self._surPlace:
-                self._positionSource.move_ip(self._positionSource.width * 4, 0)
+                self._positionSource.move_ip(self._positionSource.width * 3, 0)
                 self._positionSource.move_ip(self._positionSource.width * (self._etapeAnimation-1), 0)
             else:
                 self._positionSource.move_ip(self._positionSource.width * (self._etapeAnimation-1), 0)
                 if direction[0] == "V" or direction[0] == "R":
                     direction = direction[1:]
                 self._directionRegard = str(direction)  
-        #print(self._positionSource, direction, self._surPlace, self._etapeAnimation)
