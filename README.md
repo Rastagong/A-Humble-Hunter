@@ -48,7 +48,8 @@ The source code of the program is licensed under the GNU GPL (refer to COPYING).
 * The rabbit escape sound (lapinFuite.wav) is a work by elektroproleter licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/elektroproleter/sounds/157567/
 * The rabbit moaning sound (lapinBlesse.wav) is a work by AntumDeluge published in the public domain. http://opengameart.org/content/mouse-imitation
 
-### Musics
+### Music
+* Lost In The Meadows is a calm and enchanting music by Brandon Morris (HaelDB), which is licensed under the Creative Commons Attribution 3.0 (CC-BY). You should really listen to his tracks on OpenGameArt.org or Youtube. http://opengameart.org/content/lost-in-the-meadows, https://www.youtube.com/brandon75689 
 
 
 ### Miscellaneous

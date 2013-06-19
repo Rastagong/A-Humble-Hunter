@@ -28,22 +28,26 @@ from listeEvenements import *
 class MonGestionnaireEvenements(GestionnaireEvenements):
 
     def _getInterrupteurs(self):
-        return ["Test"]
+        return ["MusiqueForet", "finChasse1"]
 
     def _getVariables(self):
-        return [("sceneChasse", 1), ("squirrelsTues", 0), ("lapinsTues", 0)]
+        return [("sceneChasse", 1), ("SquirrelChasses", 0), ("LapinChasses", 0)]
 
     def _initialiserEvenements(self):
         self._evenements["concrets"]["Clairiere"] = OrderedDict()
+        self._evenements["concrets"]["CheminClairiere"] = OrderedDict()
         if NOM_CARTE_LANCEMENT == "Clairiere":
             self._evenements["concrets"]["Clairiere"]["Joueur"] = [ Joueur(self._jeu, self, 21, 39, 2, fichier="Chasseur.png"), (21, 39), "Bas"]
+            self._evenements["concrets"]["Clairiere"]["Sortie1"] = [Teleporteur(self._jeu, self, "CheminClairiere", 34, 2, 2, "Gauche", condition="finChasse1"), (3, 47), "Aucune"]
+            self._evenements["concrets"]["Clairiere"]["Sortie2"] = [Teleporteur(self._jeu, self, "CheminClairiere", 34, 3, 2, "Gauche", condition="finChasse1"), (3, 48), "Aucune"]
         j, self._positionJoueur = self._jeu.joueur, None
         self._xJoueur, self._yJoueur, self._cJoueur, self._directionJoueur, self._appuiValidationJoueur = j.x/32, j.y/32, j.c, j.direction, j.appuiValidation
-        self._evenements["abstraits"]["Divers"] = dict()
-        self._evenements["abstraits"]["Divers"]["Narrateur"] = Narrateur(self._jeu, self)
+        self._evenements["abstraits"]["Divers"] = OrderedDict()
         self._evenements["abstraits"]["Divers"]["ModulateurMusique"] = ModulateurMusique(self._jeu, self)
+        self._evenements["abstraits"]["Divers"]["LanceurMusique"] = LanceurMusique(self._jeu, self)
         self._evenements["abstraits"]["Divers"]["AnimateurToucheAction"] = AnimateurToucheAction(self._jeu, self)
         self._evenements["abstraits"]["Divers"]["LanceurFleches"] = LanceurFleches(self._jeu, self)
+        self._evenements["abstraits"]["Divers"]["Narrateur"] = Narrateur(self._jeu, self)
         self._evenements["abstraits"]["Divers"]["GestionnaireAnimaux"] = GestionnaireAnimaux(self._jeu, self)
 
     def chargerEvenements(self, nomCarte):

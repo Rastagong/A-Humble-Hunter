@@ -30,6 +30,16 @@ from narro.constantes import *
 from narro import directions
 import os, random
 
+class LanceurMusique(Evenement):
+    def __init__(self, jeu, gestionnaire):
+        super().__init__(jeu, gestionnaire)
+        Horloge.initialiser(id(self), "Attente Musique", 1)
+
+    def traiter(self):
+        if self._boiteOutils.interrupteurs["MusiqueForet"].voir() and Horloge.sonner(id(self), "Attente Musique", arretApresSonnerie=False):
+            self._boiteOutils.jouerSon("Lost In The Meadows", "Musique forêt meadows")
+            Horloge.initialiser(id(self), "Attente Musique", self._boiteOutils.getDureeInstanceSon("Musique forêt meadows") +  random.randint(120000, 4* 60000))
+
 class LanceurFleches(Evenement):
     def __init__(self, jeu, gestionnaire):
         super().__init__(jeu, gestionnaire)
@@ -101,20 +111,25 @@ class Narrateur(Evenement):
     def __init__(self, jeu, gestionnaire):
         super().__init__(jeu, gestionnaire)
         self._penseePossible, self._etape, self._coefNoircisseur, self._alpha = InterrupteurInverse(self._boiteOutils.penseeAGerer), 0, 0, 255
-        self._squirrelsTues = 0
-        self._debut = False
+        self._messageBoutonInteraction, self._premiereMortChasse = False, False
     
     def traiter(self):
         x, y = self._gestionnaire.xJoueur, self._gestionnaire._yJoueur
         if self._boiteOutils.nomCarte == "Clairiere":
             if self._etape == 0:
                 self._boiteOutils.ajouterPensee("It was early spring in the woods. Little by little, the animals came out of hibernation.")
-                self._boiteOutils.ajouterPensee("But winter had been harsh. No more money, no more food. We were almost starving.")
-                self._boiteOutils.jouerSon("sonsForet", "boucleSonsForet", nombreEcoutes=0)
+                self._boiteOutils.ajouterPensee("But winter had been harsh. No more money, no more food. We were almost starving.", tempsLecture=0)
+                self._boiteOutils.ajouterTransformation(True, "NoirTotal")
+                self._boiteOutils.jouerSon("sonsForet", "boucleSonsForet", nombreEcoutes=0, volume=VOLUME_MUSIQUE/5)
+                self._etape += 1
+            if self._etape == 1 and self._penseePossible.voir():
+                self._boiteOutils.retirerTransformation(True, "NoirTotal")
                 self._boiteOutils.ajouterTransformation(True, "Alpha", alpha=self._coefNoircisseur)
+                self._coordonneesJoueur = self._boiteOutils.getCoordonneesJoueur()
+                Horloge.initialiser(id(self), "TempsDecouverte", 20000)
                 Horloge.initialiser(id(self), "Alpha", 100)
                 self._etape += 1
-            if self._etape == 1 and Horloge.sonner(id(self), "Alpha"):
+            if self._etape == 2 and Horloge.sonner(id(self), "Alpha"):
                 self._coefNoircisseur += 7
                 if self._coefNoircisseur > 255:
                     self._coefNoircisseur = 255
@@ -124,30 +139,60 @@ class Narrateur(Evenement):
                     self._etape += 1
                 else:
                     Horloge.initialiser(id(self), "Alpha", 100)
-            if self._etape == 2 and self._penseePossible.voir() is True:
-                self._boiteOutils.ajouterTransformation(True, "SplashText Arrow", texte="Press X to shoot an arrow", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=self._alpha)
-                self._etape += 1
-            if self._etape > 2 and self._etape < 6:
-                if self._boiteOutils.variables["squirrelsTues"] == 1 and self._etape == 3:
+            if self._etape == 3:
+                    decouverteChasse = False
+                    if Horloge.sonner(id(self), "TempsDecouverte") or self._boiteOutils.deplacementConsequentJoueur(self._coordonneesJoueur, 22):
+                        self._boiteOutils.ajouterTransformation(True, "SplashText Arrow", texte="Press X to shoot an arrow", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=self._alpha)
+                        decouverteChasse = True
+                    elif self._premiereMortChasse is True:
+                        decouverteChasse = True
+                    if decouverteChasse:
+                        self._etape += 1
+            if self._etape > 3 and self._etape < 7:
+                if self._messageBoutonInteraction is False and self._premiereMortChasse is True:
+                    self._messageBoutonInteraction = True
+                    self._boiteOutils.retirerTransformation(True, "SplashText Arrow")
+                    self._boiteOutils.ajouterTransformation(True, "SplashText Interaction1", texte="Press Z to interact", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=self._alpha)
+                    self._boiteOutils.ajouterTransformation(True, "SplashText Interaction2", texte="Or W on an AZERTY keyboard", antialias=True, couleurTexte=(255,255,255), position=(10, 40), taille=20, alpha=self._alpha)
+                    self._gestionnaire.evenements["abstraits"]["Divers"]["GestionnaireAnimaux"].nombre["SquirrelMinimal"] = 0 #On ne restaure plus les écureuils...
+                    self._gestionnaire.evenements["abstraits"]["Divers"]["GestionnaireAnimaux"].restaurerMortsParFuite = True #Sauf quand ils meurent par fuite
+                if Horloge.sonner(id(self), "Fin SplashText Titre"):
+                    self._boiteOutils.retirerTransformation(True, "SplashText Titre1")
+                    self._boiteOutils.retirerTransformation(True, "SplashText Titre2")
+                    self._boiteOutils.retirerTransformation(True, "SplashText Titre3")
+                if Horloge.sonner(id(self), "Début SplashText Titre"):
+                    Horloge.initialiser(id(self), "Fin SplashText Titre", 5000)
+                    self._boiteOutils.ajouterTransformation(True, "SplashText Titre1", texte="A", antialias=True, couleurTexte=(255,255,255), position=(10, 0))
+                    self._boiteOutils.ajouterTransformation(True, "SplashText Titre2", texte="Humble", antialias=True, couleurTexte=(255,255,255), position=(10, FENETRE["largeurFenetre"]/4))
+                    self._boiteOutils.ajouterTransformation(True, "SplashText Titre3", texte="Hunter", antialias=True, couleurTexte=(255,255,255), position=(10, FENETRE["largeurFenetre"]/2))
+                if self._boiteOutils.variables["SquirrelChasses"] == 1 and self._etape == 4:
                     self._boiteOutils.ajouterPensee("A squirrel... I won't feed anyone with that. I can merely sell its coat.")
+                    self._boiteOutils.retirerTransformation(True, "SplashText Interaction1")
+                    self._boiteOutils.retirerTransformation(True, "SplashText Interaction2")
+                    Horloge.initialiser(id(self), "Début SplashText Titre", 5000)
+                    self._boiteOutils.interrupteurs["MusiqueForet"].activer()
                     self._etape += 1
-                if self._boiteOutils.variables["squirrelsTues"] == 2 and self._etape == 4:
-                    self._boiteOutils.ajouterPensee("The old Doug used to hunt squirrels. Now his remains feed the beasts in the forest.")
+                if self._boiteOutils.variables["SquirrelChasses"] == 2 and self._etape == 5:
+                    self._boiteOutils.ajouterPensee("The old Doug used to hunt squirrels. Now his frozen corpse is devoured by the beasts.")
                     self._etape += 1
-                if self._boiteOutils.variables["squirrelsTues"] == 3 and self._etape == 5:
-                    self._boiteOutils.ajouterPensee("I won't let that happen to me too. Never.")
+                if self._boiteOutils.variables["SquirrelChasses"] == 3 and self._etape == 6:
+                    self._boiteOutils.ajouterPensee("I won't let that happen to me. Nor to my family. I will live.")
+                    Horloge.initialiser(id(self), "tempsFinChasse", 20000)
+                    self._coordonneesJoueur = self._boiteOutils.getCoordonneesJoueur()
                     self._etape += 1
+            if self._etape == 7 and (Horloge.sonner(id(self), "tempsFinChasse") or self._boiteOutils.deplacementConsequentJoueur(self._coordonneesJoueur, 20)):
+                self._boiteOutils.ajouterPensee("It seems we won't eat tonight though... There's nothing left to hunt. Let's go home.")
+                self._boiteOutils.interrupteurs["finChasse1"].activer()
+                self._etape += 1
 
-    def onMortAnimal(self, nom):
-        if "Squirrel" in nom:
-            self._boiteOutils.variables["squirrelsTues"] += 1
-        elif "Lapin" in nom:
-            self._etape += 1
+    def onMortAnimal(self, typeAnimal, viaChasse=False):
+        if viaChasse and not self._premiereMortChasse:
+            self._premiereMortChasse = True
 
 class GestionnaireAnimaux(Evenement):
     def __init__(self, jeu, gestionnaire):
         super().__init__(jeu, gestionnaire)
-        self._etape = 0
+        self._etape, self._restaurerMortsParFuite, self._morts = 0, False, []
 
     def _genererPositionsCachettes(self, nomTileset, couche, positionSource):
         x, y, positionsCachettes = 0, 0, []
@@ -184,8 +229,8 @@ class GestionnaireAnimaux(Evenement):
         if self._etape == 0:
             if self._jeu.carteActuelle.nom == "Clairiere" and self._boiteOutils.variables["sceneChasse"] == 1:
                 self._c = 2
-                self._nombre = {"Lapin":1, "LapinMinimal":1, "Squirrel":3, "SquirrelMinimal":3}
-                self._typesAnimaux = ["Lapin", "Squirrel"]
+                self._nombre = {"Squirrel":3, "SquirrelMinimal":3}
+                self._typesAnimaux = ["Squirrel"]
                 self._parametresGeneration = dict()
                 positionsArbres = self._genererPositionsCachettes("base_out_atlas.png", 2, (832, 672, 32, 32))
                 positionsSapins = self._genererPositionsCachettes("base_out_atlas.png", 2, (800, 544, 32, 32))
@@ -197,9 +242,10 @@ class GestionnaireAnimaux(Evenement):
             self._genererAnimauxDepart()
             self._etape += 1
         if self._etape == 1:
-            for typeAnimal in self._typesAnimaux:
-                if self._nombre[typeAnimal] < self._nombre[typeAnimal+"Minimal"]:
+            for (typeAnimal, viaChasse) in self._morts:
+                if self._nombre[typeAnimal] < self._nombre[typeAnimal+"Minimal"] or (viaChasse is False and self._restaurerMortsParFuite is True):
                     self._regenererAnimaux(typeAnimal, self._parametresGeneration[typeAnimal]["classe"])
+            del self._morts[:]
     
     def _regenererAnimaux(self, typeAnimal, classe):
         self._nombre[typeAnimal+"Total"] += 1
@@ -211,8 +257,24 @@ class GestionnaireAnimaux(Evenement):
         self._gestionnaire.evenements["concrets"][self._jeu.carteActuelle.nom][nom] = [objet, (positionCarte.left/32, positionCarte.top/32), "Bas"]
         print("Ajout de", nom, (int(positionCarte.left/32), int(positionCarte.top/32)) )
 
-    def onMortAnimal(self, nom, viaChasse=False):
-        self._nombre[nom] -= 1
+    def onMortAnimal(self, typeAnimal, viaChasse=False):
+        self._nombre[typeAnimal] -= 1
+        self._morts.append((typeAnimal, viaChasse))
+
+    def _getNombre(self):
+        return self._nombre
+
+    def _setNombre(self, nouveauNombre):
+        self._nombre = nouveauNombre
+
+    def _getRestaurerMortsParFuite(self):
+        return self._restaurerMortsParFuite
+    
+    def _setRestaurerMortsParFuite(self, val):
+        self._restaurerMortsParFuite = val
+
+    nombre = property(_getNombre, _setNombre)
+    restaurerMortsParFuite = property(_getRestaurerMortsParFuite, _setRestaurerMortsParFuite)
 
 class Gibier(PNJ):
     def __init__(self, jeu, gestionnaire, x, y, c, numero, gestionnaireAnimaux, positionsCachettes=[], typeAnimal="", longueurSprite=-1, largeurSprite=-1, vitesseDeplacement=-1, arretAvant=False, coucheMonteeArbre=False, classe=None):
@@ -232,7 +294,7 @@ class Gibier(PNJ):
             self._genererLancerTrajetAleatoire(4, 8)
             self._sonMange = False
         elif self._fuite is False and self._deplacementBoucle is True and self._animationMort is False and self._sonMange is False and self._etapeAction < len(self._listeActions) and isinstance(self._listeActions[self._etapeAction],str) and self._listeActions[self._etapeAction][0] == "V" and Horloge.sonner(id(self._gestionnaireAnimaux), "SonEating"+self._typeAnimal, arretApresSonnerie=False) and self._monteeArbre is False:
-            self._boiteOutils.jouerSon(self._typeAnimal+"Eating", self._nom + "eating" + str(self._numeroBaseSon), fixe=True, evenementFixe=self._nom, volume=VOLUME_MUSIQUE/2)
+            self._boiteOutils.jouerSon(self._typeAnimal+"Eating", self._nom + "eating" + str(self._numeroBaseSon), fixe=True, evenementFixe=self._nom, volume=VOLUME_MUSIQUE/3)
             self._numeroBaseSon += 1
             Horloge.initialiser(id(self._gestionnaireAnimaux), "SonEating"+self._typeAnimal, 1000) 
             self._sonMange = True
@@ -262,6 +324,7 @@ class Gibier(PNJ):
                 self._boiteOutils.supprimerPNJ(self._nom, self._c)
                 self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
                 self._gestionnaireAnimaux.onMortAnimal(self._typeAnimal)
+                self._gestionnaire.evenements["abstraits"]["Divers"]["Narrateur"].onMortAnimal(self._typeAnimal)
         if self._animationMort is True and self._xTile == self._tileCadavre[0] and self._yTile == self._tileCadavre[1] and self._cadavreEnPlace is False:
             self._cadavreEnPlace = True
 
@@ -291,6 +354,8 @@ class Gibier(PNJ):
         if self._vie == 0 and self._animationMort is False:
             self._finirDeplacementSP()
             self._trouverTileCadavre()
+            self._gestionnaireAnimaux.onMortAnimal(self._typeAnimal, viaChasse=True)
+            self._gestionnaire.evenements["abstraits"]["Divers"]["Narrateur"].onMortAnimal(self._typeAnimal, viaChasse=True)
             self._changerCouche(self._c-1)
             self._lancerTrajet(Rect(self._tileCadavre[0]*32, self._tileCadavre[1]*32, 32, 32), False, deplacementLibre=True)
             self._vulnerable, self._fuite, self._animationMort = False, False, True
@@ -299,8 +364,7 @@ class Gibier(PNJ):
     def _onJoueurInteractionQuelconque(self, x, y, c, direction):
         if self._cadavreEnPlace is True:
             self._boiteOutils.supprimerPNJ(self._nom, self._c)
-            self._gestionnaireAnimaux.onMortAnimal(self._typeAnimal, viaChasse=True)
-            self._gestionnaire.evenements["abstraits"]["Divers"]["Narrateur"].onMortAnimal(self._typeAnimal)
+            self._boiteOutils.variables[self._typeAnimal+"Chasses"] += 1
             self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
 
     def _trouverTileCadavre(self):
