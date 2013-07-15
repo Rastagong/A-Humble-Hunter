@@ -39,6 +39,8 @@ class LanceurMusique(Evenement):
         if self._boiteOutils.interrupteurs["MusiqueForet"].voir() and Horloge.sonner(id(self), "Attente Musique", arretApresSonnerie=False):
             self._boiteOutils.jouerSon("Lost In The Meadows", "Musique forêt meadows")
             Horloge.initialiser(id(self), "Attente Musique", self._boiteOutils.getDureeInstanceSon("Musique forêt meadows") +  random.randint(120000, 4* 60000))
+        if self._boiteOutils.interrupteurs["MusiqueForet"].voir() is True and self._jeu.carteActuelle.nom not in self._boiteOutils.variables["CartesForet"]:
+            self._boiteOutils.interrupteurs["MusiqueForet"].desactiver()
 
 class LanceurFleches(Evenement):
     def __init__(self, jeu, gestionnaire):
@@ -535,7 +537,7 @@ class Belia(PNJ):
         x, y, c = 7, 3, 2
         fichier, couleurTransparente, persoCharset, vitesseDeplacement = "Belia.png", (0,0,0), (0,0), 150
         repetitionActions, directionDepart = True, "Gauche"
-        listeActions = ["VGauche2500","Bas","Bas","VDroite2500","Haut","Haut","VDroite2500","Bas","Bas","VGauche2500","Haut","VGauche2500","VDroite2500","Haut"]
+        listeActions = ["VGauche2500","Bas","Bas","Bas","Bas","VDroite2500","Haut","Haut","Haut","Haut","VDroite2500","Bas","Bas","Bas","Bas","VGauche2500","Haut","Haut","VGauche2500","VDroite2500","Haut","Haut"]
         super().__init__(jeu, gestionnaire, "Belia", x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement)
 
     def _gererEtape(self):

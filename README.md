@@ -47,10 +47,10 @@ The source code of the program is licensed under the GNU GPL (refer to COPYING).
 * The rabbit eating sound (lapinEating.wav) is a work by Traveler licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/Traveler/sounds/13537/
 * The rabbit escape sound (lapinFuite.wav) is a work by elektroproleter licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/elektroproleter/sounds/157567/
 * The rabbit moaning sound (lapinBlesse.wav) is a work by AntumDeluge published in the public domain. http://opengameart.org/content/mouse-imitation
+* The door opening sound (doorOpening.wav) was produced with the amazing Bfxr software.
 
 ### Music
 * Lost In The Meadows is a calm and enchanting music by Brandon Morris (HaelDB), which is licensed under the Creative Commons Attribution 3.0 (CC-BY). You should really listen to his tracks on OpenGameArt.org or Youtube. http://opengameart.org/content/lost-in-the-meadows, https://www.youtube.com/brandon75689 
-
 
 ### Miscellaneous
 * The Write Feather icon (Narro.ico) is a work by Double-J Design (http://www.doublejdesign.co.uk) published under the terms of the Creative Commons Attribution 3.0 license (CC-BY).
@@ -62,5 +62,5 @@ Tools of the trade
   The Narro Engine makes use of the tmxreader module from pytmxloader, a freeware Python package written by Dr0id to load TMX maps (https://code.google.com/p/pytmxloader/).
 * The characters were designed with the awesome Game Character Hub by Sébastien Bini. http://www.sebissimos.com/gch/index.php?
 * All the maps (the TMX files) were designed with the most powerful and practical level editor on the entire Internet: Tiled.  
-  It's a free cross-platform software in active development, with many awesome features. Seriously, give it a try. http://www.mapeditor.org/
-* Some sounds were produced with Bfxr. http://www.bfxr.net/
+  It's a free cross-platform software in active development, with many awesome features such as automapping. Seriously, give it a try. http://www.mapeditor.org/
+* Some sounds were produced with Bfxr, a powerful tool that any child can use. http://www.bfxr.net/
