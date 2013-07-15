@@ -226,8 +226,8 @@ class GestionnaireAnimaux(Evenement):
             numeroTypeActuel += 1
 
     def traiter(self):
-        if self._etape == 0:
-            if self._jeu.carteActuelle.nom == "Clairiere" and self._boiteOutils.variables["sceneChasse"] == 1:
+        if self._etape == 0 and self._boiteOutils.variables["sceneChasse"] == 1:
+            if self._jeu.carteActuelle.nom == "Clairiere":
                 self._c = 2
                 self._nombre = {"Squirrel":3, "SquirrelMinimal":3}
                 self._typesAnimaux = ["Squirrel"]
@@ -528,3 +528,17 @@ class Lapin(Gibier):
                 if direction[0] == "V" or direction[0] == "R":
                     direction = direction[1:]
                 self._directionRegard = str(direction)  
+
+
+class Belia(PNJ):
+    def __init__(self, jeu, gestionnaire):
+        x, y, c = 7, 3, 2
+        fichier, couleurTransparente, persoCharset, vitesseDeplacement = "Belia.png", (0,0,0), (0,0), 150
+        repetitionActions, directionDepart = True, "Gauche"
+        listeActions = ["VGauche2500","Bas","Bas","VDroite2500","Haut","Haut","VDroite2500","Bas","Bas","VGauche2500","Haut","VGauche2500","VDroite2500","Haut"]
+        super().__init__(jeu, gestionnaire, "Belia", x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement)
+
+    def _gererEtape(self):
+        if self._etapeTraitement == 1:
+            pass
+    

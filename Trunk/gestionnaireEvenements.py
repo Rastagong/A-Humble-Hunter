@@ -31,15 +31,19 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
         return ["MusiqueForet", "finChasse1"]
 
     def _getVariables(self):
-        return [("sceneChasse", 1), ("SquirrelChasses", 0), ("LapinChasses", 0)]
+        return [("sceneChasse", 0), ("SquirrelChasses", 0), ("LapinChasses", 0)]
 
     def _initialiserEvenements(self):
         self._evenements["concrets"]["Clairiere"] = OrderedDict()
         self._evenements["concrets"]["CheminClairiere"] = OrderedDict()
+        self._evenements["concrets"]["Maison"] = OrderedDict()
+        self._evenements["concrets"]["InterieurMaison"] = OrderedDict()
         if NOM_CARTE_LANCEMENT == "Clairiere":
             self._evenements["concrets"]["Clairiere"]["Joueur"] = [ Joueur(self._jeu, self, 21, 39, 2, fichier="Chasseur.png"), (21, 39), "Bas"]
-            self._evenements["concrets"]["Clairiere"]["Sortie1"] = [Teleporteur(self._jeu, self, "CheminClairiere", 34, 2, 2, "Gauche", condition="finChasse1"), (3, 47), "Aucune"]
-            self._evenements["concrets"]["Clairiere"]["Sortie2"] = [Teleporteur(self._jeu, self, "CheminClairiere", 34, 3, 2, "Gauche", condition="finChasse1"), (3, 48), "Aucune"]
+        elif NOM_CARTE_LANCEMENT == "CheminClairiere":
+            self._evenements["concrets"]["CheminClairiere"]["Joueur"] = [ Joueur(self._jeu, self, 34, 2, 2, fichier="Chasseur.png"), (34, 2), "Gauche"]
+        elif NOM_CARTE_LANCEMENT == "Maison":
+            self._evenements["concrets"]["Maison"]["Joueur"] = [ Joueur(self._jeu, self, 14, 0, 2, fichier="Chasseur.png"), (14, 0), "Bas"]
         j, self._positionJoueur = self._jeu.joueur, None
         self._xJoueur, self._yJoueur, self._cJoueur, self._directionJoueur, self._appuiValidationJoueur = j.x/32, j.y/32, j.c, j.direction, j.appuiValidation
         self._evenements["abstraits"]["Divers"] = OrderedDict()
@@ -52,5 +56,17 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
 
     def chargerEvenements(self, nomCarte):
         if nomCarte == "Clairiere":
-            #self._evenements["concrets"]["LD26-Ferme"]["Mere"] = [ Mere(self._jeu, self), (13, 9), "Bas"]
-            pass
+            self._evenements["concrets"]["Clairiere"]["Sortie1"] = [Teleporteur(self._jeu, self, "CheminClairiere", 34, 2, 2, "Gauche", condition="finChasse1"), (0, 47), "Aucune"]
+            self._evenements["concrets"]["Clairiere"]["Sortie2"] = [Teleporteur(self._jeu, self, "CheminClairiere", 34, 3, 2, "Gauche", condition="finChasse1"), (0, 48), "Aucune"]
+        elif nomCarte == "CheminClairiere":
+            self._evenements["concrets"]["CheminClairiere"]["SortieClairiere1"] = [Teleporteur(self._jeu, self, "Clairiere", 0, 47, 2, "Droite"), (34, 2), "Aucune"]
+            self._evenements["concrets"]["CheminClairiere"]["SortieClairiere2"] = [Teleporteur(self._jeu, self, "Clairiere", 0, 48, 2, "Droite"), (34, 3), "Aucune"]
+            self._evenements["concrets"]["CheminClairiere"]["SortieMaison1"] = [Teleporteur(self._jeu, self, "Maison", 14, 0, 2, "Bas"), (3, 29), "Aucune"]
+            self._evenements["concrets"]["CheminClairiere"]["SortieMaison2"] = [Teleporteur(self._jeu, self, "Maison", 15, 0, 2, "Bas"), (4, 29), "Aucune"]
+        elif nomCarte == "Maison":
+            self._evenements["concrets"]["Maison"]["SortieCheminClairiere1"] = [Teleporteur(self._jeu, self, "CheminClairiere", 3, 29, 2, "Haut"), (14, 0), "Aucune"]
+            self._evenements["concrets"]["Maison"]["SortieCheminClairiere2"] = [Teleporteur(self._jeu, self, "CheminClairiere", 4, 29, 2, "Haut"), (15, 0), "Aucune"]
+            self._evenements["concrets"]["Maison"]["SortieInterieurMaison"] = [Porte(self._jeu, self, "InterieurMaison", False, "HyptosisMaison.png", (64, 64, 32, 32), (64, 0, 32, 32), 3, 4, 2, 7, 16, 2, "Haut"), (3, 4), "Aucune"]
+        elif nomCarte == "InterieurMaison":
+            self._evenements["concrets"]["InterieurMaison"]["Sortie"] = [Teleporteur(self._jeu, self, "Maison", 3, 5, 2, "Bas"), (7, 16), "Aucune"]
+            self._evenements["concrets"]["InterieurMaison"]["Belia"] = [Belia(self._jeu, self), (14, 0), "Bas"]

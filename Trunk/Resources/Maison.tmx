@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" width="25" height="20" tilewidth="32" tileheight="32">
+ <properties>
+  <property name="Nom" value="Maison"/>
+ </properties>
  <tileset firstgid="1" source="base_out_atlas.tsx"/>
  <tileset firstgid="1025" source="terrain_atlas.tsx"/>
  <tileset firstgid="2049" source="hyptosis_tile-art-batch-3.tsx"/>
@@ -613,7 +616,7 @@
    <tile gid="0"/>
    <tile gid="112"/>
    <tile gid="113"/>
-   <tile gid="0"/>
+   <tile gid="113"/>
    <tile gid="113"/>
    <tile gid="114"/>
    <tile gid="0"/>
@@ -1092,7 +1095,7 @@
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="2950"/>
-   <tile gid="2970"/>
+   <tile gid="2967"/>
    <tile gid="2949"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -1142,7 +1145,7 @@
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
-   <tile gid="2958"/>
+   <tile gid="2957"/>
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="698"/>
@@ -1595,9 +1598,9 @@
    <tile gid="1981"/>
    <tile gid="0"/>
    <tile gid="0"/>
-   <tile gid="2963"/>
+   <tile gid="2961"/>
    <tile gid="0"/>
-   <tile gid="2956"/>
+   <tile gid="2955"/>
    <tile gid="0"/>
    <tile gid="441"/>
    <tile gid="442"/>
