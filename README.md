@@ -29,15 +29,22 @@ The source code of the program is licensed under the GNU GPL (refer to COPYING).
 
 ### Graphics
 * The arrow image comes from this impressive collection of 420 RPG icons by Ails, licensed under the Creative Commons Attribution-ShareAlike 3.0 (CC-BY-SA). http://ails.deviantart.com/art/420-Pixel-Art-Icons-for-RPG-129892453
-* The squirrel is a work by Fother licensed under the GNU GPL 2 and used in the online game The Mana World. http://forums.themanaworld.org/viewtopic.php?f=8&t=5990|View, http://forums.themanaworld.org/viewtopic.php?f=8&t=1177
 * The rabbit is a work by Stephen "Redshrike" Challener used in PixelFarm (https://bitbucket.org/tebruno99/pixelfarm), a project from tebruno99. It is published under the terms of both the Creative Commons Attribution 3.0 (CC-BY) and Creative Commons Attribution-ShareAlike 3.0 (CC-BY-SA) licenses. http://opengameart.org/content/bunny-rabbit-lpc-style-for-pixelfarm
 * Hyptosis' tiles are published under the terms of the Creative Commons Attribution 3.0 license. You can find them here: http://opengameart.org/content/lots-of-free-2d-tiles-and-sprites-by-hyptosis. You should also have a look at the games he contribued to, like the "Alice is dead" horror point'n'click. This guy is really talented. http://hyptosis.newgrounds.com/
-* The Liberated Pixel Cup assets (base\_out\_atlas.png, terrain\_atlas.png) were made for OpenGameArt.org by a bunch of awesome people I can't thank enough.  
-  For the base assets: Lanea Zimmerman, Stephen Challener, Charles Sanchez, Manuel Riecke and Daniel Armstrong.  
-  For the additional images:  Daniel Eddeland, Johann Charlot, Chris Phillips, Robert Colladay, Joshua Taylor, Jonas Klinger, Leo Villeveygoux, Barbara Rivera, Anamaris, Krusmira and Casper Nilsson.  
-  These assets are published under the terms of both the GNU GPL 3.0 and the Creative Commons Attribution-ShareAlike 3.0 Unported (CC-BY-SA).  
-  You can find them here (http://opengameart.org/content/lpc-tile-atlas) and there (http://opengameart.org/content/lpc-tile-atlas2).  
-  Refer to the "Liberated Pixel Cup Attribution" file for more details.
+
+#### The Liberated Pixel Cup
+The Liberated Pixel Cup assets (base\_out\_atlas.png, terrain\_atlas.png) were made for OpenGameArt.org by a bunch of awesome people I can't thank enough.  
+For the base assets: Lanea Zimmerman, Stephen Challener, Charles Sanchez, Manuel Riecke and Daniel Armstrong.  
+For the additional images:  Daniel Eddeland, Johann Charlot, Chris Phillips, Robert Colladay, Joshua Taylor, Jonas Klinger, Leo Villeveygoux, Barbara Rivera, Anamaris, Krusmira and Casper Nilsson.  
+These assets are published under the terms of both the GNU GPL 3.0 and the Creative Commons Attribution-ShareAlike 3.0 Unported (CC-BY-SA).  
+You can find them here (http://opengameart.org/content/lpc-tile-atlas) and there (http://opengameart.org/content/lpc-tile-atlas2).  
+Refer to the "Liberated Pixel Cup Attribution" file for more details.
+
+#### The Mana World 
+A certain number of graphics come from The Mana World, a promising open source 2D MMORPG in development. You should definitely have a look at the game (themanaworld.org), or even get involved with its development (wiki.themanaworld.org)!  
+* The squirrel is a work by Fother licensed under the GNU GPL 2 and used in The Mana World. http://forums.themanaworld.org/viewtopic.php?f=8&t=5990|View, http://forums.themanaworld.org/viewtopic.php?f=8&t=1177
+* The Woodland Indoor tilesets are a collective work by Crush, Yosuhara, Irukard and other anonymous licensed under the GNU GPL 2. https://github.com/themanaworld/tmwa-client-data/tree/master/graphics
+* The inn tileset is a work by Irukard licensed under the GNU GPL 2 and the Creative Commons Attribution-ShareAlike 3.0 (CC-BY-SA). https://github.com/themanaworld/tmwa-client-data/tree/master/graphics
 
 ### Sounds
 * The forest sounds (sonsForet.wav) were recorded by dobroide and are licensed under the Creative Commons Attribution 3.0 (CC-BY). You can find them on this page from the much useful freesound.org database: http://www.freesound.org/people/dobroide/sounds/54699/.
