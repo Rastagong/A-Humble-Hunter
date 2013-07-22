@@ -560,9 +560,20 @@ class Enfant(PNJ):
         super().__init__(jeu, gestionnaire, nom, x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement)
         if y == 15:
             self._etapeAction = 16
+        self._positionsSuivi, self._etapeSuivi = {"Tom":[(12,10),(10,5)], "Elie":[(13,10),(10,4)]}, 0
 
     def _gererEtape(self):
-        if self.
+        if self._etapeTraitement == 3:
+            self._finirDeplacementSP()
+            (xArrivee, yArrivee) = self._positionsSuivi[self._nom][self._etapeSuivi]
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, xArrivee, yArrivee)
+            self._etapeTraitement += 1
+            self._etapeSuivi += 1
+        if self._etapeTraitement == 4:
+            if self._boiteOutils.getCoordonneesJoueur() in [(10,4),(10,5)]:
+            self._finirDeplacementSP()
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, xArrivee, yArrivee)
+            self._etapeSuivi += 1
 
 class MembreFamille(PNJ):
     """Pattern decorator pour tous les membres de la famille : quelques comportements communs."""
