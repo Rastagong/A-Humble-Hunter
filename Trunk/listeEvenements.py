@@ -541,6 +541,35 @@ class Belia(PNJ):
         super().__init__(jeu, gestionnaire, "Belia", x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement)
 
     def _gererEtape(self):
-        if self._etapeTraitement == 1:
-            pass
+        pass
     
+class Enfant(PNJ):
+    def __init__(self, jeu, gestionnaire, nom, x, y, c):
+        fichier, couleurTransparente, persoCharset, vitesseDeplacement, self._nom = nom + ".png", (0,0,0), (0,0), 150, nom
+        repetitionActions, directionDepart = True, "Gauche"
+        listeActions = ["Droite","Droite","Droite","Droite","Bas","Bas","Bas","Gauche","Gauche","Gauche","Gauche","Haut","Haut","Haut"]
+        super().__init__(jeu, gestionnaire, nom, x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement)
+        if y == 12:
+            self._etapeAction = 11
+
+    def _gererEtape(self):
+        pass
+
+class MembreFamille(PNJ):
+    """Pattern decorator pour tous les membres de la famille : quelques comportements communs."""
+    def __init__(self, pnj):
+        self._pnj = pnj
+
+    def __getattr__(self, attribut):
+        return getattr(self._pnj, attribut)
+
+    def _gererEtape(self):
+        if self._etapeTraitement == 1 and self._boiteOutils.getCoordonneesJoueur() in [(2, 14), (3,14)]:
+            self._finirDeplacementSP()
+            self._lancerTrajet(self._boiteOutils.regardVersPnj("Joueur",-1,-1,evenementReference=self._nom),False)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 2:
+            self._majInfosJoueur()
+            if self._joueurBouge[0] is True:
+                self._lancerTrajet(self._boiteOutils.regardVersPnj("Joueur",-1,-1,evenementReference=self._nom),False)
+        self._pnj._gererEtape()
