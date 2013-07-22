@@ -534,37 +534,55 @@ class Lapin(Gibier):
 
 class Belia(PNJ):
     def __init__(self, jeu, gestionnaire):
-        x, y, c = 7, 3, 2
+        x, y, c = 7, 7, 2
         fichier, couleurTransparente, persoCharset, vitesseDeplacement = "Belia.png", (0,0,0), (0,0), 150
         repetitionActions, directionDepart = True, "Gauche"
-        listeActions = ["VGauche2500","Bas","Bas","Bas","Bas","VDroite2500","Haut","Haut","Haut","Haut","VDroite2500","Bas","Bas","Bas","Bas","VGauche2500","Haut","Haut","VGauche2500","VDroite2500","Haut","Haut"]
+        listeActions = ["Haut","Haut","Haut","Gauche","Gauche","Gauche","VHaut2500","Droite","Droite","Droite","Droite","VHaut2500","Droite","Droite","VHaut2500","Bas","Gauche","Gauche","Gauche","Bas","Bas","VGauche2500"]
         super().__init__(jeu, gestionnaire, "Belia", x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement)
+        self._listeSons, self._etapeSon = [("Sack",5,1), ("Cupboard",11,1), ("Cupboard",14,1), ("Knife",21,3)], 0
 
     def _gererEtape(self):
-        pass
+        if self._etapeTraitement == 1:
+                self._gererSons()
+
+    def _gererSons(self):
+        if self._etapeAction == self._listeSons[self._etapeSon][1]:
+            self._boiteOutils.jouerSon(self._listeSons[self._etapeSon][0], "Cusisine"+str(self._etapeSon), fixe=True, evenementFixe="Belia", duree=2500, nombreEcoutes=self._listeSons[self._etapeSon][2])
+            self._etapeSon += 1
+            if self._etapeSon == 4:
+                self._etapeSon = 0
     
 class Enfant(PNJ):
     def __init__(self, jeu, gestionnaire, nom, x, y, c):
         fichier, couleurTransparente, persoCharset, vitesseDeplacement, self._nom = nom + ".png", (0,0,0), (0,0), 150, nom
         repetitionActions, directionDepart = True, "Gauche"
-        listeActions = ["Droite","Droite","Droite","Droite","Bas","Bas","Bas","Gauche","Gauche","Gauche","Gauche","Haut","Haut","Haut"]
+        listeActions = ["Droite","Droite","Droite","Droite","Droite","Droite","Bas","Bas","Bas","Bas","Gauche","Gauche","Gauche","Gauche","Gauche","Gauche","Haut","Haut","Haut","Haut"]
         super().__init__(jeu, gestionnaire, nom, x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement)
-        if y == 12:
-            self._etapeAction = 11
+        if y == 15:
+            self._etapeAction = 16
 
     def _gererEtape(self):
-        pass
+        if self.
 
 class MembreFamille(PNJ):
     """Pattern decorator pour tous les membres de la famille : quelques comportements communs."""
     def __init__(self, pnj):
         self._pnj = pnj
 
+    def __setattr__(self, attribut, valeur):
+        if attribut == "_pnj":
+            self.__dict__[attribut] = valeur
+        else:
+            self._pnj.__dict__[attribut] = valeur
+
     def __getattr__(self, attribut):
-        return getattr(self._pnj, attribut)
+        if attribut == "_pnj":
+            return self.__dict__[attribut]
+        else:
+            return getattr(self._pnj, attribut)
 
     def _gererEtape(self):
-        if self._etapeTraitement == 1 and self._boiteOutils.getCoordonneesJoueur() in [(2, 14), (3,14)]:
+        if self._etapeTraitement == 1 and self._boiteOutils.getCoordonneesJoueur() in [(1, 16), (2, 16)]:
             self._finirDeplacementSP()
             self._lancerTrajet(self._boiteOutils.regardVersPnj("Joueur",-1,-1,evenementReference=self._nom),False)
             self._etapeTraitement += 1
@@ -572,4 +590,6 @@ class MembreFamille(PNJ):
             self._majInfosJoueur()
             if self._joueurBouge[0] is True:
                 self._lancerTrajet(self._boiteOutils.regardVersPnj("Joueur",-1,-1,evenementReference=self._nom),False)
+            if self._boiteOutils.getCoordonneesJoueur() in [(12,10),(13,10)]:
+                self._etapeTraitement += 1
         self._pnj._gererEtape()

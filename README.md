@@ -54,6 +54,9 @@ A certain number of graphics come from The Mana World, a promising open source 2
 * The rabbit eating sound (lapinEating.wav) is a work by Traveler licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/Traveler/sounds/13537/
 * The rabbit escape sound (lapinFuite.wav) is a work by elektroproleter licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/elektroproleter/sounds/157567/
 * The rabbit moaning sound (lapinBlesse.wav) is a work by AntumDeluge published in the public domain. http://opengameart.org/content/mouse-imitation
+* The knife sound (Knife.wav) is a work by spazzo\_1493 licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/spazzo\_1493/sounds/66113/
+* The flour pouring sound (Sack.wav) is a work by julesibulesi licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/julesibulesi/sounds/70099/
+* The cupboard sound (Cupboard.wav) is a work by jakobhandersen published in the public domain. http://freesound.org/people/jakobhandersen/sounds/133829/ http://denevigebeta.blogspot.dk/
 * The door opening sound (doorOpening.wav) was produced with the amazing Bfxr software.
 
 ### 3.3 Music

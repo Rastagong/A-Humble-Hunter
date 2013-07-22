@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><tileset name="TMW Inn X2" tileheight="32" tilewidth="32">   
+<?xml version="1.0" encoding="UTF-8"?><tileset name="Inn X2" tileheight="32" tilewidth="32">   
        <image height="128" source="inn_x2.png" width="512"/>   
        <tile id="0">      
               <properties>         
