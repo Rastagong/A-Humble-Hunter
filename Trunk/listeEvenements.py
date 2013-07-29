@@ -127,11 +127,13 @@ class Narrateur(Evenement):
             if self._etape == 1 and self._penseePossible.voir():
                 self._boiteOutils.retirerTransformation(True, "NoirTotal")
                 self._boiteOutils.ajouterTransformation(True, "Alpha", alpha=self._coefNoircisseur)
+                print(self._coefNoircisseur)
                 self._coordonneesJoueur = self._boiteOutils.getCoordonneesJoueur()
                 Horloge.initialiser(id(self), "TempsDecouverte", 20000)
                 Horloge.initialiser(id(self), "Alpha", 100)
                 self._etape += 1
             if self._etape == 2 and Horloge.sonner(id(self), "Alpha"):
+                print(self._coefNoircisseur)
                 self._coefNoircisseur += 7
                 if self._coefNoircisseur > 255:
                     self._coefNoircisseur = 255
@@ -186,6 +188,30 @@ class Narrateur(Evenement):
                 self._boiteOutils.ajouterPensee("It seems we won't eat tonight though... There's nothing left to hunt. Let's go home.")
                 self._boiteOutils.interrupteurs["finChasse1"].activer()
                 self._etape += 1
+        if self._boiteOutils.nomCarte == "InterieurMaison":
+            if self._etape < 8:
+                self._etape = 8
+            if self._etape == 8 and self._boiteOutils.getCoordonneesJoueur() in [(1,14), (2,14)]:
+                self._boiteOutils.ajouterPensee("They froze when they saw me. They wanted to see what I'd caught.")
+                self._boiteOutils.interrupteurs["JoueurEntre"].activer()
+                self._gestionnaire.evenements["abstraits"]["Divers"]["SignaleurJoueur"].ajouterSignaleur("InterieurMaison", "JoueurEntre2", (10,9))
+                self._gestionnaire.evenements["abstraits"]["Divers"]["SignaleurJoueur"].ajouterSignaleur("InterieurMaison", "JoueurEntre3", (6,4))
+                self._etape += 1
+            if self._etape == 9 and self._boiteOutils.interrupteurs["squirrelPose"].voir() is True:
+                self._boiteOutils.ajouterPensee("I'm sorry... It's only a squirrel.")
+                self._coefNoircisseur = 1
+                self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
+                Horloge.initialiser(id(self), "Transition Noir", 1000)
+                self._etape += 1
+            if self._etape == 10 and Horloge.sonner(id(self), "Transition Noir"):
+                self._coefNoircisseur += 1
+                self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
+                if self._coefNoircisseur >= 12:
+                    self._etape += 1
+                else:
+                    Horloge.initialiser(id(self), "Transition Noir", 100)
+            if self._etape == 11:
+                self._boiteOutils.ajouterPensee("It was disappointing...")
 
     def onMortAnimal(self, typeAnimal, viaChasse=False):
         if viaChasse and not self._premiereMortChasse:
@@ -544,6 +570,13 @@ class Belia(PNJ):
     def _gererEtape(self):
         if self._etapeTraitement == 1:
                 self._gererSons()
+        if self._etapeTraitement == 2 and self._deplacementBoucle is False:
+            self._finirDeplacementSP()
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 5, 3, regardFinal="Bas", arretAvant=False)
+            self._comportementParticulier = True
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 3 and self._deplacementBoucle is False and self._xTile == 5 and self._yTile == 3 and self._comportementParticulier is True:
+            self._comportementParticulier = False
 
     def _gererSons(self):
         if self._etapeAction == self._listeSons[self._etapeSon][1]:
@@ -556,33 +589,34 @@ class Enfant(PNJ):
     def __init__(self, jeu, gestionnaire, nom, x, y, c):
         fichier, couleurTransparente, persoCharset, vitesseDeplacement, self._nom = nom + ".png", (0,0,0), (0,0), 150, nom
         repetitionActions, directionDepart = True, "Gauche"
-        listeActions = ["Droite","Droite","Droite","Droite","Droite","Droite","Bas","Bas","Bas","Gauche","Gauche","Gauche","Gauche","Gauche","Gauche","Haut","Haut","Haut"]
+        listeActions = ["Droite","Bas","Bas","Bas","Bas","Bas","Bas","Bas","Droite","Droite","Droite","Bas","Gauche","Gauche","Gauche","Gauche","Haut","Haut","Haut","Haut","Haut","Haut","Haut","Haut"]
         super().__init__(jeu, gestionnaire, nom, x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement)
-        if y == 13:
-            self._etapeAction = 15
-        self._positionsSuivi, self._etapeSuivi = {"Tom":[(12,10),(10,5)], "Elie":[(13,10),(10,4)]}, 0
+        if y == 8:
+            self._etapeAction = 20
+        self._positionsSuivi, self._etapeSuivi = {"Tom":[(4,10),(7,6)], "Elie":[(4,13),(7,5)]}, 0
+        self._xArrivee, self._yArrivee = -1, -1
 
     def _gererEtape(self):
-        if self._etapeTraitement == 3:
-            self._finirDeplacementSP()
+        if self._etapeTraitement == 2 and self._deplacementBoucle is False and self._boiteOutils.interrupteurs["JoueurEntre2"].voir() is True:
             (self._xArrivee, self._yArrivee) = self._positionsSuivi[self._nom][self._etapeSuivi]
-            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, xArrivee, yArrivee)
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, self._xArrivee, self._yArrivee)
+            self._comportementParticulier = True
             self._etapeTraitement += 1
             self._etapeSuivi += 1
-        if self._etapeTraitement == 4 and self._boiteOutils.getCoordonneesJoueur() in [(9,4),(9,5)]:
-            self._finirDeplacementSP()
+        if self._etapeTraitement == 3 and self._deplacementBoucle is False and self._boiteOutils.interrupteurs["JoueurEntre3"].voir() is True:
             (self._xArrivee, self._yArrivee) = self._positionsSuivi[self._nom][self._etapeSuivi]
-            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, xArrivee, yArrivee)
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, self._xArrivee, self._yArrivee, regardFinal="Gauche")
+            self._comportementParticulier = True
             self._etapeSuivi += 1
             self._etapeTraitement += 1
-        if self._etapeTraitement == 5 and self._xTile == self._xArrivee and self._yTile == self._yArrivee:
+        if (self._etapeTraitement == 2 or self._etapeTraitement == 3) and self._comportementParticulier is True and self._xTile == self._xArrivee and self._yTile == self._yArrivee and self._deplacementBoucle is False:
             self._finirDeplacementSP()
-            self._etapeTraitement += 1
+            self._comportementParticulier = False
 
 class MembreFamille(PNJ):
     """Pattern decorator pour tous les membres de la famille : quelques comportements communs."""
     def __init__(self, pnj):
-        self._pnj = pnj
+        self._pnj, self._comportementParticulier = pnj, False
 
     def __setattr__(self, attribut, valeur):
         if attribut == "_pnj":
@@ -597,14 +631,44 @@ class MembreFamille(PNJ):
             return getattr(self._pnj, attribut)
 
     def _gererEtape(self):
-        if self._etapeTraitement == 1 and self._boiteOutils.getCoordonneesJoueur() in [(1, 16), (2, 16)]:
+        if self._etapeTraitement == 1 and self._etapeMarche == 1 and self._boiteOutils.interrupteurs["JoueurEntre"].voir() is True:
             self._finirDeplacementSP()
             self._lancerTrajet(self._boiteOutils.regardVersPnj("Joueur",-1,-1,evenementReference=self._nom),False)
             self._etapeTraitement += 1
-        if self._etapeTraitement == 2:
+        if (self._etapeTraitement == 2 or self._etapeTraitement == 3) and self._comportementParticulier is False:
             self._majInfosJoueur()
             if self._joueurBouge[0] is True:
                 self._lancerTrajet(self._boiteOutils.regardVersPnj("Joueur",-1,-1,evenementReference=self._nom),False)
-            if self._boiteOutils.getCoordonneesJoueur() in [(12,10),(13,10)]:
-                self._etapeTraitement += 1
         self._pnj._gererEtape()
+
+class TableSquirrel(EvenementConcret):
+    def __init__(self, jeu, gestionnaire):
+        EvenementConcret.__init__(self, jeu, gestionnaire)
+        self._ecureuilPose = False
+
+    def _onJoueurInteractionQuelconque(self, x, y, c, direction):
+        if self._ecureuilPose is False:
+            self._ecureuilPose = True
+            self._jeu.carteActuelle.poserPNJ(Rect(5 * 32, 5 * 32, 32, 32), 3, Rect(0,0,32,32),  "squirrelDead.png", (0,0,0), "tableSquirrel")
+            self._boiteOutils.interrupteurs["squirrelPose"].activer()
+
+class SignaleurJoueur(Evenement):
+    def __init__(self, jeu, gestionnaire, *parametres):
+        Evenement.__init__(self, jeu, gestionnaire)
+        self._i = 0
+        for parametre in parametres:
+            self._ajouterSignaleur(parametre[0], parametre[1], parametre[2])
+
+    def ajouterSignaleur(self, carte, interrupteur, position):
+        self._i += 1
+        self._gestionnaire.evenements["concrets"][carte]["Signaleur"+str(self._i)] = [Signaleur(self._jeu, self._gestionnaire, interrupteur), position, "Aucune"]
+
+class Signaleur(EvenementConcret):
+    def __init__(self, jeu, gestionnaire, interrupteur):
+        EvenementConcret.__init__(self, jeu, gestionnaire)
+        self._actif, self._interrupteur = False, interrupteur
+
+    def onJoueurDessus(self, x, y, c, direction):
+        if not self._actif:
+            self._actif = True
+            self._boiteOutils.interrupteurs[self._interrupteur].activer()

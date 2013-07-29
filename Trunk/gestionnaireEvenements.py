@@ -28,7 +28,7 @@ from listeEvenements import *
 class MonGestionnaireEvenements(GestionnaireEvenements):
 
     def _getInterrupteurs(self):
-        return ["MusiqueForet", "finChasse1"]
+        return ["MusiqueForet", "finChasse1", "JoueurEntre", "JoueurEntre2", "JoueurEntre3", "squirrelPose"]
 
     def _getVariables(self):
         return [("sceneChasse", 0), ("SquirrelChasses", 0), ("LapinChasses", 0), ("CartesForet", ["Clairiere","CheminClairiere"])]
@@ -55,6 +55,7 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
         self._evenements["abstraits"]["Divers"]["LanceurFleches"] = LanceurFleches(self._jeu, self)
         self._evenements["abstraits"]["Divers"]["Narrateur"] = Narrateur(self._jeu, self)
         self._evenements["abstraits"]["Divers"]["GestionnaireAnimaux"] = GestionnaireAnimaux(self._jeu, self)
+        self._evenements["abstraits"]["Divers"]["SignaleurJoueur"] = SignaleurJoueur(self._jeu, self)
 
     def chargerEvenements(self, nomCarte):
         if nomCarte == "Clairiere":
@@ -72,5 +73,6 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
         elif nomCarte == "InterieurMaison":
             self._evenements["concrets"]["InterieurMaison"]["Sortie"] = [Teleporteur(self._jeu, self, "Maison", 3, 5, 2, "Bas"), (13, 3), "Aucune"]
             self._evenements["concrets"]["InterieurMaison"]["Belia"] = [MembreFamille(Belia(self._jeu, self)), (7,6), "Bas"]
-            self._evenements["concrets"]["InterieurMaison"]["Tom"] = [MembreFamille(Enfant(self._jeu, self, "Tom", 4, 10, 2)), (4, 10), "Bas"]
-            self._evenements["concrets"]["InterieurMaison"]["Elie"] = [MembreFamille(Enfant(self._jeu, self, "Elie", 4, 13, 2)), (4, 13), "Bas"]
+            self._evenements["concrets"]["InterieurMaison"]["Tom"] = [MembreFamille(Enfant(self._jeu, self, "Tom", 1, 4, 2)), (1, 4), "Bas"]
+            self._evenements["concrets"]["InterieurMaison"]["Elie"] = [MembreFamille(Enfant(self._jeu, self, "Elie", 1, 8, 2)), (1, 8), "Bas"]
+            self._evenements["concrets"]["InterieurMaison"]["TableSquirrel"] = [TableSquirrel(self._jeu, self), (5, 5), "Aucune"]
