@@ -534,10 +534,10 @@ class Lapin(Gibier):
 
 class Belia(PNJ):
     def __init__(self, jeu, gestionnaire):
-        x, y, c = 7, 7, 2
+        x, y, c = 7, 6, 2
         fichier, couleurTransparente, persoCharset, vitesseDeplacement = "Belia.png", (0,0,0), (0,0), 150
         repetitionActions, directionDepart = True, "Gauche"
-        listeActions = ["Haut","Haut","Haut","Gauche","Gauche","Gauche","VHaut2500","Droite","Droite","Droite","Droite","VHaut2500","Droite","Droite","VHaut2500","Bas","Gauche","Gauche","Gauche","Bas","Bas","VGauche2500"]
+        listeActions = ["Haut","Haut","Gauche","Gauche","Gauche","VHaut2500","Droite","Droite","Droite","VHaut2500","Droite","Droite","Droite","VHaut2500","Gauche","Gauche","Gauche","Bas","Bas","VGauche2500"]
         super().__init__(jeu, gestionnaire, "Belia", x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement)
         self._listeSons, self._etapeSon = [("Sack",5,1), ("Cupboard",11,1), ("Cupboard",14,1), ("Knife",21,3)], 0
 
@@ -556,24 +556,28 @@ class Enfant(PNJ):
     def __init__(self, jeu, gestionnaire, nom, x, y, c):
         fichier, couleurTransparente, persoCharset, vitesseDeplacement, self._nom = nom + ".png", (0,0,0), (0,0), 150, nom
         repetitionActions, directionDepart = True, "Gauche"
-        listeActions = ["Droite","Droite","Droite","Droite","Droite","Droite","Bas","Bas","Bas","Bas","Gauche","Gauche","Gauche","Gauche","Gauche","Gauche","Haut","Haut","Haut","Haut"]
+        listeActions = ["Droite","Droite","Droite","Droite","Droite","Droite","Bas","Bas","Bas","Gauche","Gauche","Gauche","Gauche","Gauche","Gauche","Haut","Haut","Haut"]
         super().__init__(jeu, gestionnaire, nom, x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement)
-        if y == 15:
-            self._etapeAction = 16
+        if y == 13:
+            self._etapeAction = 15
         self._positionsSuivi, self._etapeSuivi = {"Tom":[(12,10),(10,5)], "Elie":[(13,10),(10,4)]}, 0
 
     def _gererEtape(self):
         if self._etapeTraitement == 3:
             self._finirDeplacementSP()
-            (xArrivee, yArrivee) = self._positionsSuivi[self._nom][self._etapeSuivi]
+            (self._xArrivee, self._yArrivee) = self._positionsSuivi[self._nom][self._etapeSuivi]
             self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, xArrivee, yArrivee)
             self._etapeTraitement += 1
             self._etapeSuivi += 1
-        if self._etapeTraitement == 4:
-            if self._boiteOutils.getCoordonneesJoueur() in [(10,4),(10,5)]:
+        if self._etapeTraitement == 4 and self._boiteOutils.getCoordonneesJoueur() in [(9,4),(9,5)]:
             self._finirDeplacementSP()
+            (self._xArrivee, self._yArrivee) = self._positionsSuivi[self._nom][self._etapeSuivi]
             self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, xArrivee, yArrivee)
             self._etapeSuivi += 1
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 5 and self._xTile == self._xArrivee and self._yTile == self._yArrivee:
+            self._finirDeplacementSP()
+            self._etapeTraitement += 1
 
 class MembreFamille(PNJ):
     """Pattern decorator pour tous les membres de la famille : quelques comportements communs."""

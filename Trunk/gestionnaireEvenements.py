@@ -45,7 +45,7 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
         elif NOM_CARTE_LANCEMENT == "Maison":
             self._evenements["concrets"]["Maison"]["Joueur"] = [ Joueur(self._jeu, self, 14, 0, 2, fichier="Chasseur.png"), (14, 0), "Bas"]
         elif NOM_CARTE_LANCEMENT == "InterieurMaison":
-            self._evenements["concrets"]["InterieurMaison"]["Joueur"] = [ Joueur(self._jeu, self, 16, 3, 2, fichier="Chasseur.png"), (7, 13), "Haut"]
+            self._evenements["concrets"]["InterieurMaison"]["Joueur"] = [ Joueur(self._jeu, self, 13, 3, 2, fichier="Chasseur.png"), (7, 13), "Haut"]
         j, self._positionJoueur = self._jeu.joueur, None
         self._xJoueur, self._yJoueur, self._cJoueur, self._directionJoueur, self._appuiValidationJoueur = j.x/32, j.y/32, j.c, j.direction, j.appuiValidation
         self._evenements["abstraits"]["Divers"] = OrderedDict()
@@ -68,9 +68,9 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
         elif nomCarte == "Maison":
             self._evenements["concrets"]["Maison"]["SortieCheminClairiere1"] = [Teleporteur(self._jeu, self, "CheminClairiere", 3, 29, 2, "Haut"), (14, 0), "Aucune"]
             self._evenements["concrets"]["Maison"]["SortieCheminClairiere2"] = [Teleporteur(self._jeu, self, "CheminClairiere", 4, 29, 2, "Haut"), (15, 0), "Aucune"]
-            self._evenements["concrets"]["Maison"]["SortieInterieurMaison"] = [Porte(self._jeu, self, "InterieurMaison", False, "HyptosisMaison.png", (64, 64, 32, 32), (64, 0, 32, 32), 3, 4, 2, 16, 3, 2, "Haut"), (3, 4), "Aucune"]
+            self._evenements["concrets"]["Maison"]["SortieInterieurMaison"] = [Porte(self._jeu, self, "InterieurMaison", False, "HyptosisMaison.png", (64, 64, 32, 32), (64, 0, 32, 32), 3, 4, 2, 13, 3, 2, "Haut"), (3, 4), "Aucune"]
         elif nomCarte == "InterieurMaison":
-            self._evenements["concrets"]["InterieurMaison"]["Sortie"] = [Teleporteur(self._jeu, self, "Maison", 3, 5, 2, "Bas"), (16, 3), "Aucune"]
-            self._evenements["concrets"]["InterieurMaison"]["Belia"] = [MembreFamille(Belia(self._jeu, self)), (7,7), "Bas"]
-            self._evenements["concrets"]["InterieurMaison"]["Tom"] = [MembreFamille(Enfant(self._jeu, self, "Tom", 4, 11, 2)), (4, 11), "Bas"]
-            self._evenements["concrets"]["InterieurMaison"]["Elie"] = [MembreFamille(Enfant(self._jeu, self, "Elie", 4, 15, 2)), (4, 15), "Bas"]
+            self._evenements["concrets"]["InterieurMaison"]["Sortie"] = [Teleporteur(self._jeu, self, "Maison", 3, 5, 2, "Bas"), (13, 3), "Aucune"]
+            self._evenements["concrets"]["InterieurMaison"]["Belia"] = [MembreFamille(Belia(self._jeu, self)), (7,6), "Bas"]
+            self._evenements["concrets"]["InterieurMaison"]["Tom"] = [MembreFamille(Enfant(self._jeu, self, "Tom", 4, 10, 2)), (4, 10), "Bas"]
+            self._evenements["concrets"]["InterieurMaison"]["Elie"] = [MembreFamille(Enfant(self._jeu, self, "Elie", 4, 13, 2)), (4, 13), "Bas"]
