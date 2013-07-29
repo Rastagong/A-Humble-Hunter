@@ -191,16 +191,17 @@ class Narrateur(Evenement):
         if self._boiteOutils.nomCarte == "InterieurMaison":
             if self._etape < 8:
                 self._etape = 8
-            if self._etape == 8 and self._boiteOutils.getCoordonneesJoueur() in [(1,14), (2,14)]:
+            if self._etape == 8 and self._boiteOutils.getCoordonneesJoueur() == (10,13):
                 self._boiteOutils.ajouterPensee("They froze when they saw me. They wanted to see what I'd caught.")
                 self._boiteOutils.interrupteurs["JoueurEntre"].activer()
-                self._gestionnaire.evenements["abstraits"]["Divers"]["SignaleurJoueur"].ajouterSignaleur("InterieurMaison", "JoueurEntre2", (10,9))
+                self._gestionnaire.evenements["abstraits"]["Divers"]["SignaleurJoueur"].ajouterSignaleur("InterieurMaison", "JoueurEntre2", (10,4))
                 self._gestionnaire.evenements["abstraits"]["Divers"]["SignaleurJoueur"].ajouterSignaleur("InterieurMaison", "JoueurEntre3", (6,4))
                 self._etape += 1
             if self._etape == 9 and self._boiteOutils.interrupteurs["squirrelPose"].voir() is True:
                 self._boiteOutils.ajouterPensee("I'm sorry... It's only a squirrel.")
                 self._coefNoircisseur = 1
                 self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
+                self._boiteOutils.joueurLibre.desactiver()
                 Horloge.initialiser(id(self), "Transition Noir", 1000)
                 self._etape += 1
             if self._etape == 10 and Horloge.sonner(id(self), "Transition Noir"):
@@ -208,10 +209,13 @@ class Narrateur(Evenement):
                 self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
                 if self._coefNoircisseur >= 12:
                     self._etape += 1
+                    Horloge.initialiser(id(self), "Transition Scene Interieur", 10000)
                 else:
                     Horloge.initialiser(id(self), "Transition Noir", 100)
-            if self._etape == 11:
-                self._boiteOutils.ajouterPensee("It was disappointing...")
+            if self._etape == 11 and Horloge.sonner(id(self), "Transition Scene Interieur"):
+                self._boiteOutils.retirerTransformation(True, "Noir")
+                self._etape += 1
+                
 
     def onMortAnimal(self, typeAnimal, viaChasse=False):
         if viaChasse and not self._premiereMortChasse:
@@ -593,7 +597,7 @@ class Enfant(PNJ):
         super().__init__(jeu, gestionnaire, nom, x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement)
         if y == 8:
             self._etapeAction = 20
-        self._positionsSuivi, self._etapeSuivi = {"Tom":[(4,10),(7,6)], "Elie":[(4,13),(7,5)]}, 0
+        self._positionsSuivi, self._etapeSuivi = {"Tom":[(10,7),(7,6)], "Elie":[(10,9),(7,5)]}, 0
         self._xArrivee, self._yArrivee = -1, -1
 
     def _gererEtape(self):
