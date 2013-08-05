@@ -119,21 +119,19 @@ class Narrateur(Evenement):
         x, y = self._gestionnaire.xJoueur, self._gestionnaire._yJoueur
         if self._boiteOutils.nomCarte == "Clairiere":
             if self._etape == 0:
-                """self._boiteOutils.ajouterPensee("It was early spring in the woods. Little by little, the animals came out of hibernation.")
-                self._boiteOutils.ajouterPensee("But winter had been harsh. No more money, no more food. We were almost starving.", tempsLecture=0)"""
-                self._boiteOutils.ajouterTransformation(True, "NoirTotal")
                 self._boiteOutils.jouerSon("sonsForet", "boucleSonsForet", nombreEcoutes=0, volume=VOLUME_MUSIQUE/5)
+                self._boiteOutils.ajouterPensee("It was early spring in the woods and the snow had melted, at last. I could hunt again.")
+                self._boiteOutils.ajouterPensee("It was more than time. We were barely eatin' anything at all.")
+                self._boiteOutils.ajouterPensee("Winter had been harsh. No more food, no more money.")
+                self._boiteOutils.ajouterPensee("Would I be able to get anything today? ")
                 self._etape += 1
-            if self._etape == 1 and self._penseePossible.voir():
-                self._boiteOutils.retirerTransformation(True, "NoirTotal")
+            if self._etape == 1:
                 self._boiteOutils.ajouterTransformation(True, "Alpha", alpha=self._coefNoircisseur)
-                print(self._coefNoircisseur)
                 self._coordonneesJoueur = self._boiteOutils.getCoordonneesJoueur()
                 Horloge.initialiser(id(self), "TempsDecouverte", 20000)
                 Horloge.initialiser(id(self), "Alpha", 100)
                 self._etape += 1
             if self._etape == 2 and Horloge.sonner(id(self), "Alpha"):
-                print(self._coefNoircisseur)
                 self._coefNoircisseur += 7
                 if self._coefNoircisseur > 255:
                     self._coefNoircisseur = 255
@@ -147,6 +145,7 @@ class Narrateur(Evenement):
                     decouverteChasse = False
                     if Horloge.sonner(id(self), "TempsDecouverte") or self._boiteOutils.deplacementConsequentJoueur(self._coordonneesJoueur, 22):
                         self._boiteOutils.ajouterTransformation(True, "SplashText Arrow", texte="Press X to shoot an arrow", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=self._alpha)
+                        self._boiteOutils.ajouterPensee("")
                         decouverteChasse = True
                     elif self._premiereMortChasse is True:
                         decouverteChasse = True
@@ -198,7 +197,7 @@ class Narrateur(Evenement):
                 self._gestionnaire.evenements["abstraits"]["Divers"]["SignaleurJoueur"].ajouterSignaleur("InterieurMaison", "JoueurEntre3", (6,4))
                 self._etape += 1
             if self._etape == 9 and self._boiteOutils.interrupteurs["squirrelPose"].voir() is True:
-                self._boiteOutils.ajouterPensee("I'm sorry... It's only a squirrel.")
+                self._boiteOutils.ajouterPensee("I'm sorry... I onl got squirrels...")
                 self._coefNoircisseur = 1
                 self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
                 self._boiteOutils.joueurLibre.desactiver()
@@ -254,34 +253,49 @@ class GestionnaireAnimaux(Evenement):
             x += 1
         return positionsCachettes
 
-    def _genererAnimauxDepart(self):
-        position, x, y, longueur, largeur = -1, -1, -1, self._jeu.carteActuelle.longueur, self._jeu.carteActuelle.largeur
+    def _genererAnimauxDepart(self, longueurMin=0, longueurMax=-1, largeurMin=0, largeurMax=-1, verifProximite=True):
+        position, x, y,= -1, -1, -1
+        if longueurMax == -1:
+            longueurMax = self._jeu.carteActuelle.longueur
+        if largeurMax == -1:
+            largeurMax = self._jeu.carteActuelle.largeur
         i, numeroTypeActuel, typeActuel, positionsDepart = 1, 0, "", []
         while numeroTypeActuel < len(self._typesAnimaux):
             typeActuel, animauxDeCeType = self._typesAnimaux[numeroTypeActuel], 1
             while animauxDeCeType <= self._nombre[typeActuel]:
-                while position in positionsDepart or (x,y) == (-1,-1) or self._jeu.carteActuelle.tilePraticable(x,y,self._c) is False or len([positionActuelle for positionActuelle in positionsDepart if self._boiteOutils.tileProcheDe(position, positionActuelle, 10) is True]) > 0:
-                    position = (random.randint(0, self._jeu.carteActuelle.longueur), random.randint(0, self._jeu.carteActuelle.largeur))
+                while position in positionsDepart or (x,y) == (-1,-1) or self._jeu.carteActuelle.tilePraticable(x,y,self._c) is False or len([positionActuelle for positionActuelle in positionsDepart if (self._boiteOutils.tileProcheDe(position, positionActuelle, 10) is True and verifProximite is True)]) > 0:
+                    position = (random.randint(longueurMin, longueurMax), random.randint(largeurMin, largeurMax))
                     x,y = position[0], position[1]
                 positionsDepart.append(position)
                 objetAnimal = self._parametresGeneration[typeActuel]["classe"](self._jeu, self._gestionnaire, x, y, self._c, animauxDeCeType, self, **self._parametresGeneration[typeActuel])
                 self._gestionnaire.evenements["concrets"][self._jeu.carteActuelle.nom][typeActuel+str(animauxDeCeType)] = [objetAnimal, (x,y), "Bas"]
                 print("Au depart", self._parametresGeneration[typeActuel]["typeAnimal"]+str(animauxDeCeType), (x,y))
+                self
                 animauxDeCeType += 1
                 i += 1
             numeroTypeActuel += 1
 
     def traiter(self):
-        if self._etape == 0 and self._boiteOutils.variables["sceneChasse"] == 1:
+        if self._etape == 0 and self._boiteOutils.variables["sceneChasse"] == 0:
             if self._jeu.carteActuelle.nom == "Clairiere":
                 self._c = 2
-                self._nombre = {"Squirrel":3, "SquirrelMinimal":3}
+                self._nombre = {"Squirrel":5, "SquirrelMinimal":3}
                 self._typesAnimaux = ["Squirrel"]
                 self._parametresGeneration = dict()
                 positionsArbres = self._genererPositionsCachettes("base_out_atlas.png", 2, (832, 672, 32, 32))
                 positionsSapins = self._genererPositionsCachettes("base_out_atlas.png", 2, (800, 544, 32, 32))
-                self._parametresGeneration["Squirrel"] = {"typeAnimal":"Squirrel", "classe":Squirrel, "positionsCachettes":positionsArbres, "longueurSprite":32, "largeurSprite":32, "vitesseDeplacement":150}
+                self._parametresGeneration["Squirrel"] = {"typeAnimal":"Squirrel", "classe":Squirrel, "positionsCachettes":positionsArbres, "longueurSprite":32, "largeurSprite":32, "vitesseDeplacement":250, "mobilite":False, "peur":True}
                 self._parametresGeneration["Lapin"] = {"typeAnimal":"Lapin", "classe":Lapin, "positionsCachettes":positionsSapins, "longueurSprite":32, "largeurSprite":32, "vitesseDeplacement":100, "arretAvant":True, "coucheMonteeArbre":1}
+                for typeAnimal in self._typesAnimaux:
+                    self._nombre[typeAnimal+"Total"] = self._nombre[typeAnimal]
+                    Horloge.initialiser(id(self), "SonEating" + typeAnimal, 1)
+                self._genererAnimauxDepart(longueurMin=35, largeurMin=6, longueurMax=38, largeurMax=9, verifProximite=False)
+                self._etape += 1
+        if self._etape == 0 and self._boiteOutils.variables["sceneChasse"] == 1:
+            print("in")
+            if self._jeu.carteActuelle.nom == "Clairiere":
+                self._nombre = {"Squirrel":3, "SquirrelMinimal":3}
+                self._parametresGeneration["Squirrel"] = {"typeAnimal":"Squirrel", "classe":Squirrel, "positionsCachettes":positionsArbres, "longueurSprite":32, "largeurSprite":32, "vitesseDeplacement":150}
             for typeAnimal in self._typesAnimaux:
                 self._nombre[typeAnimal+"Total"] = self._nombre[typeAnimal]
                 Horloge.initialiser(id(self), "SonEating" + typeAnimal, 1)
@@ -323,19 +337,23 @@ class GestionnaireAnimaux(Evenement):
     restaurerMortsParFuite = property(_getRestaurerMortsParFuite, _setRestaurerMortsParFuite)
 
 class Gibier(PNJ):
-    def __init__(self, jeu, gestionnaire, x, y, c, numero, gestionnaireAnimaux, positionsCachettes=[], typeAnimal="", longueurSprite=-1, largeurSprite=-1, vitesseDeplacement=-1, arretAvant=False, coucheMonteeArbre=False, classe=None):
+    def __init__(self, jeu, gestionnaire, x, y, c, numero, gestionnaireAnimaux, positionsCachettes=[], typeAnimal="", longueurSprite=-1, largeurSprite=-1, vitesseDeplacement=-1, arretAvant=False, coucheMonteeArbre=False, classe=None, mobilite=True, peur=False):
         fichier, couleurTransparente, persoCharset, vitesseDeplacement = typeAnimal+"Moving.png", (0,0,0), (0,0), vitesseDeplacement
         repetitionActions, directionDepart, listeActions = False, "Bas", []
         super().__init__(jeu, gestionnaire, typeAnimal+str(numero), x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement, fuyard=True, dureeAnimationSP=160, longueurSprite=longueurSprite, largeurSprite=largeurSprite)
         self._penseePossible, self._surPlace = InterrupteurInverse(self._boiteOutils.penseeAGerer), False
         self._nomTilesetMouvement, self._nomTilesetSurPlace, self._vie, self._fuite, self._positionsCachettes, self._cadavreEnPlace = fichier, typeAnimal+"Eating.png", 3, False, positionsCachettes, False
         self._xArrivee, self._yArrivee, self._vulnerable, self._monteeArbre, self._gestionnaireAnimaux, self._animationMort = -1, -1, True, False, gestionnaireAnimaux, False
-        self._sonMange, self._typeAnimal, self._arretAvant = False, typeAnimal, arretAvant
+        self._sonMange, self._typeAnimal, self._arretAvant, self._mobilite, self._peur, self._blessure = False, typeAnimal, arretAvant, mobilite, peur, False
         self._coucheMonteeArbre = coucheMonteeArbre if coucheMonteeArbre is not False else self._c
         Horloge.initialiser(id(self), "Rouge clignotant", 1)
         self._numeroBaseSon = 0
 
     def _gererEtape(self):
+        if self._peur is True and self._fuite is False and self._animationMort is False and self._monteeArbre is False:
+            self._finirDeplacementSP()
+            if self._boiteOutils.tileProcheDe((self._xTile,self._yTile), self._boiteOutils.getCoordonneesJoueur(), 10):
+                self._lancerFuite()
         if self._fuite is False and self._deplacementBoucle is False and self._animationMort is False and self._monteeArbre is False:
             self._genererLancerTrajetAleatoire(4, 8)
             self._sonMange = False
@@ -345,11 +363,11 @@ class Gibier(PNJ):
             Horloge.initialiser(id(self._gestionnaireAnimaux), "SonEating"+self._typeAnimal, 1000) 
             self._sonMange = True
         elif self._fuite:
-            if self._etapeTraitement == 1 and Horloge.sonner(id(self), "Rouge clignotant"):
+            if self._blessure is True and self._etapeTraitement == 1 and Horloge.sonner(id(self), "Rouge clignotant"):
                 self._boiteOutils.ajouterTransformation(False, "Rouge/"+self._nom, nom=self._nom)
                 Horloge.initialiser(id(self), "Rouge clignotant", 200)
                 self._etapeTraitement += 1
-            if self._etapeTraitement == 2 and Horloge.sonner(id(self), "Rouge clignotant"):
+            if self._blessure is True and self._etapeTraitement == 2 and Horloge.sonner(id(self), "Rouge clignotant"):
                 self._boiteOutils.retirerTransformation(False, "Rouge/"+self._nom)
                 if Horloge.sonner(id(self), "Fin clignotant"):
                     self._etapeTraitement += 1
@@ -378,25 +396,12 @@ class Gibier(PNJ):
         super().onCollision(nomPNJ, positionCarte)
         if "Fleche" in nomPNJ and self._vulnerable:
             self._vie -= 1
-            self._etapeTraitement, self._intelligence, self._courage, self._fuyard = 1, True, True, False
+            self._etapeTraitement, self._intelligence, self._courage, self._fuyard, self._blessure = 1, True, True, False, True
             self._boiteOutils.jouerSon(self._typeAnimal+"Blesse", self._nom + "blesse" + str(self._numeroBaseSon), fixe=True, evenementFixe=self._nom)
             self._numeroBaseSon += 1
             Horloge.initialiser(id(self), "Fin clignotant", 2000)
             Horloge.initialiser(id(self), "Rouge clignotant", 1)
-            if not self._fuite:
-                self._positionsCachettes = sorted(self._positionsCachettes, key=lambda position: self._boiteOutils.estimationDistanceRestante((self._xTile, self._yTile), position))
-                i, positionIdealeTrouvee = 0, False
-                while i < len(self._positionsCachettes) and not positionIdealeTrouvee:
-                    positionJoueur = (self._gestionnaire.xJoueur, self._gestionnaire.yJoueur)
-                    distanceArbreJoueur = self._boiteOutils.estimationDistanceRestante(positionJoueur, self._positionsCachettes[i])
-                    distanceArbreSquirrel = self._boiteOutils.estimationDistanceRestante((self._xTile, self._yTile), self._positionsCachettes[i])
-                    if self._boiteOutils.tileProcheDe(self._positionsCachettes[i], positionJoueur, 3) is False and distanceArbreSquirrel <= distanceArbreJoueur:
-                        self._finirDeplacementSP()
-                        self._xArrivee, self._yArrivee = self._positionsCachettes[i]
-                        self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, self._positionsCachettes[i][0], self._positionsCachettes[i][1], arretAvant=self._arretAvant)
-                        positionIdealeTrouvee = True
-                    i += 1
-                self._fuite = True
+            self._lancerFuite()
         if self._vie == 0 and self._animationMort is False:
             self._finirDeplacementSP()
             self._trouverTileCadavre()
@@ -406,6 +411,22 @@ class Gibier(PNJ):
             self._lancerTrajet(Rect(self._tileCadavre[0]*32, self._tileCadavre[1]*32, 32, 32), False, deplacementLibre=True)
             self._vulnerable, self._fuite, self._animationMort = False, False, True
             self._boiteOutils.retirerTransformation(False, "Rouge/"+self._nom)
+
+    def _lancerFuite(self):
+        if not self._fuite:
+            self._positionsCachettes = sorted(self._positionsCachettes, key=lambda position: self._boiteOutils.estimationDistanceRestante((self._xTile, self._yTile), position))
+            i, positionIdealeTrouvee = 0, False
+            while i < len(self._positionsCachettes) and not positionIdealeTrouvee:
+                positionJoueur = (self._gestionnaire.xJoueur, self._gestionnaire.yJoueur)
+                distanceArbreJoueur = self._boiteOutils.estimationDistanceRestante(positionJoueur, self._positionsCachettes[i])
+                distanceArbreSquirrel = self._boiteOutils.estimationDistanceRestante((self._xTile, self._yTile), self._positionsCachettes[i])
+                if self._boiteOutils.tileProcheDe(self._positionsCachettes[i], positionJoueur, 3) is False and distanceArbreSquirrel <= distanceArbreJoueur:
+                    self._finirDeplacementSP()
+                    self._xArrivee, self._yArrivee = self._positionsCachettes[i]
+                    self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, self._positionsCachettes[i][0], self._positionsCachettes[i][1], arretAvant=self._arretAvant)
+                    positionIdealeTrouvee = True
+                i += 1
+            self._fuite, self._fuyard = True, False
 
     def _onJoueurInteractionQuelconque(self, x, y, c, direction):
         if self._cadavreEnPlace is True:
@@ -441,7 +462,12 @@ class Gibier(PNJ):
         return tiles
 
     def _genererRegards(self, actions):
-        i, nombreRegards, directionRegard = 0, random.randint(1,2), actions[len(actions)-1]
+        i, nombreRegards= 0, random.randint(1,2)
+        if len(actions) > 0:
+            directionRegard = actions[len(actions)-1]
+        else:
+            directionRegard = "V" + self._boiteOutils.getDirectionAuHasard() + str(2500)
+            actions.append(directionRegard)
         while i < nombreRegards:
             while directionRegard == actions[len(actions)-1]:
                 directionRegard = "V" + self._boiteOutils.getDirectionAuHasard() + str(2500)
@@ -451,16 +477,17 @@ class Gibier(PNJ):
 
     def _genererLancerTrajetAleatoire(self, longueurMin, longueurMax):
         self._longueurMin, self._longueurMax, i, actions = longueurMin, longueurMax, 0, []
-        longueurTrajet, direction1, direction2 = random.randint(longueurMin, longueurMax), self._boiteOutils.getDirectionAuHasard(), self._boiteOutils.getDirectionAuHasard()
-        while direction2 == directions.directionContraire(direction1):
-            direction2 = self._boiteOutils.getDirectionAuHasard()
-        seuilDirection = int(longueurTrajet/2)
-        while i < longueurTrajet:
-            if i < seuilDirection:
-                actions.append(direction1)
-            else:
-                actions.append(direction2)
-            i += 1
+        if self._mobilite is True:
+            longueurTrajet, direction1, direction2 = random.randint(longueurMin, longueurMax), self._boiteOutils.getDirectionAuHasard(), self._boiteOutils.getDirectionAuHasard()
+            while direction2 == directions.directionContraire(direction1):
+                direction2 = self._boiteOutils.getDirectionAuHasard()
+            seuilDirection = int(longueurTrajet/2)
+            while i < longueurTrajet:
+                if i < seuilDirection:
+                    actions.append(direction1)
+                else:
+                    actions.append(direction2)
+                i += 1
         actions = self._genererRegards(actions)
         self._listeActions, self._etapeAction, self._pixelsParcourus, self._repetitionActions, self._deplacementBoucle = actions, 0, 0, False, True
         Horloge.initialiser(id(self), 1, 1)
