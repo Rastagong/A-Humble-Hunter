@@ -270,7 +270,6 @@ class GestionnaireAnimaux(Evenement):
                 objetAnimal = self._parametresGeneration[typeActuel]["classe"](self._jeu, self._gestionnaire, x, y, self._c, animauxDeCeType, self, **self._parametresGeneration[typeActuel])
                 self._gestionnaire.evenements["concrets"][self._jeu.carteActuelle.nom][typeActuel+str(animauxDeCeType)] = [objetAnimal, (x,y), "Bas"]
                 print("Au depart", self._parametresGeneration[typeActuel]["typeAnimal"]+str(animauxDeCeType), (x,y))
-                self
                 animauxDeCeType += 1
                 i += 1
             numeroTypeActuel += 1
@@ -279,7 +278,7 @@ class GestionnaireAnimaux(Evenement):
         if self._etape == 0 and self._boiteOutils.variables["sceneChasse"] == 0:
             if self._jeu.carteActuelle.nom == "Clairiere":
                 self._c = 2
-                self._nombre = {"Squirrel":5, "SquirrelMinimal":3}
+                self._nombre = {"Squirrel":5, "SquirrelMinimal":0}
                 self._typesAnimaux = ["Squirrel"]
                 self._parametresGeneration = dict()
                 positionsArbres = self._genererPositionsCachettes("base_out_atlas.png", 2, (832, 672, 32, 32))
@@ -289,13 +288,17 @@ class GestionnaireAnimaux(Evenement):
                 for typeAnimal in self._typesAnimaux:
                     self._nombre[typeAnimal+"Total"] = self._nombre[typeAnimal]
                     Horloge.initialiser(id(self), "SonEating" + typeAnimal, 1)
-                self._genererAnimauxDepart(longueurMin=35, largeurMin=6, longueurMax=38, largeurMax=9, verifProximite=False)
+                self._genererAnimauxDepart(longueurMin=0, largeurMin=44, longueurMax=4, largeurMax=48, verifProximite=False)
                 self._etape += 1
         if self._etape == 0 and self._boiteOutils.variables["sceneChasse"] == 1:
-            print("in")
             if self._jeu.carteActuelle.nom == "Clairiere":
+                self._typesAnimaux = ["Squirrel"]
                 self._nombre = {"Squirrel":3, "SquirrelMinimal":3}
+                self._parametresGeneration = dict()
+                positionsArbres = self._genererPositionsCachettes("base_out_atlas.png", 2, (832, 672, 32, 32))
+                positionsSapins = self._genererPositionsCachettes("base_out_atlas.png", 2, (800, 544, 32, 32))
                 self._parametresGeneration["Squirrel"] = {"typeAnimal":"Squirrel", "classe":Squirrel, "positionsCachettes":positionsArbres, "longueurSprite":32, "largeurSprite":32, "vitesseDeplacement":150}
+                self._parametresGeneration["Lapin"] = {"typeAnimal":"Lapin", "classe":Lapin, "positionsCachettes":positionsSapins, "longueurSprite":32, "largeurSprite":32, "vitesseDeplacement":100, "arretAvant":True, "coucheMonteeArbre":1}
             for typeAnimal in self._typesAnimaux:
                 self._nombre[typeAnimal+"Total"] = self._nombre[typeAnimal]
                 Horloge.initialiser(id(self), "SonEating" + typeAnimal, 1)
@@ -306,6 +309,13 @@ class GestionnaireAnimaux(Evenement):
                 if self._nombre[typeAnimal] < self._nombre[typeAnimal+"Minimal"] or (viaChasse is False and self._restaurerMortsParFuite is True):
                     self._regenererAnimaux(typeAnimal, self._parametresGeneration[typeAnimal]["classe"])
             del self._morts[:]
+            if self._boiteOutils.variables["sceneChasse"] == 0 and self._nombre["Squirrel"] == 0:
+                self._boiteOutils.variables["sceneChasse"] = 1
+                self._nombre["SquirrelMinimal"] = 3
+                positionsArbres = self._genererPositionsCachettes("base_out_atlas.png", 2, (832, 672, 32, 32))
+                positionsSapins = self._genererPositionsCachettes("base_out_atlas.png", 2, (800, 544, 32, 32))
+                self._parametresGeneration["Squirrel"] = {"typeAnimal":"Squirrel", "classe":Squirrel, "positionsCachettes":positionsArbres, "longueurSprite":32, "largeurSprite":32, "vitesseDeplacement":150}
+                self._morts = [("Squirrel", False)]*3
     
     def _regenererAnimaux(self, typeAnimal, classe):
         self._nombre[typeAnimal+"Total"] += 1
@@ -352,7 +362,7 @@ class Gibier(PNJ):
     def _gererEtape(self):
         if self._peur is True and self._fuite is False and self._animationMort is False and self._monteeArbre is False:
             self._finirDeplacementSP()
-            if self._boiteOutils.tileProcheDe((self._xTile,self._yTile), self._boiteOutils.getCoordonneesJoueur(), 10):
+            if self._boiteOutils.evenementVisible(self._nom, self._c):
                 self._lancerFuite()
         if self._fuite is False and self._deplacementBoucle is False and self._animationMort is False and self._monteeArbre is False:
             self._genererLancerTrajetAleatoire(4, 8)
@@ -423,10 +433,10 @@ class Gibier(PNJ):
                 if self._boiteOutils.tileProcheDe(self._positionsCachettes[i], positionJoueur, 3) is False and distanceArbreSquirrel <= distanceArbreJoueur:
                     self._finirDeplacementSP()
                     self._xArrivee, self._yArrivee = self._positionsCachettes[i]
-                    self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, self._positionsCachettes[i][0], self._positionsCachettes[i][1], arretAvant=self._arretAvant)
+                    self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, self._xArrivee, self._yArrivee, arretAvant=self._arretAvant)
                     positionIdealeTrouvee = True
                 i += 1
-            self._fuite, self._fuyard = True, False
+            self._fuite = True
 
     def _onJoueurInteractionQuelconque(self, x, y, c, direction):
         if self._cadavreEnPlace is True:
@@ -475,7 +485,7 @@ class Gibier(PNJ):
             i += 1
         return actions
 
-    def _genererLancerTrajetAleatoire(self, longueurMin, longueurMax):
+    def _genererLancerTrajetAleatoire(self, longueurMin, longueurMax, regards=True):
         self._longueurMin, self._longueurMax, i, actions = longueurMin, longueurMax, 0, []
         if self._mobilite is True:
             longueurTrajet, direction1, direction2 = random.randint(longueurMin, longueurMax), self._boiteOutils.getDirectionAuHasard(), self._boiteOutils.getDirectionAuHasard()
@@ -488,7 +498,8 @@ class Gibier(PNJ):
                 else:
                     actions.append(direction2)
                 i += 1
-        actions = self._genererRegards(actions)
+        if regards:
+            actions = self._genererRegards(actions)
         self._listeActions, self._etapeAction, self._pixelsParcourus, self._repetitionActions, self._deplacementBoucle = actions, 0, 0, False, True
         Horloge.initialiser(id(self), 1, 1)
 
