@@ -119,8 +119,8 @@ class Narrateur(Evenement):
         x, y = self._gestionnaire.xJoueur, self._gestionnaire._yJoueur
         if self._boiteOutils.nomCarte == "Clairiere":
             if self._etape == 0:
-                self._boiteOutils.ajouterPensee("It was early spring in the woods. Little by little, the animals came out of hibernation.")
-                self._boiteOutils.ajouterPensee("But winter had been harsh. No more money, no more food. We were almost starving.", tempsLecture=0)
+                """self._boiteOutils.ajouterPensee("It was early spring in the woods. Little by little, the animals came out of hibernation.")
+                self._boiteOutils.ajouterPensee("But winter had been harsh. No more money, no more food. We were almost starving.", tempsLecture=0)"""
                 self._boiteOutils.ajouterTransformation(True, "NoirTotal")
                 self._boiteOutils.jouerSon("sonsForet", "boucleSonsForet", nombreEcoutes=0, volume=VOLUME_MUSIQUE/5)
                 self._etape += 1
@@ -209,12 +209,26 @@ class Narrateur(Evenement):
                 self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
                 if self._coefNoircisseur >= 12:
                     self._etape += 1
-                    Horloge.initialiser(id(self), "Transition Scene Interieur", 10000)
+                    Horloge.initialiser(id(self), "Transition Scene Interieur", 3000)
                 else:
                     Horloge.initialiser(id(self), "Transition Noir", 100)
             if self._etape == 11 and Horloge.sonner(id(self), "Transition Scene Interieur"):
                 self._boiteOutils.retirerTransformation(True, "Noir")
+                self._boiteOutils.teleporterSurCarte("EtageMaison", 9, 3, 2, "Bas")
+                self._coefNoircisseur = 12
+                self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
+                Horloge.initialiser(id(self), "Transition Noir", 100)
+                self._boiteOutils.joueurLibre.activer()
+                self._boiteOutils.ajouterPensee("I woke up at dawn. I had only one thing to do. Go hunting.")
                 self._etape += 1
+            if self._etape == 12 and Horloge.sonner(id(self), "Transition Noir"):
+                self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
+                self._coefNoircisseur -= 1
+                if self._coefNoircisseur == 1:
+                    self._boiteOutils.retirerTransformation(True, "Noir")
+                else:
+                    Horloge.initialiser(id(self), "Transition Noir", 100)
+
                 
 
     def onMortAnimal(self, typeAnimal, viaChasse=False):
