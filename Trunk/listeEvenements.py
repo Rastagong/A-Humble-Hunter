@@ -123,15 +123,13 @@ class Narrateur(Evenement):
                 self._boiteOutils.ajouterPensee("It was early spring in the woods and the snow had melted, at last. I could hunt again.")
                 self._boiteOutils.ajouterPensee("It was more than time. We were barely eatin' anything at all.")
                 self._boiteOutils.ajouterPensee("Winter had been harsh. No more food, no more money.")
-                self._boiteOutils.ajouterPensee("Would I be able to get anything today? ")
-                self._etape += 1
-            if self._etape == 1:
+                self._boiteOutils.ajouterPensee("Wo ")
                 self._boiteOutils.ajouterTransformation(True, "Alpha", alpha=self._coefNoircisseur)
                 self._coordonneesJoueur = self._boiteOutils.getCoordonneesJoueur()
                 Horloge.initialiser(id(self), "TempsDecouverte", 20000)
                 Horloge.initialiser(id(self), "Alpha", 100)
                 self._etape += 1
-            if self._etape == 2 and Horloge.sonner(id(self), "Alpha"):
+            if self._etape == 1 and Horloge.sonner(id(self), "Alpha"):
                 self._coefNoircisseur += 7
                 if self._coefNoircisseur > 255:
                     self._coefNoircisseur = 255
@@ -141,16 +139,13 @@ class Narrateur(Evenement):
                     self._etape += 1
                 else:
                     Horloge.initialiser(id(self), "Alpha", 100)
-            if self._etape == 3:
-                    decouverteChasse = False
-                    if Horloge.sonner(id(self), "TempsDecouverte") or self._boiteOutils.deplacementConsequentJoueur(self._coordonneesJoueur, 22):
-                        self._boiteOutils.ajouterTransformation(True, "SplashText Arrow", texte="Press X to shoot an arrow", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=self._alpha)
-                        self._boiteOutils.ajouterPensee("")
-                        decouverteChasse = True
-                    elif self._premiereMortChasse is True:
-                        decouverteChasse = True
-                    if decouverteChasse:
-                        self._etape += 1
+            if self._etape == 2:
+                if self._boiteOutils.interrupteurs["DecouverteSquirrels"].voir():
+                    Horloge.initialiser(id(self), "SplashArrow", 3000)
+                    self._etape += 1
+            if self._etape == 3 and Horloge.sonner(id(self), "SplashArrow"):
+                self._boiteOutils.ajouterTransformation(True, "SplashText Arrow", texte="Press X to shoot an arrow", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=self._alpha)
+                self._etape += 1
             if self._etape > 3 and self._etape < 7:
                 if self._messageBoutonInteraction is False and self._premiereMortChasse is True:
                     self._messageBoutonInteraction = True
@@ -159,20 +154,20 @@ class Narrateur(Evenement):
                     self._boiteOutils.ajouterTransformation(True, "SplashText Interaction2", texte="Or W on an AZERTY keyboard", antialias=True, couleurTexte=(255,255,255), position=(10, 40), taille=20, alpha=self._alpha)
                     self._gestionnaire.evenements["abstraits"]["Divers"]["GestionnaireAnimaux"].nombre["SquirrelMinimal"] = 0 #On ne restaure plus les écureuils...
                     self._gestionnaire.evenements["abstraits"]["Divers"]["GestionnaireAnimaux"].restaurerMortsParFuite = True #Sauf quand ils meurent par fuite
-                if Horloge.sonner(id(self), "Fin SplashText Titre"):
-                    self._boiteOutils.retirerTransformation(True, "SplashText Titre1")
-                    self._boiteOutils.retirerTransformation(True, "SplashText Titre2")
-                    self._boiteOutils.retirerTransformation(True, "SplashText Titre3")
                 if Horloge.sonner(id(self), "Début SplashText Titre"):
                     Horloge.initialiser(id(self), "Fin SplashText Titre", 5000)
                     self._boiteOutils.ajouterTransformation(True, "SplashText Titre1", texte="A", antialias=True, couleurTexte=(255,255,255), position=(10, 0))
                     self._boiteOutils.ajouterTransformation(True, "SplashText Titre2", texte="Humble", antialias=True, couleurTexte=(255,255,255), position=(10, FENETRE["largeurFenetre"]/4))
                     self._boiteOutils.ajouterTransformation(True, "SplashText Titre3", texte="Hunter", antialias=True, couleurTexte=(255,255,255), position=(10, FENETRE["largeurFenetre"]/2))
+                if Horloge.sonner(id(self), "Fin SplashText Titre"):
+                    self._boiteOutils.retirerTransformation(True, "SplashText Titre1")
+                    self._boiteOutils.retirerTransformation(True, "SplashText Titre2")
+                    self._boiteOutils.retirerTransformation(True, "SplashText Titre3")
                 if self._boiteOutils.variables["SquirrelChasses"] == 1 and self._etape == 4:
                     self._boiteOutils.ajouterPensee("A squirrel... I won't feed anyone with that. I can merely sell its coat.")
                     self._boiteOutils.retirerTransformation(True, "SplashText Interaction1")
                     self._boiteOutils.retirerTransformation(True, "SplashText Interaction2")
-                    Horloge.initialiser(id(self), "Début SplashText Titre", 5000)
+                    Horloge.initialiser(id(self), "Début SplashText Titre", 12000)
                     self._boiteOutils.interrupteurs["MusiqueForet"].activer()
                     self._etape += 1
                 if self._boiteOutils.variables["SquirrelChasses"] == 2 and self._etape == 5:
@@ -361,8 +356,9 @@ class Gibier(PNJ):
 
     def _gererEtape(self):
         if self._peur is True and self._fuite is False and self._animationMort is False and self._monteeArbre is False:
-            self._finirDeplacementSP()
-            if self._boiteOutils.evenementVisible(self._nom, self._c):
+            if self._boiteOutils.tileProcheDe((self._xTile,self._yTile), self._boiteOutils.getCoordonneesJoueur(), 4) or self._boiteOutils.interrupteurs["DecouverteSquirrels"].voir():
+                self._finirDeplacementSP()
+                self._boiteOutils.interrupteurs["DecouverteSquirrels"].activer()
                 self._lancerFuite()
         if self._fuite is False and self._deplacementBoucle is False and self._animationMort is False and self._monteeArbre is False:
             self._genererLancerTrajetAleatoire(4, 8)
@@ -430,13 +426,13 @@ class Gibier(PNJ):
                 positionJoueur = (self._gestionnaire.xJoueur, self._gestionnaire.yJoueur)
                 distanceArbreJoueur = self._boiteOutils.estimationDistanceRestante(positionJoueur, self._positionsCachettes[i])
                 distanceArbreSquirrel = self._boiteOutils.estimationDistanceRestante((self._xTile, self._yTile), self._positionsCachettes[i])
-                if self._boiteOutils.tileProcheDe(self._positionsCachettes[i], positionJoueur, 3) is False and distanceArbreSquirrel <= distanceArbreJoueur:
+                if self._boiteOutils.tileProcheDe(self._positionsCachettes[i], positionJoueur, 3) is False and (distanceArbreSquirrel <= distanceArbreJoueur or distanceArbreSquirrel > 10):
                     self._finirDeplacementSP()
                     self._xArrivee, self._yArrivee = self._positionsCachettes[i]
                     self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, self._xArrivee, self._yArrivee, arretAvant=self._arretAvant)
                     positionIdealeTrouvee = True
                 i += 1
-            self._fuite = True
+            self._fuite, self._fuyard = True, False
 
     def _onJoueurInteractionQuelconque(self, x, y, c, direction):
         if self._cadavreEnPlace is True:
@@ -500,7 +496,7 @@ class Gibier(PNJ):
                 i += 1
         if regards:
             actions = self._genererRegards(actions)
-        self._listeActions, self._etapeAction, self._pixelsParcourus, self._repetitionActions, self._deplacementBoucle = actions, 0, 0, False, True
+        self._lancerTrajet(actions, False)
         Horloge.initialiser(id(self), 1, 1)
 
 class Squirrel(Gibier):
