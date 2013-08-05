@@ -121,9 +121,8 @@ class Narrateur(Evenement):
             if self._etape == 0:
                 self._boiteOutils.jouerSon("sonsForet", "boucleSonsForet", nombreEcoutes=0, volume=VOLUME_MUSIQUE/5)
                 self._boiteOutils.ajouterPensee("It was early spring in the woods and the snow had melted, at last. I could hunt again.")
-                self._boiteOutils.ajouterPensee("It was more than time. We were barely eatin' anything at all.")
-                self._boiteOutils.ajouterPensee("Winter had been harsh. No more food, no more money.")
-                self._boiteOutils.ajouterPensee("Wo ")
+                self._boiteOutils.ajouterPensee("It was more than time. Winter had been harsh. No more food, no more money.")
+                self._boiteOutils.ajouterPensee("We were almost starving.")
                 self._boiteOutils.ajouterTransformation(True, "Alpha", alpha=self._coefNoircisseur)
                 self._coordonneesJoueur = self._boiteOutils.getCoordonneesJoueur()
                 Horloge.initialiser(id(self), "TempsDecouverte", 20000)
@@ -171,15 +170,15 @@ class Narrateur(Evenement):
                     self._boiteOutils.interrupteurs["MusiqueForet"].activer()
                     self._etape += 1
                 if self._boiteOutils.variables["SquirrelChasses"] == 2 and self._etape == 5:
-                    self._boiteOutils.ajouterPensee("The old Doug used to hunt squirrels. Now his frozen corpse is devoured by the beasts.")
+                    self._boiteOutils.ajouterPensee("I won't find any big game in these woods anyway. I've barely seen any hare.")
                     self._etape += 1
                 if self._boiteOutils.variables["SquirrelChasses"] == 3 and self._etape == 6:
-                    self._boiteOutils.ajouterPensee("I won't let that happen to me. Nor to my family. I will live.")
+                    self._boiteOutils.ajouterPensee("Truly, the gods haven't been fair with the humble hunter I am....")
                     Horloge.initialiser(id(self), "tempsFinChasse", 20000)
                     self._coordonneesJoueur = self._boiteOutils.getCoordonneesJoueur()
                     self._etape += 1
             if self._etape == 7 and (Horloge.sonner(id(self), "tempsFinChasse") or self._boiteOutils.deplacementConsequentJoueur(self._coordonneesJoueur, 20)):
-                self._boiteOutils.ajouterPensee("It seems we won't eat tonight though... There's nothing left to hunt. Let's go home.")
+                self._boiteOutils.ajouterPensee("It seems we won't eat tonight either, there's nothing left to hunt. I should go home.")
                 self._boiteOutils.interrupteurs["finChasse1"].activer()
                 self._etape += 1
         if self._boiteOutils.nomCarte == "InterieurMaison":
