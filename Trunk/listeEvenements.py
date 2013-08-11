@@ -37,7 +37,7 @@ class LanceurMusique(Evenement):
 
     def traiter(self):
         if self._boiteOutils.interrupteurs["MusiqueForet"].voir() and Horloge.sonner(id(self), "Attente Musique", arretApresSonnerie=False):
-            self._boiteOutils.jouerSon("Lost In The Meadows", "Musique forêt meadows")
+            self._boiteOutils.jouerSon("Lost In The Meadows", "Musique forêt meadows", volume=VOLUME_LONGUE_MUSIQUE)
             Horloge.initialiser(id(self), "Attente Musique", self._boiteOutils.getDureeInstanceSon("Musique forêt meadows") +  random.randint(120000, 4* 60000))
         if self._boiteOutils.interrupteurs["MusiqueForet"].voir() is True and self._jeu.carteActuelle.nom not in self._boiteOutils.variables["CartesForet"]:
             self._boiteOutils.interrupteurs["MusiqueForet"].desactiver()
@@ -184,15 +184,18 @@ class Narrateur(Evenement):
         if self._boiteOutils.nomCarte == "InterieurMaison":
             if self._etape < 8:
                 self._etape = 8
-            if self._etape == 8 and self._boiteOutils.getCoordonneesJoueur() == (10,13):
+            if self._etape == 8 and self._boiteOutils.getCoordonneesJoueur() == (13,3):
+                self._boiteOutils.arreterSonEnFondu("boucleSonsForet", 3000)
+                self._etape += 1
+            if self._etape == 9 and self._boiteOutils.getCoordonneesJoueur() == (10,13):
                 self._boiteOutils.ajouterPensee("They froze when they saw me. They wanted to see what I'd caught.")
                 self._boiteOutils.interrupteurs["JoueurEntre"].activer()
                 self._gestionnaire.evenements["abstraits"]["Divers"]["SignaleurJoueur"].ajouterSignaleur("InterieurMaison", "JoueurEntre2", (10,4))
                 self._gestionnaire.evenements["abstraits"]["Divers"]["SignaleurJoueur"].ajouterSignaleur("InterieurMaison", "JoueurEntre3", (6,4))
                 self._etape += 1
             if self._etape == 9 and self._boiteOutils.interrupteurs["squirrelPose"].voir() is True:
-                self._boiteOutils.ajouterPensee("I'm sorry... I onl got squirrels...")
-                self._coefNoircisseur = 1
+                self._boiteOutils.ajouterPensee("I'm sorry... I only got squirrels...")
+                """self._coefNoircisseur = 1
                 self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
                 self._boiteOutils.joueurLibre.desactiver()
                 Horloge.initialiser(id(self), "Transition Noir", 1000)
@@ -220,10 +223,8 @@ class Narrateur(Evenement):
                 if self._coefNoircisseur == 1:
                     self._boiteOutils.retirerTransformation(True, "Noir")
                 else:
-                    Horloge.initialiser(id(self), "Transition Noir", 100)
-
+                    Horloge.initialiser(id(self), "Transition Noir", 100)"""
                 
-
     def onMortAnimal(self, typeAnimal, viaChasse=False):
         if viaChasse and not self._premiereMortChasse:
             self._premiereMortChasse = True
@@ -616,7 +617,7 @@ class Belia(PNJ):
         repetitionActions, directionDepart = True, "Gauche"
         listeActions = ["Haut","Haut","Gauche","Gauche","Gauche","VHaut2500","Droite","Droite","Droite","VHaut2500","Droite","Droite","Droite","VHaut2500","Gauche","Gauche","Gauche","Bas","Bas","VGauche2500"]
         super().__init__(jeu, gestionnaire, "Belia", x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement)
-        self._listeSons, self._etapeSon = [("Sack",5,1), ("Cupboard",11,1), ("Cupboard",14,1), ("Knife",21,3)], 0
+        self._listeSons, self._etapeSon = [("Sack",5,1), ("Cupboard",9,1), ("Cupboard",13,1), ("Knife",18,3)], 0
 
     def _gererEtape(self):
         if self._etapeTraitement == 1:
@@ -708,7 +709,7 @@ class SignaleurJoueur(Evenement):
         Evenement.__init__(self, jeu, gestionnaire)
         self._i = 0
         for parametre in parametres:
-            self._ajouterSignaleur(parametre[0], parametre[1], parametre[2])
+            self.ajouterSignaleur(parametre[0], parametre[1], parametre[2])
 
     def ajouterSignaleur(self, carte, interrupteur, position):
         self._i += 1
