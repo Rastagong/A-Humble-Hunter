@@ -193,7 +193,8 @@ class Narrateur(Evenement):
             if self._etape == 10 and self._boiteOutils.interrupteurs["squirrelPose"].voir() is True:
                 self._boiteOutils.ajouterPensee("I'm sorry... I only got squirrels...")
                 self._boiteOutils.ajouterPensee("Belia: Tom, Elie, go playing upstairs.", nom="thoughtUpstairs")
-                self._boiteOutils.ajouterPensee("Belia: We'll have to pick up berries outside...", nom="thoughtBerries")
+                self._boiteOutils.ajouterPensee("Belia: Let's talk outside. I must fetch some water anyway.", nom="thoughtOutside")
+                self._boiteOutils.jouerSon("Osare Unrest Middle", "Thème familier", volume=VOLUME_LONGUE_MUSIQUE, nombreEcoutes=0)
                 self._etape += 1
                 """self._coefNoircisseur = 1
                 self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
@@ -629,12 +630,23 @@ class Belia(PNJ):
             self._etapeTraitement += 1
         if self._etapeTraitement == 3 and self._deplacementBoucle is False and self._xTile == 5 and self._yTile == 3 and self._comportementParticulier is True:
             self._comportementParticulier = False
-        if self._etapeTraitement == 3 and self._boiteOutils.getNomPensee() == "thoughtBerries":
+        if self._etapeTraitement == 3 and self._boiteOutils.getNomPensee() == "thoughtOutside":
             self._comportementParticulier = True
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 7, 6, regardFinal="Droite")
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 4 and self._xTile == 7 and self._yTile == 6 and self._deplacementBoucle is False:
+            self._lancerTrajet("VDroite1500", False)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 5 and self._deplacementBoucle is False:
+            self._boiteOutils.changerBloc(8, 5, 2, "base_out_atlas.png", (576, 448, 32, 32), (0,0,0), False)
+            self._boiteOutils.changerBloc(9, 5, 2, "base_out_atlas.png", (608, 448, 32, 32), (0,0,0), False)
+            self._boiteOutils.changerBloc(8, 6, 2, "base_out_atlas.png", (576, 480, 32, 32), (0,0,0), False)
+            self._boiteOutils.changerBloc(9, 6, 2, "base_out_atlas.png", (608, 480, 32, 32), (0,0,0), False)
             self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 13, 3)
             self._etapeTraitement += 1
-        if self._etapeTraitement == 4 and self._deplacementBoucle is False and self._xTile == 13 and self._yTile == 3:
+        if self._etapeTraitement == 6 and self._deplacementBoucle is False and self._xTile == 13 and self._yTile == 3:
             self._etapeTraitement += 1
+            self._boiteOutils.interrupteurs["BeliaSortie"].activer()
             self._boiteOutils.supprimerPNJ(self._nom, self._c)
 
     def _gererSons(self):
@@ -668,12 +680,13 @@ class Enfant(PNJ):
             self._comportementParticulier = True
             self._etapeSuivi += 1
             self._etapeTraitement += 1
-        if self._etapeTraitement == 3 and self._boiteOutils.getNomPensee() == "thoughtUpstairs":
-            self._etapeTraitement += 1
+        if (self._etapeTraitement == 3 or self._etapeTraitement == 2) and self._boiteOutils.getNomPensee() == "thoughtUpstairs" and self._etapeMarche == 1:
+            self._etapeTraitement = 4
+            self._finirDeplacementSP()
         if (self._etapeTraitement == 2 or self._etapeTraitement == 3) and self._comportementParticulier is True and self._xTile == self._xArrivee and self._yTile == self._yArrivee and self._deplacementBoucle is False:
             self._finirDeplacementSP()
             self._comportementParticulier = False
-        if self._etapeTraitement == 4 and self._deplacementBoucle is False and self._boiteOutils.getNomPensee() == "thoughtUpstairs":
+        if self._etapeTraitement == 4 and self._etapeMarche == 1 and self._boiteOutils.getNomPensee() == "thoughtUpstairs":
             self._comportementParticulier = True
             self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 1, 3)
             self._etapeTraitement += 1

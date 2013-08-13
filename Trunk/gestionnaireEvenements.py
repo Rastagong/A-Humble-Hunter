@@ -28,7 +28,7 @@ from listeEvenements import *
 class MonGestionnaireEvenements(GestionnaireEvenements):
 
     def _getInterrupteurs(self):
-        return ["DecouverteSquirrels", "MusiqueForet", "finChasse1", "JoueurEntre", "JoueurEntre2", "JoueurEntre3", "squirrelPose"]
+        return ["DecouverteSquirrels", "MusiqueForet", "finChasse1", "JoueurEntre", "JoueurEntre2", "JoueurEntre3", "squirrelPose", "BeliaSortie"]
 
     def _getVariables(self):
         return [("sceneChasse", 0), ("SquirrelChasses", 0), ("LapinChasses", 0), ("CartesForet", ["Clairiere","CheminClairiere"])]
