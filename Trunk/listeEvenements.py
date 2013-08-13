@@ -212,6 +212,8 @@ class Narrateur(Evenement):
                 self._boiteOutils.jouerSon("Laugh", "Rires")
                 self._etape += 1
         if self._boiteOutils.nomCarte == "Maison":
+            if self._etape < 12:
+                self._etape = 12
             if self._etape == 12:
                 self._etape += 1
                 """self._coefNoircisseur = 1
@@ -680,7 +682,7 @@ class Belia2(PNJ):
         repetitionActions, directionDepart = False, "Bas"
         listeActions = ["Aucune"]
         Horloge.initialiser(id(self), "Attente départ", 3000)
-        super().__init__(jeu, gestionnaire, "Belia", x, y, 2, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement, poseDepart=poseDepart)
+        super().__init__(jeu, gestionnaire, "Belia2", x, y, 2, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement, poseDepart=poseDepart)
 
     def _gererEtape(self):
         if self._etapeTraitement == 0:
@@ -688,8 +690,49 @@ class Belia2(PNJ):
             if self._boiteOutils.tileProcheDe((3,5), coordonneesJoueur, 3) is False or (Horloge.sonner(id(self), "Attente départ", arretApresSonnerie=False) and coordonneesJoueur != (3,5)):
                 self._poseDepart = True
         if self._etapeTraitement == 1:
-            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 16, 13)
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 14, arretAvant=True)
             self._etapeTraitement += 1
+        if self._etapeTraitement == 2 and self._deplacementBoucle is False and self._boiteOutils.positionProcheEvenement(15, 14, self._nom):
+            self._boiteOutils.interrupteurs["discussionEtang"].activer()
+            self._lancerTrajet("V"+self._boiteOutils.determinerDirectionDeplacement((self._xTile,self._yTile),(15,14))+"1500",False)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 3 and self._boiteOutils.getCoordonneesJoueur() != (15,14) and self._deplacementBoucle is False:
+            self._boiteOutils.changerBloc(15, 14, 2, "base_out_atlas.png", (480, 448, 32, 32), (0,0,0), False)
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 17, 11, arretAvant=True)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 4 and self._deplacementBoucle is False and self._boiteOutils.positionProcheEvenement(17, 11, self._nom):
+            self._lancerTrajet("V"+self._boiteOutils.determinerDirectionDeplacement((self._xTile,self._yTile),(17,11))+"1500",False)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 5 and self._boiteOutils.getCoordonneesJoueur() != (17,11) and self._deplacementBoucle is False:
+            self._boiteOutils.changerBloc(17, 10, 3, "base_out_atlas.png", (608, 448, 32, 32), (0,0,0), False)
+            self._boiteOutils.changerBloc(17, 11, 2, "base_out_atlas.png", (608, 480, 32, 32), (0,0,0), False)
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 13, regardFinal="Droite")
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 6 and self._xTile == 15 and self._yTile == 13 and self._deplacementBoucle is False:
+            self._lancerTrajet(["VDroite2500", "Haut", "Haut", "Droite", "VDroite2500","Gauche","Bas","Bas","VBas1500"]*3, False)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 7:
+            if self._deplacementBoucle is False:
+                self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 12, arretAvant=True)
+                self._etapeTraitement += 1
+            elif self._etapeAction == 17:
+                self._boiteOutils.changerBloc(15, 14, 2, "base_out_atlas.png", (480, 480, 32, 32), (0,0,0), False)
+        if self._etapeTraitement == 8 and self._deplacementBoucle is False and self._boiteOutils.positionProcheEvenement(15, 12, self._nom):
+            self._lancerTrajet("V"+self._boiteOutils.determinerDirectionDeplacement((self._xTile,self._yTile),(15,12))+"1500",False)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 9 and self._boiteOutils.getCoordonneesJoueur() != (15,12) and self._deplacementBoucle is False:
+            self._boiteOutils.changerBloc(15, 12, 2, "base_out_atlas.png", (480, 448, 32, 32), (0,0,0), False)
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 13, regardFinal="Droite")
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 10 and self._xTile == 15 and self._yTile == 13 and self._deplacementBoucle is False:
+            self._lancerTrajet(["VDroite2500", "Gauche","Haut", "Haut", "Droite", "Droite", "VDroite2500","Gauche", "VBas1500", "Gauche", "Bas", "Bas", "Droite", "VBas1500"]*3, False)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 11:
+            if self._deplacementBoucle is False:
+                self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 3, 5, arretAvant=True)
+                self._etapeTraitement += 1
+            elif self._etapeAction == 26:
+                self._boiteOutils.changerBloc(15, 12, 2, "base_out_atlas.png", (480, 480, 32, 32), (0,0,0), False)
     
 class Enfant(PNJ):
     def __init__(self, jeu, gestionnaire, nom, x, y, c):

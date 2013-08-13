@@ -28,7 +28,7 @@ from listeEvenements import *
 class MonGestionnaireEvenements(GestionnaireEvenements):
 
     def _getInterrupteurs(self):
-        return ["DecouverteSquirrels", "MusiqueForet", "Rires", "finChasse1", "JoueurEntre", "JoueurEntre2", "JoueurEntre3", "squirrelPose", "BeliaSortie"]
+        return ["DecouverteSquirrels", "MusiqueForet", "Rires", "finChasse1", "JoueurEntre", "JoueurEntre2", "JoueurEntre3", "squirrelPose", "BeliaSortie","discussionEtang"]
 
     def _getVariables(self):
         return [("sceneChasse", 0), ("SquirrelChasses", 0), ("LapinChasses", 0), ("CartesForet", ["Clairiere","CheminClairiere"])]
@@ -70,13 +70,15 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
             self._evenements["concrets"]["CheminClairiere"]["SortieMaison1"] = [Teleporteur(self._jeu, self, "Maison", 14, 0, 2, "Bas"), (3, 29), "Aucune"]
             self._evenements["concrets"]["CheminClairiere"]["SortieMaison2"] = [Teleporteur(self._jeu, self, "Maison", 15, 0, 2, "Bas"), (4, 29), "Aucune"]
         elif nomCarte == "Maison":
+            if self._evenements["abstraits"]["Divers"]["Narrateur"]._etape < 12:
+                self._boiteOutils.interrupteurs["squirrelPose"].activer()
             self._evenements["concrets"]["Maison"]["SortieCheminClairiere1"] = [Teleporteur(self._jeu, self, "CheminClairiere", 3, 29, 2, "Haut"), (14, 0), "Aucune"]
             self._evenements["concrets"]["Maison"]["SortieCheminClairiere2"] = [Teleporteur(self._jeu, self, "CheminClairiere", 4, 29, 2, "Haut"), (15, 0), "Aucune"]
             self._evenements["concrets"]["Maison"]["SortieInterieurMaison"] = [Porte(self._jeu, self, "InterieurMaison", False, "HyptosisMaison.png", (64, 64, 32, 32), (64, 0, 32, 32), 3, 4, 2, 13, 3, 2, "Haut"), (3, 4), "Aucune"]
             if self._boiteOutils.interrupteurs["squirrelPose"].voir() and self._boiteOutils.interrupteurs["BeliaSortie"].voir():
-                self._evenements["concrets"]["Maison"]["Belia"] = [Belia2(self._jeu, self, 3, 8, True), (3,8), "Bas"]
+                self._evenements["concrets"]["Maison"]["Belia2"] = [Belia2(self._jeu, self, 3, 8, True), (3,8), "Bas"]
             elif self._boiteOutils.interrupteurs["squirrelPose"].voir() and not self._boiteOutils.interrupteurs["BeliaSortie"].voir():
-                self._evenements["concrets"]["Maison"]["Belia"] = [Belia2(self._jeu, self, 3, 5, False), (3,5), "Bas"]
+                self._evenements["concrets"]["Maison"]["Belia2"] = [Belia2(self._jeu, self, 3, 5, False), (3,5), "Bas"]
         elif nomCarte == "InterieurMaison":
             self._evenements["concrets"]["InterieurMaison"]["SortieExterieur"] = [Teleporteur(self._jeu, self, "Maison", 3, 5, 2, "Bas"), (13, 3), "Aucune"]
             self._evenements["concrets"]["InterieurMaison"]["SortieEtage"] = [Teleporteur(self._jeu, self, "EtageMaison", 1, 3, 2, "Bas"), (1, 3), "Aucune"]
