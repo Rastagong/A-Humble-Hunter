@@ -33,12 +33,15 @@ import os, random
 class LanceurMusique(Evenement):
     def __init__(self, jeu, gestionnaire):
         super().__init__(jeu, gestionnaire)
-        Horloge.initialiser(id(self), "Attente Musique", 1)
+        Horloge.initialiser(id(self), "Attente Musique Foret", 1)
+        Horloge.initialiser(id(self), "Attente Rires", 1)
 
     def traiter(self):
-        if self._boiteOutils.interrupteurs["MusiqueForet"].voir() and Horloge.sonner(id(self), "Attente Musique", arretApresSonnerie=False):
+        if self._boiteOutils.interrupteurs["MusiqueForet"].voir() and Horloge.sonner(id(self), "Attente Musique Foret", arretApresSonnerie=False):
             self._boiteOutils.jouerSon("Lost In The Meadows", "Musique forêt meadows", volume=VOLUME_LONGUE_MUSIQUE)
-            Horloge.initialiser(id(self), "Attente Musique", self._boiteOutils.getDureeInstanceSon("Musique forêt meadows") +  random.randint(120000, 4* 60000))
+        if self._boiteOutils.interrupteurs["Rires"].voir() and Horloge.sonner(id(self), "Attente Rires", arretApresSonnerie=False):
+            self._boiteOutils.jouerSon("Laugh", "Rires")
+            Horloge.initialiser(id(self), "Attente Rires", self._boiteOutils.getDureeInstanceSon("Rires") +  random.randint(10000, 20000))
         if self._boiteOutils.interrupteurs["MusiqueForet"].voir() is True and self._jeu.carteActuelle.nom not in self._boiteOutils.variables["CartesForet"]:
             self._boiteOutils.interrupteurs["MusiqueForet"].desactiver()
 
@@ -183,18 +186,33 @@ class Narrateur(Evenement):
                 self._etape = 8
             if self._etape == 8 and self._boiteOutils.getCoordonneesJoueur() == (13,3):
                 self._boiteOutils.arreterSonEnFondu("boucleSonsForet", 3000)
+                self._boiteOutils.interrupteurs["Rires"].activer()
                 self._etape += 1
             if self._etape == 9 and (self._boiteOutils.getCoordonneesJoueur() == (11,13) or self._boiteOutils.getCoordonneesJoueur() == (11,14)):
+                self._boiteOutils.interrupteurs["Rires"].desactiver()
                 self._boiteOutils.ajouterPensee("They froze when they saw me. They wanted to see what I'd caught.")
                 self._boiteOutils.interrupteurs["JoueurEntre"].activer()
                 self._gestionnaire.evenements["abstraits"]["Divers"]["SignaleurJoueur"].ajouterSignaleur("InterieurMaison", "JoueurEntre2", (10,4))
                 self._gestionnaire.evenements["abstraits"]["Divers"]["SignaleurJoueur"].ajouterSignaleur("InterieurMaison", "JoueurEntre3", (6,4))
+                Horloge.initialiser(id(self), "Attente squirrelPose", 15000)
                 self._etape += 1
+            if self._etape == 10 and Horloge.sonner(id(self), "Attente squirrelPose") and not self._boiteOutils.interrupteurs["squirrelPose"].voir():
+                self._boiteOutils.ajouterTransformation(True, "SplashText InteractionTable1", texte="Press Z to interact with the table", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=self._alpha)
+                self._boiteOutils.ajouterTransformation(True, "SplashText InteractionTable2", texte="Or W on an AZERTY keyboard", antialias=True, couleurTexte=(255,255,255), position=(10, 40), taille=20, alpha=self._alpha)
             if self._etape == 10 and self._boiteOutils.interrupteurs["squirrelPose"].voir() is True:
                 self._boiteOutils.ajouterPensee("I'm sorry... I only got squirrels...")
                 self._boiteOutils.ajouterPensee("Belia: Tom, Elie, go playing upstairs.", nom="thoughtUpstairs")
                 self._boiteOutils.ajouterPensee("Belia: Let's talk outside. I must fetch some water anyway.", nom="thoughtOutside")
                 self._boiteOutils.jouerSon("Osare Unrest Middle", "Thème familier", volume=VOLUME_LONGUE_MUSIQUE, nombreEcoutes=0)
+                self._boiteOutils.retirerTransformation(True, "SplashText InteractionTable1")
+                self._boiteOutils.retirerTransformation(True, "SplashText InteractionTable2")
+                Horloge.initialiser(id(self), "Rires Upstairs", 6000)
+                self._etape += 1
+            if self._etape == 11 and Horloge.sonner(id(self), "Rires Upstairs"):
+                self._boiteOutils.jouerSon("Laugh", "Rires")
+                self._etape += 1
+        if self._boiteOutils.nomCarte == "Maison":
+            if self._etape == 12:
                 self._etape += 1
                 """self._coefNoircisseur = 1
                 self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
@@ -655,6 +673,23 @@ class Belia(PNJ):
             self._etapeSon += 1
             if self._etapeSon == 4:
                 self._etapeSon = 0
+
+class Belia2(PNJ):
+    def __init__(self, jeu, gestionnaire, x, y, poseDepart):
+        fichier, couleurTransparente, persoCharset, vitesseDeplacement = "Belia.png", (0,0,0), (0,0), 150
+        repetitionActions, directionDepart = False, "Bas"
+        listeActions = ["Aucune"]
+        Horloge.initialiser(id(self), "Attente départ", 3000)
+        super().__init__(jeu, gestionnaire, "Belia", x, y, 2, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement, poseDepart=poseDepart)
+
+    def _gererEtape(self):
+        if self._etapeTraitement == 0:
+            coordonneesJoueur = self._boiteOutils.getCoordonneesJoueur()
+            if self._boiteOutils.tileProcheDe((3,5), coordonneesJoueur, 3) is False or (Horloge.sonner(id(self), "Attente départ", arretApresSonnerie=False) and coordonneesJoueur != (3,5)):
+                self._poseDepart = True
+        if self._etapeTraitement == 1:
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 16, 13)
+            self._etapeTraitement += 1
     
 class Enfant(PNJ):
     def __init__(self, jeu, gestionnaire, nom, x, y, c):

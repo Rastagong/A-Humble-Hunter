@@ -50,17 +50,19 @@ A certain number of graphics come from The Mana World, a promising open source 2
 * The forest sounds (sonsForet.wav) were recorded by dobroide and are licensed under the Creative Commons Attribution 3.0 (CC-BY). You can find them on this page from the much useful freesound.org database: http://www.freesound.org/people/dobroide/sounds/54699/.
 * The squirrel escape sound (squirrelFuite.wav) is a work by the sound design class projects at Carnegie Mellon University School of Drama (http://www.drama.cmu.edu) and is licensed under the Creative Commons Attribution 3.0. http://freesound.org/people/cmusounddesign/sounds/119816/
 * The squirrel moaning sound (squirrelBlesse.wav) is a work by Justin Wasack (http://www.justinwasack.com) licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/JustinBW/sounds/78652/
-* The squirrel eating sound (squirrelEating.wav) is a work by Asovang published in the public domain. http://freesound.org/people/Asovang/sounds/156215/
+* The squirrel eating sound (squirrelEating.wav) is a work by Asovang published in the public domain (CC0). http://freesound.org/people/Asovang/sounds/156215/
 * The rabbit eating sound (lapinEating.wav) is a work by Traveler licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/Traveler/sounds/13537/
 * The rabbit escape sound (lapinFuite.wav) is a work by elektroproleter licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/elektroproleter/sounds/157567/
-* The rabbit moaning sound (lapinBlesse.wav) is a work by AntumDeluge published in the public domain. http://opengameart.org/content/mouse-imitation
+* The rabbit moaning sound (lapinBlesse.wav) is a work by AntumDeluge published in the public domain (CC0). http://opengameart.org/content/mouse-imitation
 * The knife sound (Knife.wav) is a work by spazzo\_1493 licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/spazzo\_1493/sounds/66113/
 * The flour pouring sound (Sack.wav) is a work by julesibulesi licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/julesibulesi/sounds/70099/
-* The cupboard sound (Cupboard.wav) is a work by jakobhandersen published in the public domain. http://freesound.org/people/jakobhandersen/sounds/133829/ http://denevigebeta.blogspot.dk/
+* The cupboard sound (Cupboard.wav) is a work by jakobhandersen published in the public domain (CC0). http://freesound.org/people/jakobhandersen/sounds/133829/ http://denevigebeta.blogspot.dk/
+* The child laugh sound (Laugh.wav) is a work by kim.headlee published in the public domain (CC0). http://freesound.org/people/kim.headlee/sounds/184616/
 * The door opening sound (doorOpening.wav) was produced with the amazing Bfxr software.
 
 ### 3.3 Music
 * Lost In The Meadows is a calm and enchanting music by Brandon Morris (HaelDB), which is licensed under the Creative Commons Attribution 3.0 (CC-BY). You should really listen to his tracks on OpenGameArt.org or Youtube. http://opengameart.org/content/lost-in-the-meadows, https://www.youtube.com/brandon75689 
+* Osare Unrest Theme is another music by Brandon Morris, licensed under the Creative Commons Attribution 3.0 (CC-BY). http://opengameart.org/content/osare-unrest-theme
 
 ### 3.4 Miscellaneous
 * The Write Feather icon (Narro.ico) is a work by Double-J Design (http://www.doublejdesign.co.uk) published under the terms of the Creative Commons Attribution 3.0 license (CC-BY).
