@@ -5,6 +5,7 @@
  <tileset firstgid="473" source="inn_x2.tsx"/>
  <tileset firstgid="537" source="woodland_indoor.tsx"/>
  <tileset firstgid="793" source="woodland_indoor_x3.tsx"/>
+ <tileset firstgid="841" source="base_out_atlas.tsx"/>
  <layer name="Tile Layer 1" width="15" height="16">
   <data>
    <tile gid="0"/>
@@ -578,8 +579,8 @@
    <tile gid="762"/>
    <tile gid="763"/>
    <tile gid="0"/>
-   <tile gid="482"/>
-   <tile gid="483"/>
+   <tile gid="1372"/>
+   <tile gid="1373"/>
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -593,8 +594,8 @@
    <tile gid="778"/>
    <tile gid="779"/>
    <tile gid="0"/>
-   <tile gid="498"/>
-   <tile gid="499"/>
+   <tile gid="1404"/>
+   <tile gid="1405"/>
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
