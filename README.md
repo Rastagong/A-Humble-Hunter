@@ -58,6 +58,9 @@ A certain number of graphics come from The Mana World, a promising open source 2
 * The flour pouring sound (Sack.wav) is a work by julesibulesi licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/julesibulesi/sounds/70099/
 * The cupboard sound (Cupboard.wav) is a work by jakobhandersen published in the public domain (CC0). http://freesound.org/people/jakobhandersen/sounds/133829/ http://denevigebeta.blogspot.dk/
 * The child laugh sound (Laugh.wav) is a work by kim.headlee published in the public domain (CC0). http://freesound.org/people/kim.headlee/sounds/184616/
+* The barrel sound (Barrel.wav) is a work by Jorick Bronius (http://jorickbronius.wordpress.com) licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/jorickhoofd/sounds/178657/
+* The washing sound (Washing.wav) is a work by Brian R. Johnson published in the public domain (CC0). http://freesound.org/people/JohnsonBrandEditing/sounds/173938/ 
+* The wave sound (Wateragitation.wav) is a work by mystiscool licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/mystiscool/sounds/7055/
 * The door opening sound (doorOpening.wav) was produced with the amazing Bfxr software.
 
 ### 3.3 Music
