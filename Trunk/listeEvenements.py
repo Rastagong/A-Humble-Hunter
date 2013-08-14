@@ -216,14 +216,35 @@ class Narrateur(Evenement):
                 self._etape = 12
             if self._etape == 12 and self._boiteOutils.interrupteurs["discussionEtang"].voir():
                 self._boiteOutils.ajouterPensee("We'll have to fetch some nuts for the children,", faceset="Belia.png")
-                self._boiteOutils.ajouterPensee("you should shake down the trees.", faceset="Belia.png")
+                self._boiteOutils.ajouterPensee("you should shake down the oak trees.", faceset="Belia.png")
+                i, positions = 0, [(12,2),(7,4),(5,9),(20,10),(23,12),(19,14),(7,15),(15,17),(7,19)]
+                while i < 9:
+                    self._gestionnaire.evenements["concrets"]["Maison"]["Chene"+str(i)]=[Chene(self._jeu, self._gestionnaire, positions[i][0], positions[i][1], i), positions[i], "Aucune"]
+                    i += 1
+                self._etape += 1
+            if self._etape == 13 and self._boiteOutils.penseeAGerer.voir() is False:
+                Horloge.initialiser(id(self), "Discussion attente", 15000)
+                self._etape += 1
+            if self._etape == 14 and Horloge.sonner(id(self), "Discussion attente"):
                 self._boiteOutils.ajouterPensee("How many hares have you seen today?", faceset="Belia.png")
                 self._boiteOutils.ajouterPensee("None. These woods are almost inhabited.", faceset="Chasseur.png")
                 self._boiteOutils.ajouterPensee("I don't know what to do. We can't even harvest our crops yet.", faceset="Belia.png")
+                self._etape += 1
+            if self._etape == 15 and self._boiteOutils.penseeAGerer.voir() is False:
+                Horloge.initialiser(id(self), "Discussion attente", 15000)
+                self._etape += 1
+            if self._etape == 16 and Horloge.sonner(id(self), "Discussion attente"):
                 self._boiteOutils.ajouterPensee("The other day, I saw Doug, the forest warden... And he told me that...", faceset="Chasseur.png")
                 self._boiteOutils.ajouterPensee("...that the heart of the forest conceals the most extraordinary game.", faceset="Chasseur.png")
                 self._boiteOutils.ajouterPensee("It might be dangerous, but it sure could feed us for days.", faceset="Chasseur.png")
                 self._boiteOutils.ajouterPensee("No one enters the heart of the forest. Not even the prince. Forget it.", faceset="Belia.png")
+                self._boiteOutils.ajouterPensee("But we will starve if we do nothing.", faceset="Chasseur.png")
+                self._boiteOutils.ajouterPensee("Pray the gods. It could be worse. We're still alive, for now.", faceset="Belia.png")
+                self._etape += 1
+            if self._etape == 17 and self._boiteOutils.interrupteurs["BeliaRentree"].voir():
+                self._boiteOutils.ajouterPensee("Praying the gods? Praying the gods?")
+                self._boiteOutils.ajouterPensee("I've been praying them for years... What did they grant me?")
+                self._boiteOutils.ajouterPensee("I had to go to sleep. Now.")
                 self._etape += 1
                 """self._coefNoircisseur = 1
                 self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
@@ -674,9 +695,10 @@ class Belia(PNJ):
             self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 13, 3)
             self._etapeTraitement += 1
         if self._etapeTraitement == 6 and self._deplacementBoucle is False and self._xTile == 13 and self._yTile == 3:
-            self._etapeTraitement += 1
             self._boiteOutils.interrupteurs["BeliaSortie"].activer()
             self._boiteOutils.supprimerPNJ(self._nom, self._c)
+            self._gestionnaire.ajouterEvenementATuer("concrets", "InterieurMaison", self._nom)
+            self._etapeTraitement += 1
 
     def _gererSons(self):
         if self._etapeAction == self._listeSons[self._etapeSon][1]:
@@ -685,13 +707,67 @@ class Belia(PNJ):
             if self._etapeSon == 4:
                 self._etapeSon = 0
 
+class Chene(EvenementConcret):
+    def __init__(self, jeu, gestionnaire, x, y, numero):
+        super().__init__(jeu,gestionnaire)
+        self._periodeAgitation, self._niveauAgitation, self._niveauGland, self._numero, self._glandTombe = False, 0, random.randint(20,25), str(numero), Interrupteur(False)
+        self._tilesGlands, self._tileFeuilles = [(x+1,y+1), (x-1,y+1), (x+1,y), (x-1,y), (x,y-1)], (x,y-1)
+        Horloge.initialiser(id(self), "Attente son", 1)
+
+    def _onJoueurInteractionQuelconque(self, x, y, c, direction):
+        if not self._periodeAgitation:
+            Horloge.initialiser(id(self), "Deadline agitation", 20000)
+        if Horloge.sonner(id(self), "Attente son"):
+            self._boiteOutils.jouerSon("lapinFuite", "Chene secoue", fixe=True, xFixe=self._tileFeuilles[0], yFixe=self._tileFeuilles[1])
+            Horloge.initialiser(id(self), "Attente son", 1000)
+        self._periodeAgitation, self._niveauAgitation = True, self._niveauAgitation + 1
+
+    def traiter(self):
+        if self._niveauAgitation >= self._niveauGland and self._glandTombe.voir() is False:
+            (x,y), i = self._tilesGlands[0], 0
+            while (not self._jeu.carteActuelle.tileExistant(x,y) or not self._jeu.carteActuelle.tilePraticable(x, y, 2)) and i < len(self._tilesGlands):
+                i += 1
+                (x,y) = self._tilesGlands[i]
+            self._gestionnaire.evenements["concrets"][self._jeu.carteActuelle.nom]["Gland"+self._numero] = [Gland(self._jeu, self._gestionnaire, self._tileFeuilles, x, y, self._numero), self._tileFeuilles, "Aucune"]
+            self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, "Chene"+self._numero)
+            self._glandTombe.activer()
+        if Horloge.sonner(id(self), "Deadline agitation") and self._glandTombe.voir() is False:
+            self._periodeAgitation, self._niveauAgitation = False, 0
+
+class Gland(PNJ):
+    def __init__(self, jeu, gestionnaire, tileFeuilles, xArrivee, yArrivee, numero):
+        fichier, couleurTransparente, persoCharset = "Gland.png", (0,0,0), (0,0)
+        (x,y), self._xArrivee, self._yArrivee = tileFeuilles, xArrivee, yArrivee
+        repetitionActions, listeActions = False, ["Aucune"]
+        super().__init__(jeu, gestionnaire, "Gland"+numero, x, y, 2, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, deplacementLibre=True, vitesseDeplacement=100)
+        self._positionSource, self._glandPris = Rect(0,0,32,32), False
+
+    def _ajusterPositionSource(self, enMarche, direction):
+        pass
+
+    def _gererEtape(self):
+        if self._etapeTraitement == 1:
+            self._tempsPrecedent = pygame.time.get_ticks()
+            self._lancerTrajet(Rect(self._xArrivee*32,self._yArrivee*32,32,32), False, deplacementLibre=True)
+            self._boiteOutils.jouerSon("lapinFuite", "Chene secoue", fixe=True, xFixe=self._xTile, yFixe=self._yTile)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 2 and self._xTile == self._xArrivee and self._yTile == self._yArrivee:
+            self._changerCouche(self._c-1)
+            self._etapeTraitement += 1
+
+    def _onJoueurInteractionQuelconque(self, x, y, c, direction):
+        if not self._glandPris:
+            self._glandPris, self._boiteOutils.variables["NombreGlands"] = True, self._boiteOutils.variables["NombreGlands"] + 1
+            self._boiteOutils.supprimerPNJ(self._nom, self._c)
+            self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
+
 class Belia2(PNJ):
     def __init__(self, jeu, gestionnaire, x, y, poseDepart):
         fichier, couleurTransparente, persoCharset, vitesseDeplacement = "Belia.png", (0,0,0), (0,0), 150
         repetitionActions, directionDepart = False, "Bas"
         listeActions = ["Aucune"]
-        Horloge.initialiser(id(self), "Attente départ", 3000)
         super().__init__(jeu, gestionnaire, "Belia2", x, y, 2, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement, poseDepart=poseDepart)
+        Horloge.initialiser(id(self), "Attente départ", 3000)
         self._sons = dict()
         self._sons[0] = [["Wateragitation", "Washing clothe"], {"fixe":True, "evenementFixe":self._nom}, True]
         self._sons[9], self._sons[18] = list(self._sons[0]), list(self._sons[0])
@@ -780,7 +856,17 @@ class Belia2(PNJ):
         if self._etapeTraitement == 17 and self._deplacementBoucle is False:
             self._boiteOutils.changerBloc(15,14,2, -1,-1,-1,-1, vide=True )
             self._boiteOutils.jouerSon("Barrel", "Setting it up6", fixe=True, evenementFixe=self._nom)
-            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 3, 5, arretAvant=True)
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 3, 5, regardFinal="Haut")
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 18 and self._deplacementBoucle is False and self._xTile == 3 and self._yTile == 5:
+            self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].ouvrirOuFermerPorte()
+            self._lancerTrajet("Haut",False)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 19 and self._deplacementBoucle is False and self._xTile == 3 and self._yTile == 4:
+            self._boiteOutils.supprimerPNJ(self._nom, self._c)
+            self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].ouvrirOuFermerPorte()
+            self._gestionnaire.ajouterEvenementATuer("concrets", "Maison", self._nom)
+            self._boiteOutils.interrupteurs["BeliaRentree"].activer()
             self._etapeTraitement += 1
 
     def _gererSons(self):
@@ -795,7 +881,7 @@ class Belia2(PNJ):
         self._sons[14], self._sons[28] = list(self._sons[0]), list(self._sons[0])
         self._sons[6] = [["Barrel", "Taking clothe"], {"fixe":True, "evenementFixe":self._nom}, True]
         self._sons[20], self._sons[34] = list(self._sons[6]), list(self._sons[6])
-        self._sons[8] = [["Washing", "Washing clothe"], {"fixe":True, "evenementFixe":self._nom}, True]
+        self._sons[8] = [["Washing", "Washing barrel"], {"fixe":True, "evenementFixe":self._nom}, True]
         self._sons[22], self._sons[36] = list(self._sons[8]), list(self._sons[8])
         self._sons[13], self._sons[27], self._sons[41] = list(self._sons[8]), list(self._sons[8]), list(self._sons[8])
     
@@ -835,6 +921,7 @@ class Enfant(PNJ):
             self._etapeTraitement += 1
         if self._etapeTraitement == 5 and self._deplacementBoucle is False and self._xTile == 1 and self._yTile == 3:
             self._boiteOutils.supprimerPNJ(self._nom, self._c)
+            self._gestionnaire.ajouterEvenementATuer("concrets", "InterieurMaison", self._nom)
             self._etapeTraitement += 1
 
 class MembreFamille(PNJ):

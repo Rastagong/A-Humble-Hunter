@@ -28,10 +28,12 @@ from listeEvenements import *
 class MonGestionnaireEvenements(GestionnaireEvenements):
 
     def _getInterrupteurs(self):
-        return ["DecouverteSquirrels", "MusiqueForet", "Rires", "finChasse1", "JoueurEntre", "JoueurEntre2", "JoueurEntre3", "squirrelPose", "BeliaSortie","discussionEtang"]
+        a = ["DecouverteSquirrels", "MusiqueForet", "Rires", "finChasse1", "JoueurEntre", "JoueurEntre2", "JoueurEntre3", "squirrelPose", "BeliaSortie","discussionEtang"]
+        b = ["BeliaRentree"]
+        return a + b
 
     def _getVariables(self):
-        return [("sceneChasse", 0), ("SquirrelChasses", 0), ("LapinChasses", 0), ("CartesForet", ["Clairiere","CheminClairiere"])]
+        return [("sceneChasse", 0), ("SquirrelChasses", 0), ("LapinChasses", 0), ("CartesForet", ["Clairiere","CheminClairiere"]), ("NombreGlands", 0)]
 
     def _initialiserEvenements(self):
         self._evenements["concrets"]["Clairiere"] = OrderedDict()

@@ -28,7 +28,7 @@ Made with Python 3, Pygame and my own RPG engine, the Narro Engine (v0.3). Repo:
 The source code of the program is licensed under the GNU GPL (refer to COPYING). Some assets and dependencies used by the program are published under the terms of different licenses.
 
 ### 3.1 Graphics
-* The arrow image comes from this impressive collection of 420 RPG icons by Ails, licensed under the Creative Commons Attribution-ShareAlike 3.0 (CC-BY-SA). http://ails.deviantart.com/art/420-Pixel-Art-Icons-for-RPG-129892453
+* The arrow and nuts images comes from this impressive collection of 420 RPG icons by Ails, licensed under the Creative Commons Attribution-ShareAlike 3.0 (CC-BY-SA). http://ails.deviantart.com/art/420-Pixel-Art-Icons-for-RPG-129892453
 * The rabbit is a work by Stephen "Redshrike" Challener used in PixelFarm (https://bitbucket.org/tebruno99/pixelfarm), a project from tebruno99. It is published under the terms of both the Creative Commons Attribution 3.0 (CC-BY) and Creative Commons Attribution-ShareAlike 3.0 (CC-BY-SA) licenses. http://opengameart.org/content/bunny-rabbit-lpc-style-for-pixelfarm
 * Hyptosis' tiles are published under the terms of the Creative Commons Attribution 3.0 license. You can find them here: http://opengameart.org/content/lots-of-free-2d-tiles-and-sprites-by-hyptosis. You should also have a look at the games he contribued to, like the "Alice is dead" horror point'n'click. This guy is really talented. http://hyptosis.newgrounds.com/
 
