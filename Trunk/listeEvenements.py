@@ -201,8 +201,8 @@ class Narrateur(Evenement):
                 self._boiteOutils.ajouterTransformation(True, "SplashText InteractionTable2", texte="Or W on an AZERTY keyboard", antialias=True, couleurTexte=(255,255,255), position=(10, 40), taille=20, alpha=self._alpha)
             if self._etape == 10 and self._boiteOutils.interrupteurs["squirrelPose"].voir() is True:
                 self._boiteOutils.ajouterPensee("I'm sorry... I only got squirrels...")
-                self._boiteOutils.ajouterPensee("Belia: Tom, Elie, go playing upstairs.", nom="thoughtUpstairs")
-                self._boiteOutils.ajouterPensee("Belia: Let's talk outside. I must fetch some water anyway.", nom="thoughtOutside")
+                self._boiteOutils.ajouterPensee("Belia: Tom, Elie, go play upstairs.", nom="thoughtUpstairs")
+                self._boiteOutils.ajouterPensee("Belia: Let's talk outside. I must wash some clothe anyway.", nom="thoughtOutside")
                 self._boiteOutils.jouerSon("Osare Unrest Middle", "Thème familier", volume=VOLUME_LONGUE_MUSIQUE, nombreEcoutes=0)
                 self._boiteOutils.retirerTransformation(True, "SplashText InteractionTable1")
                 self._boiteOutils.retirerTransformation(True, "SplashText InteractionTable2")
@@ -214,7 +214,16 @@ class Narrateur(Evenement):
         if self._boiteOutils.nomCarte == "Maison":
             if self._etape < 12:
                 self._etape = 12
-            if self._etape == 12:
+            if self._etape == 12 and self._boiteOutils.interrupteurs["discussionEtang"].voir():
+                self._boiteOutils.ajouterPensee("We'll have to fetch some nuts for the children,", faceset="Belia.png")
+                self._boiteOutils.ajouterPensee("you should shake down the trees.", faceset="Belia.png")
+                self._boiteOutils.ajouterPensee("How many hares have you seen today?", faceset="Belia.png")
+                self._boiteOutils.ajouterPensee("None. These woods are almost inhabited.", faceset="Chasseur.png")
+                self._boiteOutils.ajouterPensee("I don't know what to do. We can't even harvest our crops yet.", faceset="Belia.png")
+                self._boiteOutils.ajouterPensee("The other day, I saw Doug, the forest warden... And he told me that...", faceset="Chasseur.png")
+                self._boiteOutils.ajouterPensee("...that the heart of the forest conceals the most extraordinary game.", faceset="Chasseur.png")
+                self._boiteOutils.ajouterPensee("It might be dangerous, but it sure could feed us for days.", faceset="Chasseur.png")
+                self._boiteOutils.ajouterPensee("No one enters the heart of the forest. Not even the prince. Forget it.", faceset="Belia.png")
                 self._etape += 1
                 """self._coefNoircisseur = 1
                 self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
