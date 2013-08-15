@@ -669,7 +669,8 @@ class Belia(PNJ):
         listeActions = ["Haut","Haut","Gauche","Gauche","Gauche","VHaut2500","Droite","Droite","Droite","VHaut2500","Droite","Droite","Droite","VHaut2500","Gauche","Gauche","Gauche","Bas","Bas","VGauche2500"]
         super().__init__(jeu, gestionnaire, "Belia", x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement)
         self._listeSons, self._etapeSon = [("Sack",5,1), ("Cupboard",9,1), ("Cupboard",13,1), ("Knife",18,3)], 0
-        if self._boiteOutils.interrupteurs["squirrelPose"].voir() and not self._boiteOutils.interrupteurs["BeliaRentree"].voir():
+        if self._boiteOutils.interrupteurs["squirrelPose"].voir() is True and self._boiteOutils.interrupteurs["BeliaRentree"].voir() is False:
+            print("indeed")
             self._poseDepart = False
 
     def _gererEtape(self):
@@ -690,10 +691,10 @@ class Belia(PNJ):
             self._lancerTrajet("VDroite1500", False)
             self._etapeTraitement += 1
         if self._etapeTraitement == 5 and self._deplacementBoucle is False:
-            self._boiteOutils.changerBloc(8, 5, 2, "base_out_atlas.png", (576, 448, 32, 32), (0,0,0), False)
-            self._boiteOutils.changerBloc(9, 5, 2, "base_out_atlas.png", (608, 448, 32, 32), (0,0,0), False)
-            self._boiteOutils.changerBloc(8, 6, 2, "base_out_atlas.png", (576, 480, 32, 32), (0,0,0), False)
-            self._boiteOutils.changerBloc(9, 6, 2, "base_out_atlas.png", (608, 480, 32, 32), (0,0,0), False)
+            self._boiteOutils.changerBloc(8, 5, 2, "base_out_atlas.png", (576, 448, 32, 32), (0,0,0), False, permanente=True, nomModif="Retrait tonneaux1")
+            self._boiteOutils.changerBloc(9, 5, 2, "base_out_atlas.png", (608, 448, 32, 32), (0,0,0), False, permanente=True, nomModif="Retrait tonneaux2")
+            self._boiteOutils.changerBloc(8, 6, 2, "base_out_atlas.png", (576, 480, 32, 32), (0,0,0), False, permanente=True, nomModif="Retrait tonneaux3")
+            self._boiteOutils.changerBloc(9, 6, 2, "base_out_atlas.png", (608, 480, 32, 32), (0,0,0), False, permanente=True, nomModif="Retrait tonneaux4")
             self._boiteOutils.jouerSon("Barrel", "Taking it for laundry", fixe=True, evenementFixe=self._nom)
             self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 13, 3)
             self._etapeTraitement += 1
@@ -771,16 +772,19 @@ class Belia2(PNJ):
         listeActions = ["Aucune"]
         super().__init__(jeu, gestionnaire, "Belia2", x, y, 2, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement, poseDepart=poseDepart)
         Horloge.initialiser(id(self), "Attente départ", 3000)
-        self._sons = dict()
+        self._sons, self._poseAutorisee = dict(), True
         self._sons[0] = [["Wateragitation", "Washing clothe"], {"fixe":True, "evenementFixe":self._nom}, True]
         self._sons[9], self._sons[18] = list(self._sons[0]), list(self._sons[0])
         self._sons[4] = [["Barrel", "Taking clothe"], {"fixe":True, "evenementFixe":self._nom}, True]
         self._sons[13], self._sons[22] = list(self._sons[4]), list(self._sons[4])
         self._sons[8] = [["Washing", "Washing clothe"], {"fixe":True, "evenementFixe":self._nom}, True]
         self._sons[17], self._sons[26] = list(self._sons[8]), list(self._sons[8])
+        self._porteRefermee = False
+        if not self._boiteOutils.interrupteurs["BeliaSortie"].voir() or not self._boiteOutils.interrupteurs["squirrelPose"].voir():
+            self._poseAutorisee = False
 
     def _gererEtape(self):
-        if self._etapeTraitement == 0:
+        if self._etapeTraitement == 0 and self._poseAutorisee is True:
             coordonneesJoueur = self._boiteOutils.getCoordonneesJoueur()
             if self._boiteOutils.tileProcheDe((3,5), coordonneesJoueur, 3) is False or (Horloge.sonner(id(self), "Attente départ", arretApresSonnerie=False) and coordonneesJoueur != (3,5)):
                 if self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].getPorteOuverte() is False:
@@ -788,9 +792,11 @@ class Belia2(PNJ):
                 self._poseDepart = True
         if self._etapeTraitement == 1:
             self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 14, arretAvant=True)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 2 and self._porteRefermee is False and self._boiteOutils.tileProcheDe((self._xTile,self._yTile),(3,4), 4) is False:
             if self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].getPorteOuverte():
                 self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].ouvrirOuFermerPorte()
-            self._etapeTraitement += 1
+                self._porteRefermee = True
         if self._etapeTraitement == 2 and self._deplacementBoucle is False and self._boiteOutils.positionProcheEvenement(15, 14, self._nom):
             self._boiteOutils.interrupteurs["discussionEtang"].activer()
             self._lancerTrajet("V"+self._boiteOutils.determinerDirectionDeplacement((self._xTile,self._yTile),(15,14))+"1500",False)
@@ -939,7 +945,6 @@ class Enfant(PNJ):
         if self._etapeTraitement == 5 and self._deplacementBoucle is False and self._xTile == 1 and self._yTile == 3:
             self._boiteOutils.supprimerPNJ(self._nom, self._c)
             self._boiteOutils.interrupteurs[self._nom+"Etage"].activer()
-            print(self._boiteOutils.interrupteurs[self._nom+"Etage"].voir(),self._nom+"Etage")
             self._gestionnaire.ajouterEvenementATuer("concrets", "InterieurMaison", self._nom)
             self._etapeTraitement += 1
 
