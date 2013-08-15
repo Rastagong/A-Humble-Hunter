@@ -29,7 +29,7 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
 
     def _getInterrupteurs(self):
         a = ["DecouverteSquirrels", "MusiqueForet", "Rires", "finChasse1", "JoueurEntre", "JoueurEntre2", "JoueurEntre3", "squirrelPose", "BeliaSortie","discussionEtang"]
-        b = ["BeliaRentree"]
+        b = ["BeliaRentree", "TomEtage", "ElieEtage", "ConversationEnfants"]
         return a + b
 
     def _getVariables(self):
@@ -90,3 +90,5 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
             self._evenements["concrets"]["InterieurMaison"]["TableSquirrel"] = [TableSquirrel(self._jeu, self), (5, 5), "Aucune"]
         elif nomCarte == "EtageMaison":
             self._evenements["concrets"]["EtageMaison"]["Sortie"] = [Teleporteur(self._jeu, self, "InterieurMaison", 1, 3, 2, "Bas"), (1,3), "Aucune" ]
+            self._evenements["concrets"]["EtageMaison"]["Tom"] = [Enfant(self._jeu, self, "Tom", 1, 7, 2), (1, 7), "Bas"]
+            self._evenements["concrets"]["EtageMaison"]["Elie"] = [Enfant(self._jeu, self, "Elie", 1, 6, 2), (1, 6), "Bas"]

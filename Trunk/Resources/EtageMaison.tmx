@@ -441,7 +441,7 @@
    <tile gid="0"/>
    <tile gid="815"/>
    <tile gid="816"/>
-   <tile gid="744"/>
+   <tile gid="0"/>
    <tile gid="737"/>
    <tile gid="738"/>
    <tile gid="739"/>
@@ -456,7 +456,7 @@
    <tile gid="0"/>
    <tile gid="831"/>
    <tile gid="832"/>
-   <tile gid="760"/>
+   <tile gid="0"/>
    <tile gid="753"/>
    <tile gid="754"/>
    <tile gid="755"/>

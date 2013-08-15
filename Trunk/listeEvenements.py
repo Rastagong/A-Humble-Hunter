@@ -200,9 +200,9 @@ class Narrateur(Evenement):
                 self._boiteOutils.ajouterTransformation(True, "SplashText InteractionTable1", texte="Press Z to interact with the table", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=self._alpha)
                 self._boiteOutils.ajouterTransformation(True, "SplashText InteractionTable2", texte="Or W on an AZERTY keyboard", antialias=True, couleurTexte=(255,255,255), position=(10, 40), taille=20, alpha=self._alpha)
             if self._etape == 10 and self._boiteOutils.interrupteurs["squirrelPose"].voir() is True:
-                self._boiteOutils.ajouterPensee("I'm sorry... I only got squirrels...")
-                self._boiteOutils.ajouterPensee("Belia: Tom, Elie, go play upstairs.", nom="thoughtUpstairs")
-                self._boiteOutils.ajouterPensee("Belia: Let's talk outside. I must wash some clothe anyway.", nom="thoughtOutside")
+                self._boiteOutils.ajouterPensee("I'm sorry... I only got squirrels...", faceset="Chasseur.png")
+                self._boiteOutils.ajouterPensee("Tom, Elie, go play upstairs.", nom="thoughtUpstairs", faceset="Belia.png")
+                self._boiteOutils.ajouterPensee("Let's talk outside. I must wash some clothes anyway.", nom="thoughtOutside", faceset="Belia.png")
                 self._boiteOutils.jouerSon("Osare Unrest Middle", "Thème familier", volume=VOLUME_LONGUE_MUSIQUE, nombreEcoutes=0)
                 self._boiteOutils.retirerTransformation(True, "SplashText InteractionTable1")
                 self._boiteOutils.retirerTransformation(True, "SplashText InteractionTable2")
@@ -669,6 +669,8 @@ class Belia(PNJ):
         listeActions = ["Haut","Haut","Gauche","Gauche","Gauche","VHaut2500","Droite","Droite","Droite","VHaut2500","Droite","Droite","Droite","VHaut2500","Gauche","Gauche","Gauche","Bas","Bas","VGauche2500"]
         super().__init__(jeu, gestionnaire, "Belia", x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement)
         self._listeSons, self._etapeSon = [("Sack",5,1), ("Cupboard",9,1), ("Cupboard",13,1), ("Knife",18,3)], 0
+        if self._boiteOutils.interrupteurs["squirrelPose"].voir() and not self._boiteOutils.interrupteurs["BeliaRentree"].voir():
+            self._poseDepart = False
 
     def _gererEtape(self):
         if self._etapeTraitement == 1:
@@ -692,6 +694,7 @@ class Belia(PNJ):
             self._boiteOutils.changerBloc(9, 5, 2, "base_out_atlas.png", (608, 448, 32, 32), (0,0,0), False)
             self._boiteOutils.changerBloc(8, 6, 2, "base_out_atlas.png", (576, 480, 32, 32), (0,0,0), False)
             self._boiteOutils.changerBloc(9, 6, 2, "base_out_atlas.png", (608, 480, 32, 32), (0,0,0), False)
+            self._boiteOutils.jouerSon("Barrel", "Taking it for laundry", fixe=True, evenementFixe=self._nom)
             self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 13, 3)
             self._etapeTraitement += 1
         if self._etapeTraitement == 6 and self._deplacementBoucle is False and self._xTile == 13 and self._yTile == 3:
@@ -780,9 +783,13 @@ class Belia2(PNJ):
         if self._etapeTraitement == 0:
             coordonneesJoueur = self._boiteOutils.getCoordonneesJoueur()
             if self._boiteOutils.tileProcheDe((3,5), coordonneesJoueur, 3) is False or (Horloge.sonner(id(self), "Attente départ", arretApresSonnerie=False) and coordonneesJoueur != (3,5)):
+                if self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].getPorteOuverte() is False:
+                    self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].ouvrirOuFermerPorte()
                 self._poseDepart = True
         if self._etapeTraitement == 1:
             self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 14, arretAvant=True)
+            if self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].getPorteOuverte():
+                self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].ouvrirOuFermerPorte()
             self._etapeTraitement += 1
         if self._etapeTraitement == 2 and self._deplacementBoucle is False and self._boiteOutils.positionProcheEvenement(15, 14, self._nom):
             self._boiteOutils.interrupteurs["discussionEtang"].activer()
@@ -888,15 +895,25 @@ class Belia2(PNJ):
 class Enfant(PNJ):
     def __init__(self, jeu, gestionnaire, nom, x, y, c):
         fichier, couleurTransparente, persoCharset, vitesseDeplacement, self._nom = nom + ".png", (0,0,0), (0,0), 150, nom
-        repetitionActions, directionDepart = True, "Gauche"
+        repetitionActions, directionDepart, poseDepart = True, "Gauche", True
         listeActions = ["Droite","Bas","Bas","Bas","Bas","Bas","Bas","Bas","Droite","Droite","Droite","Bas","Gauche","Gauche","Gauche","Gauche","Haut","Haut","Haut","Haut","Haut","Haut","Haut","Haut"]
-        super().__init__(jeu, gestionnaire, nom, x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement)
+        super().__init__(jeu, gestionnaire, nom, x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement, poseDepart=poseDepart)
+        if self._jeu.carteActuelle.nom == "InterieurMaison" and self._boiteOutils.interrupteurs["squirrelPose"].voir() and not self._boiteOutils.interrupteurs["BeliaRentree"].voir():
+            self._poseDepart = False
+        elif self._jeu.carteActuelle.nom == "EtageMaison" and not self._boiteOutils.interrupteurs[self._nom+"Etage"].voir():
+            self._poseDepart = False
         if y == 8:
             self._etapeAction = 20
         self._positionsSuivi, self._etapeSuivi = {"Tom":[(10,7),(7,6)], "Elie":[(10,9),(7,5)]}, 0
         self._xArrivee, self._yArrivee = -1, -1
 
     def _gererEtape(self):
+        if self._jeu.carteActuelle.nom == "InterieurMaison":
+            self._gererEtapeRDC()
+        elif self._jeu.carteActuelle.nom == "EtageMaison":
+            self._gererEtapeEtage()
+
+    def _gererEtapeRDC(self):
         if self._etapeTraitement == 2 and self._deplacementBoucle is False and self._boiteOutils.interrupteurs["JoueurEntre2"].voir() is True:
             (self._xArrivee, self._yArrivee) = self._positionsSuivi[self._nom][self._etapeSuivi]
             self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, self._xArrivee, self._yArrivee)
@@ -921,8 +938,56 @@ class Enfant(PNJ):
             self._etapeTraitement += 1
         if self._etapeTraitement == 5 and self._deplacementBoucle is False and self._xTile == 1 and self._yTile == 3:
             self._boiteOutils.supprimerPNJ(self._nom, self._c)
+            self._boiteOutils.interrupteurs[self._nom+"Etage"].activer()
+            print(self._boiteOutils.interrupteurs[self._nom+"Etage"].voir(),self._nom+"Etage")
             self._gestionnaire.ajouterEvenementATuer("concrets", "InterieurMaison", self._nom)
             self._etapeTraitement += 1
+
+    def _gererEtapeEtage(self):
+        if self._etapeTraitement == 0 and self._jeu.carteActuelle.deplacementPossible(Rect(1*32, 3*32, 32, 32), self._c, self._nom) and self._boiteOutils.interrupteurs["squirrelPose"].voir():
+            self._modifierPositionInitiale(1,3,2,"Bas")
+            self._poseDepart = True
+        if self._etapeTraitement == 1:
+            (self._xArrivee,self._yArrivee) = (3,11) if self._nom == "Tom" else (3,10)
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, self._xArrivee, self._yArrivee)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 2 and self._xTile == self._xArrivee and self._yTile == self._yArrivee and self._deplacementBoucle is False:
+            self._lancerTrajet(500,False)
+            self._fuyard = True
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 3 and self._deplacementBoucle is False:
+            self._genererLancerTrajetAleatoire(2,2)
+            if self._boiteOutils.interrupteurs["ConversationEnfants"].voir() is False and self._boiteOutils.penseeAGerer.voir() is False:
+                self._boiteOutils.ajouterPensee("Are we havin' nuts for dinner tonight? Will I ever taste some meat again?", faceset="Tom.png")
+                self._boiteOutils.ajouterPensee("Shhh, not so loud... He's here!", faceset="Elie.png")
+                self._boiteOutils.interrupteurs["ConversationEnfants"].activer()
+
+    def _genererRegards(self, actions):
+        directions, i = [actions[len(actions)-1], self._boiteOutils.getDirectionAuHasard()], 1
+        while i < len(directions):
+            while directions[i] == directions[i-1]:
+                directions[i] = self._boiteOutils.getDirectionAuHasard()
+            i += 1
+        directions = directions[1:]
+        directions = [f(direction) for direction in directions for f in (lambda direction: 500, lambda direction: "R"+direction)] + [500]
+        return actions + directions
+
+    def _genererLancerTrajetAleatoire(self, longueurMin, longueurMax, regards=True):
+        i, actions = 0, []
+        longueurTrajet, direction1, direction2 = random.randint(longueurMin, longueurMax), self._boiteOutils.getDirectionAuHasard(), self._boiteOutils.getDirectionAuHasard()
+        while direction2 == directions.directionContraire(direction1):
+            direction2 = self._boiteOutils.getDirectionAuHasard()
+        seuilDirection = int(longueurTrajet/2)
+        while i < longueurTrajet:
+            if i < seuilDirection:
+                actions.append(direction1)
+            else:
+                actions.append(direction2)
+            i += 1
+        if regards:
+            actions = self._genererRegards(actions)
+        self._lancerTrajet(actions, False)
+        Horloge.initialiser(id(self), 1, 1)
 
 class MembreFamille(PNJ):
     """Pattern decorator pour tous les membres de la famille : quelques comportements communs."""
