@@ -39,6 +39,7 @@ class LanceurMusique(Evenement):
     def traiter(self):
         if self._boiteOutils.interrupteurs["MusiqueForet"].voir() and Horloge.sonner(id(self), "Attente Musique Foret", arretApresSonnerie=False):
             self._boiteOutils.jouerSon("Lost In The Meadows", "Musique forêt meadows", volume=VOLUME_LONGUE_MUSIQUE)
+            Horloge.initialiser(id(self), "Attente Musique Foret", self._boiteOutils.getDureeInstanceSon("Musique forêt meadows") +  random.randint(120000, 4* 60000))
         if self._boiteOutils.interrupteurs["Rires"].voir() and Horloge.sonner(id(self), "Attente Rires", arretApresSonnerie=False):
             self._boiteOutils.jouerSon("Laugh", "Rires")
             Horloge.initialiser(id(self), "Attente Rires", self._boiteOutils.getDureeInstanceSon("Rires") +  random.randint(10000, 20000))
@@ -403,7 +404,6 @@ class Gibier(PNJ):
         self._sonMange, self._typeAnimal, self._arretAvant, self._mobilite, self._peur, self._blessure = False, typeAnimal, arretAvant, mobilite, peur, False
         self._coucheMonteeArbre = coucheMonteeArbre if coucheMonteeArbre is not False else self._c
         Horloge.initialiser(id(self), "Rouge clignotant", 1)
-        self._numeroBaseSon = 0
 
     def _gererEtape(self):
         if self._peur is True and self._fuite is False and self._animationMort is False and self._monteeArbre is False:
@@ -415,8 +415,8 @@ class Gibier(PNJ):
             self._genererLancerTrajetAleatoire(4, 8)
             self._sonMange = False
         elif self._fuite is False and self._deplacementBoucle is True and self._animationMort is False and self._sonMange is False and self._etapeAction < len(self._listeActions) and isinstance(self._listeActions[self._etapeAction],str) and self._listeActions[self._etapeAction][0] == "V" and Horloge.sonner(id(self._gestionnaireAnimaux), "SonEating"+self._typeAnimal, arretApresSonnerie=False) and self._monteeArbre is False:
-            self._boiteOutils.jouerSon(self._typeAnimal+"Eating", self._nom + "eating" + str(self._numeroBaseSon), fixe=True, evenementFixe=self._nom, volume=VOLUME_MUSIQUE/3)
-            self._numeroBaseSon += 1
+            print("1")
+            self._boiteOutils.jouerSon(self._typeAnimal+"Eating", self._nom + "eating", fixe=True, evenementFixe=self._nom, volume=VOLUME_MUSIQUE/3)
             Horloge.initialiser(id(self._gestionnaireAnimaux), "SonEating"+self._typeAnimal, 1000) 
             self._sonMange = True
         elif self._fuite:
@@ -437,8 +437,8 @@ class Gibier(PNJ):
                     self._changerCouche(self._coucheMonteeArbre)
                 self._lancerTrajet("Haut","Haut",False, deplacementLibre=True)
                 self._boiteOutils.retirerTransformation(False, "Rouge/"+self._nom)
-                self._boiteOutils.jouerSon(self._typeAnimal+"Fuite", self._nom + "fuite" + str(self._numeroBaseSon), fixe=True, xFixe=self._xTile, yFixe=self._yTile)
-                self._numeroBaseSon += 1
+                print("2")
+                self._boiteOutils.jouerSon(self._typeAnimal+"Fuite", self._nom + "fuite", fixe=True, xFixe=self._xTile, yFixe=self._yTile)
                 self._monteeArbre, self._fuite = True, False
         if self._monteeArbre:
             if self._deplacementBoucle is False:
@@ -454,8 +454,8 @@ class Gibier(PNJ):
         if "Fleche" in nomPNJ and self._vulnerable:
             self._vie -= 1
             self._etapeTraitement, self._intelligence, self._courage, self._fuyard, self._blessure = 1, True, True, False, True
-            self._boiteOutils.jouerSon(self._typeAnimal+"Blesse", self._nom + "blesse" + str(self._numeroBaseSon), fixe=True, evenementFixe=self._nom)
-            self._numeroBaseSon += 1
+            print("3")
+            self._boiteOutils.jouerSon(self._typeAnimal+"Blesse", self._nom + "blesse", fixe=True, evenementFixe=self._nom)
             Horloge.initialiser(id(self), "Fin clignotant", 2000)
             Horloge.initialiser(id(self), "Rouge clignotant", 1)
             self._lancerFuite()
@@ -1036,20 +1036,21 @@ class TableSquirrel(EvenementConcret):
 class SignaleurJoueur(Evenement):
     def __init__(self, jeu, gestionnaire, *parametres):
         Evenement.__init__(self, jeu, gestionnaire)
-        self._i = 0
+        self._signaleurs = dict()
         for parametre in parametres:
             self.ajouterSignaleur(parametre[0], parametre[1], parametre[2])
 
     def ajouterSignaleur(self, carte, interrupteur, position):
-        self._i += 1
-        self._gestionnaire.evenements["concrets"][carte]["Signaleur"+str(self._i)] = [Signaleur(self._jeu, self._gestionnaire, interrupteur), position, "Aucune"]
+        if carte not in self._signaleurs.keys():
+            self._signaleurs[carte] = dict()
+        self._signaleurs[carte][position] = interrupteur
 
-class Signaleur(EvenementConcret):
-    def __init__(self, jeu, gestionnaire, interrupteur):
-        EvenementConcret.__init__(self, jeu, gestionnaire)
-        self._actif, self._interrupteur = False, interrupteur
+    def traiter(self):
+        self._majInfosJoueur()
+        if self._jeu.carteActuelle.nom in self._signaleurs.keys():
+            if self._joueurBouge[0] and (self._xJoueur[0], self._yJoueur[0]) in self._signaleurs[self._jeu.carteActuelle.nom].keys():
+                nomInterrupteur = self._signaleurs[self._jeu.carteActuelle.nom][self._xJoueur[0], self._yJoueur[0]]
+                self._boiteOutils.interrupteurs[nomInterrupteur].activer()
+                print(nomInterrupteur)
+                self._signaleurs[self._jeu.carteActuelle.nom].pop((self._xJoueur[0], self._yJoueur[0]))
 
-    def onJoueurDessus(self, x, y, c, direction):
-        if not self._actif:
-            self._actif = True
-            self._boiteOutils.interrupteurs[self._interrupteur].activer()

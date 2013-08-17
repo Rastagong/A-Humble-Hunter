@@ -63,15 +63,15 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
         self._evenements["abstraits"]["Divers"]["SignaleurJoueur"] = SignaleurJoueur(self._jeu, self)
 
     def chargerEvenements(self, nomCarte):
-        if nomCarte == "Clairiere":
+        if nomCarte == "Clairiere" and len(self._evenements["concrets"]["Clairiere"]) == 1:
             self._evenements["concrets"]["Clairiere"]["Sortie1"] = [Teleporteur(self._jeu, self, "CheminClairiere", 34, 2, 2, "Gauche", condition="finChasse1"), (0, 47), "Aucune"]
             self._evenements["concrets"]["Clairiere"]["Sortie2"] = [Teleporteur(self._jeu, self, "CheminClairiere", 34, 3, 2, "Gauche", condition="finChasse1"), (0, 48), "Aucune"]
-        elif nomCarte == "CheminClairiere":
+        elif nomCarte == "CheminClairiere" and len(self._evenements["concrets"]["CheminClairiere"]) == 1:
             self._evenements["concrets"]["CheminClairiere"]["SortieClairiere1"] = [Teleporteur(self._jeu, self, "Clairiere", 0, 47, 2, "Droite"), (34, 2), "Aucune"]
             self._evenements["concrets"]["CheminClairiere"]["SortieClairiere2"] = [Teleporteur(self._jeu, self, "Clairiere", 0, 48, 2, "Droite"), (34, 3), "Aucune"]
             self._evenements["concrets"]["CheminClairiere"]["SortieMaison1"] = [Teleporteur(self._jeu, self, "Maison", 14, 0, 2, "Bas"), (3, 29), "Aucune"]
             self._evenements["concrets"]["CheminClairiere"]["SortieMaison2"] = [Teleporteur(self._jeu, self, "Maison", 15, 0, 2, "Bas"), (4, 29), "Aucune"]
-        elif nomCarte == "Maison":
+        elif nomCarte == "Maison" and len(self._evenements["concrets"]["Maison"]) == 1:
             self._evenements["concrets"]["Maison"]["SortieCheminClairiere1"] = [Teleporteur(self._jeu, self, "CheminClairiere", 3, 29, 2, "Haut"), (14, 0), "Aucune"]
             self._evenements["concrets"]["Maison"]["SortieCheminClairiere2"] = [Teleporteur(self._jeu, self, "CheminClairiere", 4, 29, 2, "Haut"), (15, 0), "Aucune"]
             self._evenements["concrets"]["Maison"]["SortieInterieurMaison"] = [Porte(self._jeu, self, "InterieurMaison", False, "HyptosisMaison.png", (64, 64, 32, 32), (64, 0, 32, 32), 3, 4, 2, 13, 3, 2, "Haut"), (3, 4), "Aucune"]
@@ -79,14 +79,15 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
                 self._evenements["concrets"]["Maison"]["Belia2"] = [Belia2(self._jeu, self, 3, 8, True), (3,8), "Bas"]
             elif self._boiteOutils.interrupteurs["squirrelPose"].voir() and not self._boiteOutils.interrupteurs["BeliaSortie"].voir():
                 self._evenements["concrets"]["Maison"]["Belia2"] = [Belia2(self._jeu, self, 3, 5, False), (3,5), "Bas"]
-        elif nomCarte == "InterieurMaison":
+        elif nomCarte == "InterieurMaison" and len(self._evenements["concrets"]["InterieurMaison"]) == 1:
+            print("in")
             self._evenements["concrets"]["InterieurMaison"]["SortieExterieur"] = [Teleporteur(self._jeu, self, "Maison", 3, 5, 2, "Bas"), (13, 3), "Aucune"]
             self._evenements["concrets"]["InterieurMaison"]["SortieEtage"] = [Teleporteur(self._jeu, self, "EtageMaison", 1, 3, 2, "Bas"), (1, 3), "Aucune"]
             self._evenements["concrets"]["InterieurMaison"]["Belia"] = [MembreFamille(Belia(self._jeu, self)), (7,6), "Bas"]
             self._evenements["concrets"]["InterieurMaison"]["Tom"] = [MembreFamille(Enfant(self._jeu, self, "Tom", 1, 4, 2)), (1, 4), "Bas"]
             self._evenements["concrets"]["InterieurMaison"]["Elie"] = [MembreFamille(Enfant(self._jeu, self, "Elie", 1, 8, 2)), (1, 8), "Bas"]
             self._evenements["concrets"]["InterieurMaison"]["TableSquirrel"] = [TableSquirrel(self._jeu, self), (5, 5), "Aucune"]
-        elif nomCarte == "EtageMaison":
+        elif nomCarte == "EtageMaison" and len(self._evenements["concrets"]["EtageMaison"]) == 1:
             self._evenements["concrets"]["EtageMaison"]["Sortie"] = [Teleporteur(self._jeu, self, "InterieurMaison", 1, 3, 2, "Bas"), (1,3), "Aucune" ]
             self._evenements["concrets"]["EtageMaison"]["Tom"] = [Enfant(self._jeu, self, "Tom", 1, 7, 2), (1, 7), "Bas"]
             self._evenements["concrets"]["EtageMaison"]["Elie"] = [Enfant(self._jeu, self, "Elie", 1, 6, 2), (1, 6), "Bas"]
