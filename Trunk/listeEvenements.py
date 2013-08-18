@@ -118,7 +118,6 @@ class Narrateur(Evenement):
         super().__init__(jeu, gestionnaire)
         self._penseePossible, self._etape, self._coefNoircisseur, self._alpha = InterrupteurInverse(self._boiteOutils.penseeAGerer), 0, 0, 255
         self._messageBoutonInteraction, self._premiereMortChasse = False, False
-        self._etape = 8
     
     def traiter(self):
         x, y = self._gestionnaire.xJoueur, self._gestionnaire._yJoueur
@@ -186,6 +185,7 @@ class Narrateur(Evenement):
         elif self._etape >= 8 and self._etape < 12:
             if self._etape == 8 and self._boiteOutils.getCoordonneesJoueur() == (13,3):
                 self._boiteOutils.arreterSonEnFondu("boucleSonsForet", 3000)
+                self._boiteOutils.arreterSonEnFondu("Musique forêt meadows", 3000)
                 self._boiteOutils.interrupteurs["Rires"].activer()
                 self._etape += 1
             if self._etape == 9 and (self._boiteOutils.getCoordonneesJoueur() == (11,13) or self._boiteOutils.getCoordonneesJoueur() == (11,14)):
@@ -236,24 +236,24 @@ class Narrateur(Evenement):
                 self._boiteOutils.ajouterPensee("...that the heart of the forest conceals the most extraordinary game.", faceset="Chasseur.png")
                 self._boiteOutils.ajouterPensee("It might be dangerous, but it sure could feed us for days.", faceset="Chasseur.png")
                 self._boiteOutils.ajouterPensee("No one enters the heart of the forest. Not even the prince. Forget it.", faceset="Belia.png")
-                self._boiteOutils.ajouterPensee("But we will starve if we do nothing.", faceset="Chasseur.png")
-                self._boiteOutils.ajouterPensee("Pray the gods. It could be worse. We're still alive, for now.", faceset="Belia.png")
+                self._boiteOutils.ajouterPensee("I know... But I don't want us to starve.", faceset="Chasseur.png")
+                self._boiteOutils.ajouterPensee("Aren't we still alive? We shouldn't complain. Be thankful and pray the gods.", faceset="Belia.png")
                 self._etape += 1
             if self._etape == 17 and self._boiteOutils.interrupteurs["BeliaRentree"].voir():
                 self._boiteOutils.ajouterPensee("Praying the gods? Praying the gods?")
-                self._boiteOutils.ajouterPensee("I've been praying them for years... What did they grant me?")
+                self._boiteOutils.ajouterPensee("I'd been praying them for years... What had they granted me?")
                 self._etape += 1
         elif self._etape >= 18:
-            if self._etape == 18 and self._boiteOutils.interrupteurs["TomHungry"].voir() and self._penseePossible.voir():
-                self._boiteOutils.ajouterPensee("I threw the nuts on the table,")
+            if self._etape == 18:
                 self._etape += 1
             if self._etape == 19 and self._boiteOutils.interrupteurs["nutsOnTable"].voir():
-                self._boiteOutils.ajouterPensee("and I went straight to bed.")
+                self._boiteOutils.ajouterPensee("I threw the nuts on the table and I went straight to bed.")
                 self._etape += 1
             if self._etape == 20 and self._boiteOutils.getCoordonneesJoueur() in [(7,3), (8,3), (9,3)]:
                 self._coefNoircisseur = 1
                 self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
                 self._boiteOutils.joueurLibre.desactiver()
+                self._boiteOutils.arreterSonEnFondu("Thème familier", 3000)
                 Horloge.initialiser(id(self), "Transition Noir", 1)
                 self._etape += 1
             if self._etape == 21 and Horloge.sonner(id(self), "Transition Noir"):
@@ -264,7 +264,12 @@ class Narrateur(Evenement):
                     self._boiteOutils.ajouterPensee("Truly, the gods haven't been fair with the humble hunter I am....")
                 else:
                     Horloge.initialiser(id(self), "Transition Noir", 100)
-            if self._etape == 22 and self._penseePossible.voir():
+            if self._etape == 22:
+                self._gestionnaire.envoyerNotificationEvenement("Narrateur", "Belia", "InterieurMaison", "Nuit étage", x=9, y=3)
+                self._gestionnaire.envoyerNotificationEvenement("Narrateur", "Tom", "InterieurMaison", "Nuit étage", x=13, y=3)
+                self._gestionnaire.envoyerNotificationEvenement("Narrateur", "Elie", "InterieurMaison", "Nuit étage", x=13, y=7)
+                self._etape += 1
+            if self._etape == 23 and self._penseePossible.voir():
                 self._boiteOutils.teleporterJoueurSurPosition(7, 3, "Bas")
                 self._coefNoircisseur = 12
                 self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
@@ -272,7 +277,7 @@ class Narrateur(Evenement):
                 self._boiteOutils.joueurLibre.activer()
                 self._boiteOutils.ajouterPensee("I woke up at dawn. I had only one thing to do. Go hunting.")
                 self._etape += 1
-            if self._etape == 23 and Horloge.sonner(id(self), "Transition Noir"):
+            if self._etape == 24 and Horloge.sonner(id(self), "Transition Noir"):
                 self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
                 self._coefNoircisseur -= 1
                 if self._coefNoircisseur == 1:
@@ -670,10 +675,19 @@ class Belia(PNJ):
         listeActions = ["Haut","Haut","Gauche","Gauche","Gauche","VHaut2500","Droite","Droite","Droite","VHaut2500","Droite","Droite","Droite","VHaut2500","Gauche","Gauche","Gauche","Bas","Bas","VGauche2500"]
         super().__init__(jeu, gestionnaire, "Belia", x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement)
         self._listeSons, self._etapeSon = [("Sack",5,1), ("Cupboard",9,1), ("Cupboard",13,1), ("Knife",18,3)], 0
-        if self._boiteOutils.interrupteurs["squirrelPose"].voir() is True and self._boiteOutils.interrupteurs["BeliaRentree"].voir() is False:
-            self._poseDepart = False
+        self._penseePossible, self._penseeJour1Dite = InterrupteurInverse(self._boiteOutils.penseeAGerer), False
 
     def _gererEtape(self):
+        if self._etapeTraitement < 7:
+            self._gererEtapes1()
+        elif self._etapeTraitement >= 7 and self._etapeTraitement < 14:
+            self._gererEtapes2()
+        elif self._etapeTraitement >= 14 and self._etapeTraitement < 21:
+            self._gererEtapes3()
+        elif self._etapeTraitement >= 21:
+            self._gererEtapes4()
+
+    def _gererEtapes1(self):
         if self._etapeTraitement == 1:
                 self._gererSons()
         if self._etapeTraitement == 2 and self._deplacementBoucle is False:
@@ -702,6 +716,8 @@ class Belia(PNJ):
             self._boiteOutils.interrupteurs["BeliaSortie"].activer()
             self._deplacerSurCarte("Maison", 3, 8, 2, "Bas")
             self._etapeTraitement += 1
+
+    def _gererEtapes2(self):
         if self._etapeTraitement == 7 and self._jeu.carteActuelle.nom == "Maison":
             self._porteRefermee, self._sons = True, dict()
             self._sons[0] = [["Wateragitation", "Washing clothe"], {"fixe":True, "evenementFixe":self._nom}, True]
@@ -751,6 +767,8 @@ class Belia(PNJ):
         if self._etapeTraitement == 13 and self._xTile == 15 and self._yTile == 13 and self._deplacementBoucle is False:
             self._lancerTrajet(["VDroite2500", "Haut", "Haut", "Droite", "VDroite2500","Gauche","Bas","Bas","VBas1500"]*3, False)
             self._etapeTraitement += 1
+
+    def _gererEtapes3(self):
         if self._etapeTraitement == 14:
             if self._deplacementBoucle is False:
                 self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 12, arretAvant=True)
@@ -788,6 +806,8 @@ class Belia(PNJ):
             self._boiteOutils.jouerSon("Barrel", "Setting it up4", fixe=True, evenementFixe=self._nom)
             self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 12, arretAvant=True)
             self._etapeTraitement += 1
+
+    def _gererEtapes4(self):
         if self._etapeTraitement == 21 and self._deplacementBoucle is False and self._boiteOutils.positionProcheEvenement(15, 12, self._nom):
             self._lancerTrajet("V"+self._boiteOutils.determinerDirectionDeplacement((self._xTile,self._yTile),(15,12))+"1500",False)
             self._etapeTraitement += 1
@@ -850,6 +870,16 @@ class Belia(PNJ):
                 self._poseDepart = False
                 self._etapeTraitement = 7
 
+    def _onJoueurInteractionQuelconque(self, x, y, c, direction):
+        if self._etapeTraitement == 28 and self._penseePossible.voir() and not self._penseeJour1Dite:
+            if self._boiteOutils.variables["NombreGlands"] == 0:
+                self._boiteOutils.ajouterPensee("Have you found some nuts? You should shake down the oak trees outside.", faceset="Belia.png", tempsLecture=0)
+            elif not self._boiteOutils.interrupteurs["nutsOnTable"].voir():
+                self._boiteOutils.ajouterPensee("Just put the nuts on the table for the children.", faceset="Belia.png", tempsLecture=0)
+            elif self._boiteOutils.interrupteurs["nutsOnTable"].voir():
+                self._boiteOutils.ajouterPensee("Tomorrow is another day...", faceset="Belia.png", tempsLecture=0)
+            self._penseeJour1Dite = True
+
 class Chene(EvenementConcret):
     def __init__(self, jeu, gestionnaire, x, y, numero):
         super().__init__(jeu,gestionnaire)
@@ -901,6 +931,7 @@ class Gland(PNJ):
     def _onJoueurInteractionQuelconque(self, x, y, c, direction):
         if not self._glandPris:
             self._glandPris, self._boiteOutils.variables["NombreGlands"] = True, self._boiteOutils.variables["NombreGlands"] + 1
+            self._boiteOutils.jouerSon("Pickup", "Gland ramassé", fixe=True, xFixe=x, yFixe=y)
             self._boiteOutils.supprimerPNJ(self._nom, self._c)
             self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
 
@@ -917,7 +948,7 @@ class Enfant(PNJ):
         (self._xEtage,self._yEtage) = (1,7) if self._nom == "Tom" else (1,6)
         (self._xRDC,self._yRDC) = (1,3) if self._nom == "Tom" else (5,13)
         self._gestionnaire.ajouterChangementCarteANotifier("Maison", "InterieurMaison", self._nom, "EtageMaison")
-        self._monteeEtage, self._descenteEtage, self._penseeDite = False, False, False
+        self._monteeEtage, self._descenteEtage, self._penseeDite, self._penseePossible = False, False, False, InterrupteurInverse(self._boiteOutils.penseeAGerer)
 
     def onChangementCarte(self, carteQuittee, carteEntree):
         if carteQuittee == "InterieurMaison" and carteEntree == "Maison" and self._boiteOutils.interrupteurs["squirrelPose"].voir() and not self._boiteOutils.interrupteurs["BeliaRentree"].voir() and not self._monteeEtage:
@@ -967,9 +998,9 @@ class Enfant(PNJ):
         if self._etapeTraitement == 10:
             self._poseDepart = True
             if self._nom == "Tom":
-                self._lancerTrajet("RBas", False)
+                self._lancerTrajet("RBas", True)
             self._etapeTraitement += 1
-        if self._etapeTraitement == 11 and self._deplacementBoucle is False:
+        if self._etapeTraitement == 11 and (self._deplacementBoucle is False or self._etapeMarche == 1):
             if self._nom == "Elie" and not self._boiteOutils.interrupteurs["nutsOnTable"].voir():
                 self._fuyard = True
                 self._genererLancerTrajetAleatoire(2,2)
@@ -1028,10 +1059,14 @@ class Enfant(PNJ):
         Horloge.initialiser(id(self), 1, 1)
 
     def _onJoueurInteractionQuelconque(self, x, y, c, direction):
-        if self._nom == "Tom" and self._etapeTraitement == 11 and self._penseeDite is False:
-            self._boiteOutils.ajouterPensee("I'M HUNGRY!!!", faceset="Tom.png")
-            self._boiteOutils.interrupteurs["TomHungry"].activer()
-            self._penseeDite = True
+        if self._etapeTraitement == 11 and self._penseePossible.voir():
+            if self._nom == "Tom" and self._penseeDite is False:
+                self._boiteOutils.ajouterPensee("I'M HUNGRY!!!", faceset="Tom.png", tempsLecture=0)
+                self._boiteOutils.interrupteurs["TomHungry"].activer()
+                self._penseeDite = True
+            elif self._nom == "Elie" and self._penseeDite is False:
+                self._boiteOutils.ajouterPensee("Whatever you've found for dinner will do.", faceset="Elie.png", tempsLecture=0)
+                self._penseeDite = True
 
 class MembreFamille(PNJ):
     """Pattern decorator pour tous les membres de la famille : quelques comportements communs."""
@@ -1054,6 +1089,12 @@ class MembreFamille(PNJ):
             if self._joueurBouge[0] is True:
                 self._lancerTrajet(self._boiteOutils.regardVersPnj("Joueur",-1,-1,evenementReference=self._nom),False)
         self.__dict__["_pnj"]._gererEtape()
+
+    def onNotification(self, nomNotifieur, carteNotifieur, objetNotification, *parametres1, **parametres2):
+        if objetNotification == "Nuit étage":
+            self._finirDeplacementSP()
+            self._deplacerSurCarte("EtageMaison", parametres2["x"], parametres2["y"], 2, "Bas", carteQuittee="InterieurMaison")
+            self._lancerTrajet("Aucune", True)
 
     def onChangementCarte(self, carteQuittee, carteEntree):
         self.__dict__["_pnj"].onChangementCarte(carteQuittee, carteEntree)
@@ -1102,11 +1143,12 @@ class TableSquirrel(ObjetAPoser):
             self._boiteOutils.interrupteurs["squirrelPose"].activer()
 
 class TableNuts(ObjetAPoser):
-    def __init__(self, jeu, gestionnaire):
-        super().__init__(jeu, gestionnaire, False, Rect(7 * 32, 12 * 32, 32, 32), 3, Rect(0,0,32,32),  "Gland.png", (0,0,0), "tableGland")
+    def __init__(self, jeu, gestionnaire, x, y):
+        super().__init__(jeu, gestionnaire, False, Rect(x * 32, y * 32, 32, 32), 3, Rect(0,0,32,32),  "Gland.png", (0,0,0), "tableGland")
 
     def _posePossible(self, initiale=False):
-        return self._boiteOutils.interrupteurs["BeliaRentree"].voir()
+        possessionGlands = (self._boiteOutils.variables["NombreGlands"] > 0) if initiale else True
+        return possessionGlands and self._boiteOutils.interrupteurs["BeliaRentree"].voir()
 
     def _actionsApresPose(self, initiale=False):
         if initiale:
