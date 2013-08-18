@@ -118,10 +118,11 @@ class Narrateur(Evenement):
         super().__init__(jeu, gestionnaire)
         self._penseePossible, self._etape, self._coefNoircisseur, self._alpha = InterrupteurInverse(self._boiteOutils.penseeAGerer), 0, 0, 255
         self._messageBoutonInteraction, self._premiereMortChasse = False, False
+        self._etape = 8
     
     def traiter(self):
         x, y = self._gestionnaire.xJoueur, self._gestionnaire._yJoueur
-        if self._boiteOutils.nomCarte == "Clairiere":
+        if self._etape < 8:
             if self._etape == 0:
                 self._boiteOutils.jouerSon("sonsForet", "boucleSonsForet", nombreEcoutes=0, volume=VOLUME_MUSIQUE/5)
                 self._boiteOutils.ajouterPensee("It was early spring in the woods and the snow had melted, at last. I could hunt again.")
@@ -182,9 +183,7 @@ class Narrateur(Evenement):
                 self._boiteOutils.ajouterPensee("It seems we won't eat tonight either, there's nothing left to hunt. I should go home.")
                 self._boiteOutils.interrupteurs["finChasse1"].activer()
                 self._etape += 1
-        if self._boiteOutils.nomCarte == "InterieurMaison":
-            if self._etape < 8:
-                self._etape = 8
+        elif self._etape >= 8 and self._etape < 12:
             if self._etape == 8 and self._boiteOutils.getCoordonneesJoueur() == (13,3):
                 self._boiteOutils.arreterSonEnFondu("boucleSonsForet", 3000)
                 self._boiteOutils.interrupteurs["Rires"].activer()
@@ -212,7 +211,7 @@ class Narrateur(Evenement):
             if self._etape == 11 and Horloge.sonner(id(self), "Rires Upstairs"):
                 self._boiteOutils.jouerSon("Laugh", "Rires")
                 self._etape += 1
-        if self._boiteOutils.nomCarte == "Maison":
+        elif self._etape >= 12 and self._etape < 18:
             if self._etape == 12 and self._boiteOutils.interrupteurs["discussionEtang"].voir():
                 self._boiteOutils.ajouterPensee("We'll have to fetch some nuts for the children,", faceset="Belia.png")
                 self._boiteOutils.ajouterPensee("you should shake down the oak trees.", faceset="Belia.png")
@@ -243,37 +242,44 @@ class Narrateur(Evenement):
             if self._etape == 17 and self._boiteOutils.interrupteurs["BeliaRentree"].voir():
                 self._boiteOutils.ajouterPensee("Praying the gods? Praying the gods?")
                 self._boiteOutils.ajouterPensee("I've been praying them for years... What did they grant me?")
-                self._boiteOutils.ajouterPensee("I had to go to sleep. Now.")
                 self._etape += 1
-                """self._coefNoircisseur = 1
+        elif self._etape >= 18:
+            if self._etape == 18 and self._boiteOutils.interrupteurs["TomHungry"].voir() and self._penseePossible.voir():
+                self._boiteOutils.ajouterPensee("I threw the nuts on the table,")
+                self._etape += 1
+            if self._etape == 19 and self._boiteOutils.interrupteurs["nutsOnTable"].voir():
+                self._boiteOutils.ajouterPensee("and I went straight to bed.")
+                self._etape += 1
+            if self._etape == 20 and self._boiteOutils.getCoordonneesJoueur() in [(7,3), (8,3), (9,3)]:
+                self._coefNoircisseur = 1
                 self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
                 self._boiteOutils.joueurLibre.desactiver()
-                Horloge.initialiser(id(self), "Transition Noir", 1000)
+                Horloge.initialiser(id(self), "Transition Noir", 1)
                 self._etape += 1
-            if self._etape == 10 and Horloge.sonner(id(self), "Transition Noir"):
+            if self._etape == 21 and Horloge.sonner(id(self), "Transition Noir"):
                 self._coefNoircisseur += 1
                 self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
                 if self._coefNoircisseur >= 12:
                     self._etape += 1
-                    Horloge.initialiser(id(self), "Transition Scene Interieur", 3000)
+                    self._boiteOutils.ajouterPensee("Truly, the gods haven't been fair with the humble hunter I am....")
                 else:
                     Horloge.initialiser(id(self), "Transition Noir", 100)
-            if self._etape == 11 and Horloge.sonner(id(self), "Transition Scene Interieur"):
-                self._boiteOutils.retirerTransformation(True, "Noir")
-                self._boiteOutils.teleporterSurCarte("EtageMaison", 9, 3, 2, "Bas")
+            if self._etape == 22 and self._penseePossible.voir():
+                self._boiteOutils.teleporterJoueurSurPosition(7, 3, "Bas")
                 self._coefNoircisseur = 12
                 self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
                 Horloge.initialiser(id(self), "Transition Noir", 100)
                 self._boiteOutils.joueurLibre.activer()
                 self._boiteOutils.ajouterPensee("I woke up at dawn. I had only one thing to do. Go hunting.")
                 self._etape += 1
-            if self._etape == 12 and Horloge.sonner(id(self), "Transition Noir"):
+            if self._etape == 23 and Horloge.sonner(id(self), "Transition Noir"):
                 self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
                 self._coefNoircisseur -= 1
                 if self._coefNoircisseur == 1:
                     self._boiteOutils.retirerTransformation(True, "Noir")
+                    self._etape += 1
                 else:
-                    Horloge.initialiser(id(self), "Transition Noir", 100)"""
+                    Horloge.initialiser(id(self), "Transition Noir", 100)
                 
     def onMortAnimal(self, typeAnimal, viaChasse=False):
         if viaChasse and not self._premiereMortChasse:
@@ -413,7 +419,6 @@ class Gibier(PNJ):
             self._genererLancerTrajetAleatoire(4, 8)
             self._sonMange = False
         elif self._fuite is False and self._deplacementBoucle is True and self._animationMort is False and self._sonMange is False and self._etapeAction < len(self._listeActions) and isinstance(self._listeActions[self._etapeAction],str) and self._listeActions[self._etapeAction][0] == "V" and Horloge.sonner(id(self._gestionnaireAnimaux), "SonEating"+self._typeAnimal, arretApresSonnerie=False) and self._monteeArbre is False:
-            print("1")
             self._boiteOutils.jouerSon(self._typeAnimal+"Eating", self._nom + "eating", fixe=True, evenementFixe=self._nom, volume=VOLUME_MUSIQUE/3)
             Horloge.initialiser(id(self._gestionnaireAnimaux), "SonEating"+self._typeAnimal, 1000) 
             self._sonMange = True
@@ -435,7 +440,6 @@ class Gibier(PNJ):
                     self._changerCouche(self._coucheMonteeArbre)
                 self._lancerTrajet("Haut","Haut",False, deplacementLibre=True)
                 self._boiteOutils.retirerTransformation(False, "Rouge/"+self._nom)
-                print("2")
                 self._boiteOutils.jouerSon(self._typeAnimal+"Fuite", self._nom + "fuite", fixe=True, xFixe=self._xTile, yFixe=self._yTile)
                 self._monteeArbre, self._fuite = True, False
         if self._monteeArbre:
@@ -452,7 +456,6 @@ class Gibier(PNJ):
         if "Fleche" in nomPNJ and self._vulnerable:
             self._vie -= 1
             self._etapeTraitement, self._intelligence, self._courage, self._fuyard, self._blessure = 1, True, True, False, True
-            print("3")
             self._boiteOutils.jouerSon(self._typeAnimal+"Blesse", self._nom + "blesse", fixe=True, evenementFixe=self._nom)
             Horloge.initialiser(id(self), "Fin clignotant", 2000)
             Horloge.initialiser(id(self), "Rouge clignotant", 1)
@@ -668,7 +671,6 @@ class Belia(PNJ):
         super().__init__(jeu, gestionnaire, "Belia", x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement)
         self._listeSons, self._etapeSon = [("Sack",5,1), ("Cupboard",9,1), ("Cupboard",13,1), ("Knife",18,3)], 0
         if self._boiteOutils.interrupteurs["squirrelPose"].voir() is True and self._boiteOutils.interrupteurs["BeliaRentree"].voir() is False:
-            print("nope")
             self._poseDepart = False
 
     def _gererEtape(self):
@@ -846,7 +848,7 @@ class Belia(PNJ):
                 self._deplacerSurCarte("Maison", 3, 4, 2, "Bas")
                 self._lancerTrajet("Aucune", False)
                 self._poseDepart = False
-                self._etapeTraitement += 1
+                self._etapeTraitement = 7
 
 class Chene(EvenementConcret):
     def __init__(self, jeu, gestionnaire, x, y, numero):
@@ -915,7 +917,7 @@ class Enfant(PNJ):
         (self._xEtage,self._yEtage) = (1,7) if self._nom == "Tom" else (1,6)
         (self._xRDC,self._yRDC) = (1,3) if self._nom == "Tom" else (5,13)
         self._gestionnaire.ajouterChangementCarteANotifier("Maison", "InterieurMaison", self._nom, "EtageMaison")
-        self._monteeEtage, self._descenteEtage = False, False
+        self._monteeEtage, self._descenteEtage, self._penseeDite = False, False, False
 
     def onChangementCarte(self, carteQuittee, carteEntree):
         if carteQuittee == "InterieurMaison" and carteEntree == "Maison" and self._boiteOutils.interrupteurs["squirrelPose"].voir() and not self._boiteOutils.interrupteurs["BeliaRentree"].voir() and not self._monteeEtage:
@@ -926,7 +928,6 @@ class Enfant(PNJ):
             self._etapeTraitement = 6
             self._poseDepart, self._monteeEtage = False, True
         elif carteQuittee == "Maison" and carteEntree == "InterieurMaison" and self._boiteOutils.interrupteurs["BeliaRentree"].voir() and not self._descenteEtage:
-            print(self._xRDC, self._yRDC, self._nom)
             self._deplacerSurCarte("InterieurMaison", self._xRDC, self._yRDC, 2, "Bas", carteQuittee="EtageMaison")
             self._etapeTraitement, self._descenteEtage = 10, True
 
@@ -969,8 +970,16 @@ class Enfant(PNJ):
                 self._lancerTrajet("RBas", False)
             self._etapeTraitement += 1
         if self._etapeTraitement == 11 and self._deplacementBoucle is False:
-            if self._nom == "Elie":
+            if self._nom == "Elie" and not self._boiteOutils.interrupteurs["nutsOnTable"].voir():
+                self._fuyard = True
                 self._genererLancerTrajetAleatoire(2,2)
+            elif self._boiteOutils.interrupteurs["nutsOnTable"].voir():
+                (self._xTable,self._yTable) = (5,13) if self._nom == "Tom" else (9,13)
+                self._directionTable = "Droite" if self._nom == "Tom" else "Gauche"
+                self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, self._xTable, self._yTable, regardFinal=self._directionTable)
+                self._etapeTraitement += 1
+        if self._etapeTraitement == 12 and self._deplacementBoucle is False and self._xTile == self._xTable and self._yTile == self._yTable:
+            self._lancerTrajet("V"+self._directionTable+str(2500), True)
 
     def _gererEtapeEtage(self):
         if self._etapeTraitement == 6 and self._jeu.carteActuelle.deplacementPossible(Rect(1*32, 3*32, 32, 32), self._c, self._nom):
@@ -1019,8 +1028,10 @@ class Enfant(PNJ):
         Horloge.initialiser(id(self), 1, 1)
 
     def _onJoueurInteractionQuelconque(self, x, y, c, direction):
-        if self._nom == "Tom" and self._etapeTraitement == 11 and self._boiteOutils.penseeAGerer.voir() is False:
+        if self._nom == "Tom" and self._etapeTraitement == 11 and self._penseeDite is False:
             self._boiteOutils.ajouterPensee("I'M HUNGRY!!!", faceset="Tom.png")
+            self._boiteOutils.interrupteurs["TomHungry"].activer()
+            self._penseeDite = True
 
 class MembreFamille(PNJ):
     """Pattern decorator pour tous les membres de la famille : quelques comportements communs."""
@@ -1050,24 +1061,56 @@ class MembreFamille(PNJ):
     def _onJoueurInteractionQuelconque(self, x, y, c, direction):
         self.__dict__["_pnj"]._onJoueurInteractionQuelconque(x, y, c, direction)
 
-class TableSquirrel(EvenementConcret):
-    def __init__(self, jeu, gestionnaire):
+class ObjetAPoser(EvenementConcret):
+    def __init__(self, jeu, gestionnaire, bloc, *parametresPose1, **parametresPose2):
         EvenementConcret.__init__(self, jeu, gestionnaire)
-        self._ecureuilPose, self._ecureuilVisible = False, False
+        self._objetPose, self._objetVisible, self._poseBloc, self._parametresPose1, self._parametresPose2 = False, False, bloc, parametresPose1, parametresPose2
 
     def _onJoueurInteractionQuelconque(self, x, y, c, direction):
-        if self._ecureuilPose is False:
-            self._ecureuilPose, self._ecureuilVisible = True, True
-            self._jeu.carteActuelle.poserPNJ(Rect(5 * 32, 5 * 32, 32, 32), 3, Rect(0,0,32,32),  "squirrelDead.png", (0,0,0), "tableSquirrel")
-            self._boiteOutils.interrupteurs["squirrelPose"].activer()
+        if self._objetPose is False and self._posePossible(initiale=True):
+            self._objetPose, self._objetVisible = True, True
+            self._actionPose(initiale=True)
+            self._actionsApresPose(initiale=True)
+
+    def _actionPose(self, initiale=False):
+        if self._poseBloc:
+            self._boiteOutils.changerBloc(*self._parametresPose1, **self._parametresPose2)
+        else:
+            self._jeu.carteActuelle.poserPNJ(*self._parametresPose1, **self._parametresPose2)
+
+    def _posePossible(self, initiale=False):
+        return True
+
+    def _actionsApresPose(self, initiale=False):
+        pass
 
     def onChangementCarte(self, carteQuittee, carteEntree):
-        self._ecureuilVisible = False
+        self._objetVisible = False
 
     def traiter(self):
-        if self._ecureuilPose and not self._ecureuilVisible:
-            self._jeu.carteActuelle.poserPNJ(Rect(5 * 32, 5 * 32, 32, 32), 3, Rect(0,0,32,32),  "squirrelDead.png", (0,0,0), "tableSquirrel")
-            self._ecureuilVisible = True
+        if self._objetPose and not self._objetVisible and self._posePossible():
+            self._objetVisible = True
+            self._actionPose()
+            self._actionsApresPose()
+
+class TableSquirrel(ObjetAPoser):
+    def __init__(self, jeu, gestionnaire):
+        super().__init__(jeu, gestionnaire, False, Rect(5 * 32, 5 * 32, 32, 32), 3, Rect(0,0,32,32),  "squirrelDead.png", (0,0,0), "tableSquirrel")
+
+    def _actionsApresPose(self, initiale=False):
+        if initiale:
+            self._boiteOutils.interrupteurs["squirrelPose"].activer()
+
+class TableNuts(ObjetAPoser):
+    def __init__(self, jeu, gestionnaire):
+        super().__init__(jeu, gestionnaire, False, Rect(7 * 32, 12 * 32, 32, 32), 3, Rect(0,0,32,32),  "Gland.png", (0,0,0), "tableGland")
+
+    def _posePossible(self, initiale=False):
+        return self._boiteOutils.interrupteurs["BeliaRentree"].voir()
+
+    def _actionsApresPose(self, initiale=False):
+        if initiale:
+            self._boiteOutils.interrupteurs["nutsOnTable"].activer()
 
 class SignaleurJoueur(Evenement):
     def __init__(self, jeu, gestionnaire, *parametres):
