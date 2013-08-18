@@ -213,8 +213,6 @@ class Narrateur(Evenement):
                 self._boiteOutils.jouerSon("Laugh", "Rires")
                 self._etape += 1
         if self._boiteOutils.nomCarte == "Maison":
-            if self._etape < 12:
-                self._etape = 12
             if self._etape == 12 and self._boiteOutils.interrupteurs["discussionEtang"].voir():
                 self._boiteOutils.ajouterPensee("We'll have to fetch some nuts for the children,", faceset="Belia.png")
                 self._boiteOutils.ajouterPensee("you should shake down the oak trees.", faceset="Belia.png")
@@ -670,7 +668,7 @@ class Belia(PNJ):
         super().__init__(jeu, gestionnaire, "Belia", x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement)
         self._listeSons, self._etapeSon = [("Sack",5,1), ("Cupboard",9,1), ("Cupboard",13,1), ("Knife",18,3)], 0
         if self._boiteOutils.interrupteurs["squirrelPose"].voir() is True and self._boiteOutils.interrupteurs["BeliaRentree"].voir() is False:
-            print("indeed")
+            print("nope")
             self._poseDepart = False
 
     def _gererEtape(self):
@@ -700,16 +698,155 @@ class Belia(PNJ):
             self._etapeTraitement += 1
         if self._etapeTraitement == 6 and self._deplacementBoucle is False and self._xTile == 13 and self._yTile == 3:
             self._boiteOutils.interrupteurs["BeliaSortie"].activer()
-            self._boiteOutils.supprimerPNJ(self._nom, self._c)
-            self._gestionnaire.ajouterEvenementATuer("concrets", "InterieurMaison", self._nom)
+            self._deplacerSurCarte("Maison", 3, 8, 2, "Bas")
             self._etapeTraitement += 1
+        if self._etapeTraitement == 7 and self._jeu.carteActuelle.nom == "Maison":
+            self._porteRefermee, self._sons = True, dict()
+            self._sons[0] = [["Wateragitation", "Washing clothe"], {"fixe":True, "evenementFixe":self._nom}, True]
+            self._sons[9], self._sons[18] = list(self._sons[0]), list(self._sons[0])
+            self._sons[4] = [["Barrel", "Taking clothe"], {"fixe":True, "evenementFixe":self._nom}, True]
+            self._sons[13], self._sons[22] = list(self._sons[4]), list(self._sons[4])
+            self._sons[8] = [["Washing", "Washing clothe"], {"fixe":True, "evenementFixe":self._nom}, True]
+            self._sons[17], self._sons[26] = list(self._sons[8]), list(self._sons[8])
+            if self._boiteOutils.interrupteurs["BeliaSortie"].voir():
+                self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 14, arretAvant=True)
+                self._etapeTraitement += 2
+            else:
+                Horloge.initialiser(id(self), "Attente départ", 3000)
+                self._etapeTraitement += 1
+        if self._etapeTraitement == 8:
+            coordonneesJoueur = self._boiteOutils.getCoordonneesJoueur()
+            if self._boiteOutils.tileProcheDe((3,5), coordonneesJoueur, 3) is False or (Horloge.sonner(id(self), "Attente départ", arretApresSonnerie=False) and coordonneesJoueur != (3,5)):
+                if self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].getPorteOuverte() is False:
+                    self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].ouvrirOuFermerPorte()
+                    self._porteRefermee = False
+                self._poseDepart = True
+                self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 14, arretAvant=True)
+                self._boiteOutils.interrupteurs["BeliaSortie"].activer()
+                self._etapeTraitement += 1
+        if self._etapeTraitement == 9 and self._porteRefermee is False and self._boiteOutils.tileProcheDe((self._xTile,self._yTile),(3,4), 4) is False:
+            if self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].getPorteOuverte():
+                self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].ouvrirOuFermerPorte()
+                self._porteRefermee = True
+        if self._etapeTraitement == 9 and self._deplacementBoucle is False and self._boiteOutils.positionProcheEvenement(15, 14, self._nom):
+            self._boiteOutils.interrupteurs["discussionEtang"].activer()
+            self._lancerTrajet("V"+self._boiteOutils.determinerDirectionDeplacement((self._xTile,self._yTile),(15,14))+"1500",False)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 10 and self._boiteOutils.getCoordonneesJoueur() != (15,14) and self._deplacementBoucle is False:
+            self._boiteOutils.changerBloc(15, 14, 2, "base_out_atlas.png", (480, 448, 32, 32), (0,0,0), False)
+            self._boiteOutils.jouerSon("Barrel", "Setting it up", fixe=True, evenementFixe=self._nom)
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 17, 11, arretAvant=True)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 11 and self._deplacementBoucle is False and self._boiteOutils.positionProcheEvenement(17, 11, self._nom):
+            self._lancerTrajet("V"+self._boiteOutils.determinerDirectionDeplacement((self._xTile,self._yTile),(17,11))+"1500",False)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 12 and self._boiteOutils.getCoordonneesJoueur() != (17,11) and self._deplacementBoucle is False:
+            self._boiteOutils.changerBloc(17, 10, 3, "base_out_atlas.png", (608, 448, 32, 32), (0,0,0), False)
+            self._boiteOutils.changerBloc(17, 11, 2, "base_out_atlas.png", (608, 480, 32, 32), (0,0,0), False)
+            self._boiteOutils.jouerSon("Barrel", "Setting it up2", fixe=True, evenementFixe=self._nom)
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 13, regardFinal="Droite")
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 13 and self._xTile == 15 and self._yTile == 13 and self._deplacementBoucle is False:
+            self._lancerTrajet(["VDroite2500", "Haut", "Haut", "Droite", "VDroite2500","Gauche","Bas","Bas","VBas1500"]*3, False)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 14:
+            if self._deplacementBoucle is False:
+                self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 12, arretAvant=True)
+                self._etapeTraitement += 1
+            else:
+                self._gererSons2()
+                if self._etapeAction == 17:
+                    self._boiteOutils.changerBloc(15, 14, 2, "base_out_atlas.png", (480, 480, 32, 32), (0,0,0), False)
+        if self._etapeTraitement == 15 and self._deplacementBoucle is False and self._boiteOutils.positionProcheEvenement(15, 12, self._nom):
+            self._lancerTrajet("V"+self._boiteOutils.determinerDirectionDeplacement((self._xTile,self._yTile),(15,12))+"1500",False)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 16 and self._boiteOutils.getCoordonneesJoueur() != (15,12) and self._deplacementBoucle is False:
+            self._boiteOutils.changerBloc(15, 12, 2, "base_out_atlas.png", (480, 448, 32, 32), (0,0,0), False)
+            self._boiteOutils.jouerSon("Barrel", "Setting it up3", fixe=True, evenementFixe=self._nom)
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 13, regardFinal="Droite")
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 17 and self._xTile == 15 and self._yTile == 13 and self._deplacementBoucle is False:
+            self._majSons()
+            self._lancerTrajet(["VDroite2500", "Gauche","Haut", "Haut", "Droite", "Droite", "VDroite2500","Gauche", "VBas1500", "Gauche", "Bas", "Bas", "Droite", "VBas1500"]*3, False)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 18:
+            if self._deplacementBoucle is False:
+                self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 17, 11, arretAvant=True)
+                self._etapeTraitement += 1
+            else:
+                self._gererSons2()
+                if self._etapeAction == 22:
+                    self._boiteOutils.changerBloc(15, 12, 2, "base_out_atlas.png", (480, 480, 32, 32), (0,0,0), False)
+        if self._etapeTraitement == 19 and self._deplacementBoucle is False and self._boiteOutils.positionProcheEvenement(17, 11, self._nom):
+            self._lancerTrajet("V"+self._boiteOutils.determinerDirectionDeplacement((self._xTile,self._yTile),(17,11))+"1500",False)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 20 and self._deplacementBoucle is False:
+            self._boiteOutils.changerBloc(17,11,2, -1,-1,-1,-1, vide=True )
+            self._boiteOutils.changerBloc(17,10,3, -1,-1,-1,-1, vide=True )
+            self._boiteOutils.jouerSon("Barrel", "Setting it up4", fixe=True, evenementFixe=self._nom)
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 12, arretAvant=True)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 21 and self._deplacementBoucle is False and self._boiteOutils.positionProcheEvenement(15, 12, self._nom):
+            self._lancerTrajet("V"+self._boiteOutils.determinerDirectionDeplacement((self._xTile,self._yTile),(15,12))+"1500",False)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 22 and self._deplacementBoucle is False:
+            self._boiteOutils.changerBloc(15,12,2, -1,-1,-1,-1, vide=True )
+            self._boiteOutils.jouerSon("Barrel", "Setting it up5", fixe=True, evenementFixe=self._nom)
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 14, arretAvant=True)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 23 and self._deplacementBoucle is False and self._boiteOutils.positionProcheEvenement(15, 14, self._nom):
+            self._lancerTrajet("V"+self._boiteOutils.determinerDirectionDeplacement((self._xTile,self._yTile),(15,14))+"1500",False)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 24 and self._deplacementBoucle is False:
+            self._boiteOutils.changerBloc(15,14,2, -1,-1,-1,-1, vide=True )
+            self._boiteOutils.jouerSon("Barrel", "Setting it up6", fixe=True, evenementFixe=self._nom)
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 3, 5, regardFinal="Haut")
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 25 and self._deplacementBoucle is False and self._xTile == 3 and self._yTile == 5:
+            self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].ouvrirOuFermerPorte()
+            self._lancerTrajet("Haut",False)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 26 and self._deplacementBoucle is False and self._xTile == 3 and self._yTile == 4:
+            self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].ouvrirOuFermerPorte()
+            self._boiteOutils.interrupteurs["BeliaRentree"].activer()
+            self._deplacerSurCarte("InterieurMaison", 7, 6, 2, "Gauche")
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 27 and self._jeu.carteActuelle.nom == "InterieurMaison":
+            self._lancerTrajet("Haut","Haut","Gauche","Gauche","Gauche","VHaut2500","Droite","Droite","Droite","VHaut2500","Droite","Droite","Droite","VHaut2500","Gauche","Gauche","Gauche","Bas","Bas","VGauche2500",True)
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 28:
+            self._gererSons()
 
     def _gererSons(self):
         if self._etapeAction == self._listeSons[self._etapeSon][1]:
-            self._boiteOutils.jouerSon(self._listeSons[self._etapeSon][0], "Cusisine"+str(self._etapeSon), fixe=True, evenementFixe="Belia", duree=2500, nombreEcoutes=self._listeSons[self._etapeSon][2])
+            self._boiteOutils.jouerSon(self._listeSons[self._etapeSon][0], "Cuisine"+str(self._etapeSon), fixe=True, evenementFixe="Belia", duree=2500, nombreEcoutes=self._listeSons[self._etapeSon][2])
             self._etapeSon += 1
             if self._etapeSon == 4:
                 self._etapeSon = 0
+
+    def _gererSons2(self):
+        if self._etapeAction in self._sons.keys():
+            if self._sons[self._etapeAction][2] is True:
+                self._boiteOutils.jouerSon(*self._sons[self._etapeAction][0], **self._sons[self._etapeAction][1])
+                self._sons[self._etapeAction][2] = False
+
+    def _majSons(self):
+        self._sons = dict()
+        self._sons[0] = [["Wateragitation", "Washing clothe"], {"fixe":True, "evenementFixe":self._nom}, True]
+        self._sons[14], self._sons[28] = list(self._sons[0]), list(self._sons[0])
+        self._sons[6] = [["Barrel", "Taking clothe"], {"fixe":True, "evenementFixe":self._nom}, True]
+        self._sons[20], self._sons[34] = list(self._sons[6]), list(self._sons[6])
+        self._sons[8] = [["Washing", "Washing barrel"], {"fixe":True, "evenementFixe":self._nom}, True]
+        self._sons[22], self._sons[36] = list(self._sons[8]), list(self._sons[8])
+        self._sons[13], self._sons[27], self._sons[41] = list(self._sons[8]), list(self._sons[8]), list(self._sons[8])
+
+    def onChangementCarte(self, carteQuittee, carteEntree):
+        if carteQuittee == "InterieurMaison" and carteEntree == "Maison":
+            if self._boiteOutils.interrupteurs["squirrelPose"].voir() and not self._boiteOutils.interrupteurs["BeliaRentree"].voir() and not self._boiteOutils.interrupteurs["BeliaSortie"].voir():
+                self._deplacerSurCarte("Maison", 3, 4, 2, "Bas")
+                self._lancerTrajet("Aucune", False)
+                self._poseDepart = False
+                self._etapeTraitement += 1
 
 class Chene(EvenementConcret):
     def __init__(self, jeu, gestionnaire, x, y, numero):
@@ -765,158 +902,38 @@ class Gland(PNJ):
             self._boiteOutils.supprimerPNJ(self._nom, self._c)
             self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
 
-class Belia2(PNJ):
-    def __init__(self, jeu, gestionnaire, x, y, poseDepart):
-        fichier, couleurTransparente, persoCharset, vitesseDeplacement = "Belia.png", (0,0,0), (0,0), 150
-        repetitionActions, directionDepart = False, "Bas"
-        listeActions = ["Aucune"]
-        super().__init__(jeu, gestionnaire, "Belia2", x, y, 2, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement, poseDepart=poseDepart)
-        Horloge.initialiser(id(self), "Attente départ", 3000)
-        self._sons, self._poseAutorisee = dict(), True
-        self._sons[0] = [["Wateragitation", "Washing clothe"], {"fixe":True, "evenementFixe":self._nom}, True]
-        self._sons[9], self._sons[18] = list(self._sons[0]), list(self._sons[0])
-        self._sons[4] = [["Barrel", "Taking clothe"], {"fixe":True, "evenementFixe":self._nom}, True]
-        self._sons[13], self._sons[22] = list(self._sons[4]), list(self._sons[4])
-        self._sons[8] = [["Washing", "Washing clothe"], {"fixe":True, "evenementFixe":self._nom}, True]
-        self._sons[17], self._sons[26] = list(self._sons[8]), list(self._sons[8])
-        self._porteRefermee = False
-        if not self._boiteOutils.interrupteurs["BeliaSortie"].voir() or not self._boiteOutils.interrupteurs["squirrelPose"].voir():
-            self._poseAutorisee = False
-
-    def _gererEtape(self):
-        if self._etapeTraitement == 0 and self._poseAutorisee is True:
-            coordonneesJoueur = self._boiteOutils.getCoordonneesJoueur()
-            if self._boiteOutils.tileProcheDe((3,5), coordonneesJoueur, 3) is False or (Horloge.sonner(id(self), "Attente départ", arretApresSonnerie=False) and coordonneesJoueur != (3,5)):
-                if self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].getPorteOuverte() is False:
-                    self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].ouvrirOuFermerPorte()
-                self._poseDepart = True
-        if self._etapeTraitement == 1:
-            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 14, arretAvant=True)
-            self._etapeTraitement += 1
-        if self._etapeTraitement == 2 and self._porteRefermee is False and self._boiteOutils.tileProcheDe((self._xTile,self._yTile),(3,4), 4) is False:
-            if self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].getPorteOuverte():
-                self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].ouvrirOuFermerPorte()
-                self._porteRefermee = True
-        if self._etapeTraitement == 2 and self._deplacementBoucle is False and self._boiteOutils.positionProcheEvenement(15, 14, self._nom):
-            self._boiteOutils.interrupteurs["discussionEtang"].activer()
-            self._lancerTrajet("V"+self._boiteOutils.determinerDirectionDeplacement((self._xTile,self._yTile),(15,14))+"1500",False)
-            self._etapeTraitement += 1
-        if self._etapeTraitement == 3 and self._boiteOutils.getCoordonneesJoueur() != (15,14) and self._deplacementBoucle is False:
-            self._boiteOutils.changerBloc(15, 14, 2, "base_out_atlas.png", (480, 448, 32, 32), (0,0,0), False)
-            self._boiteOutils.jouerSon("Barrel", "Setting it up", fixe=True, evenementFixe=self._nom)
-            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 17, 11, arretAvant=True)
-            self._etapeTraitement += 1
-        if self._etapeTraitement == 4 and self._deplacementBoucle is False and self._boiteOutils.positionProcheEvenement(17, 11, self._nom):
-            self._lancerTrajet("V"+self._boiteOutils.determinerDirectionDeplacement((self._xTile,self._yTile),(17,11))+"1500",False)
-            self._etapeTraitement += 1
-        if self._etapeTraitement == 5 and self._boiteOutils.getCoordonneesJoueur() != (17,11) and self._deplacementBoucle is False:
-            self._boiteOutils.changerBloc(17, 10, 3, "base_out_atlas.png", (608, 448, 32, 32), (0,0,0), False)
-            self._boiteOutils.changerBloc(17, 11, 2, "base_out_atlas.png", (608, 480, 32, 32), (0,0,0), False)
-            self._boiteOutils.jouerSon("Barrel", "Setting it up2", fixe=True, evenementFixe=self._nom)
-            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 13, regardFinal="Droite")
-            self._etapeTraitement += 1
-        if self._etapeTraitement == 6 and self._xTile == 15 and self._yTile == 13 and self._deplacementBoucle is False:
-            self._lancerTrajet(["VDroite2500", "Haut", "Haut", "Droite", "VDroite2500","Gauche","Bas","Bas","VBas1500"]*3, False)
-            self._etapeTraitement += 1
-        if self._etapeTraitement == 7:
-            if self._deplacementBoucle is False:
-                self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 12, arretAvant=True)
-                self._etapeTraitement += 1
-            else:
-                self._gererSons()
-                if self._etapeAction == 17:
-                    self._boiteOutils.changerBloc(15, 14, 2, "base_out_atlas.png", (480, 480, 32, 32), (0,0,0), False)
-        if self._etapeTraitement == 8 and self._deplacementBoucle is False and self._boiteOutils.positionProcheEvenement(15, 12, self._nom):
-            self._lancerTrajet("V"+self._boiteOutils.determinerDirectionDeplacement((self._xTile,self._yTile),(15,12))+"1500",False)
-            self._etapeTraitement += 1
-        if self._etapeTraitement == 9 and self._boiteOutils.getCoordonneesJoueur() != (15,12) and self._deplacementBoucle is False:
-            self._boiteOutils.changerBloc(15, 12, 2, "base_out_atlas.png", (480, 448, 32, 32), (0,0,0), False)
-            self._boiteOutils.jouerSon("Barrel", "Setting it up3", fixe=True, evenementFixe=self._nom)
-            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 13, regardFinal="Droite")
-            self._etapeTraitement += 1
-        if self._etapeTraitement == 10 and self._xTile == 15 and self._yTile == 13 and self._deplacementBoucle is False:
-            self._majSons()
-            self._lancerTrajet(["VDroite2500", "Gauche","Haut", "Haut", "Droite", "Droite", "VDroite2500","Gauche", "VBas1500", "Gauche", "Bas", "Bas", "Droite", "VBas1500"]*3, False)
-            self._etapeTraitement += 1
-        if self._etapeTraitement == 11:
-            if self._deplacementBoucle is False:
-                self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 17, 11, arretAvant=True)
-                self._etapeTraitement += 1
-            else:
-                self._gererSons()
-                if self._etapeAction == 22:
-                    self._boiteOutils.changerBloc(15, 12, 2, "base_out_atlas.png", (480, 480, 32, 32), (0,0,0), False)
-        if self._etapeTraitement == 12 and self._deplacementBoucle is False and self._boiteOutils.positionProcheEvenement(17, 11, self._nom):
-            self._lancerTrajet("V"+self._boiteOutils.determinerDirectionDeplacement((self._xTile,self._yTile),(17,11))+"1500",False)
-            self._etapeTraitement += 1
-        if self._etapeTraitement == 13 and self._deplacementBoucle is False:
-            self._boiteOutils.changerBloc(17,11,2, -1,-1,-1,-1, vide=True )
-            self._boiteOutils.changerBloc(17,10,3, -1,-1,-1,-1, vide=True )
-            self._boiteOutils.jouerSon("Barrel", "Setting it up4", fixe=True, evenementFixe=self._nom)
-            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 12, arretAvant=True)
-            self._etapeTraitement += 1
-        if self._etapeTraitement == 14 and self._deplacementBoucle is False and self._boiteOutils.positionProcheEvenement(15, 12, self._nom):
-            self._lancerTrajet("V"+self._boiteOutils.determinerDirectionDeplacement((self._xTile,self._yTile),(15,12))+"1500",False)
-            self._etapeTraitement += 1
-        if self._etapeTraitement == 15 and self._deplacementBoucle is False:
-            self._boiteOutils.changerBloc(15,12,2, -1,-1,-1,-1, vide=True )
-            self._boiteOutils.jouerSon("Barrel", "Setting it up5", fixe=True, evenementFixe=self._nom)
-            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 15, 14, arretAvant=True)
-            self._etapeTraitement += 1
-        if self._etapeTraitement == 16 and self._deplacementBoucle is False and self._boiteOutils.positionProcheEvenement(15, 14, self._nom):
-            self._lancerTrajet("V"+self._boiteOutils.determinerDirectionDeplacement((self._xTile,self._yTile),(15,14))+"1500",False)
-            self._etapeTraitement += 1
-        if self._etapeTraitement == 17 and self._deplacementBoucle is False:
-            self._boiteOutils.changerBloc(15,14,2, -1,-1,-1,-1, vide=True )
-            self._boiteOutils.jouerSon("Barrel", "Setting it up6", fixe=True, evenementFixe=self._nom)
-            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 3, 5, regardFinal="Haut")
-            self._etapeTraitement += 1
-        if self._etapeTraitement == 18 and self._deplacementBoucle is False and self._xTile == 3 and self._yTile == 5:
-            self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].ouvrirOuFermerPorte()
-            self._lancerTrajet("Haut",False)
-            self._etapeTraitement += 1
-        if self._etapeTraitement == 19 and self._deplacementBoucle is False and self._xTile == 3 and self._yTile == 4:
-            self._boiteOutils.supprimerPNJ(self._nom, self._c)
-            self._gestionnaire.evenements["concrets"]["Maison"]["SortieInterieurMaison"][0].ouvrirOuFermerPorte()
-            self._gestionnaire.ajouterEvenementATuer("concrets", "Maison", self._nom)
-            self._boiteOutils.interrupteurs["BeliaRentree"].activer()
-            self._etapeTraitement += 1
-
-    def _gererSons(self):
-        if self._etapeAction in self._sons.keys():
-            if self._sons[self._etapeAction][2] is True:
-                self._boiteOutils.jouerSon(*self._sons[self._etapeAction][0], **self._sons[self._etapeAction][1])
-                self._sons[self._etapeAction][2] = False
-
-    def _majSons(self):
-        self._sons = dict()
-        self._sons[0] = [["Wateragitation", "Washing clothe"], {"fixe":True, "evenementFixe":self._nom}, True]
-        self._sons[14], self._sons[28] = list(self._sons[0]), list(self._sons[0])
-        self._sons[6] = [["Barrel", "Taking clothe"], {"fixe":True, "evenementFixe":self._nom}, True]
-        self._sons[20], self._sons[34] = list(self._sons[6]), list(self._sons[6])
-        self._sons[8] = [["Washing", "Washing barrel"], {"fixe":True, "evenementFixe":self._nom}, True]
-        self._sons[22], self._sons[36] = list(self._sons[8]), list(self._sons[8])
-        self._sons[13], self._sons[27], self._sons[41] = list(self._sons[8]), list(self._sons[8]), list(self._sons[8])
-    
 class Enfant(PNJ):
     def __init__(self, jeu, gestionnaire, nom, x, y, c):
         fichier, couleurTransparente, persoCharset, vitesseDeplacement, self._nom = nom + ".png", (0,0,0), (0,0), 150, nom
         repetitionActions, directionDepart, poseDepart = True, "Gauche", True
         listeActions = ["Droite","Bas","Bas","Bas","Bas","Bas","Bas","Bas","Droite","Droite","Droite","Bas","Gauche","Gauche","Gauche","Gauche","Haut","Haut","Haut","Haut","Haut","Haut","Haut","Haut"]
         super().__init__(jeu, gestionnaire, nom, x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement, poseDepart=poseDepart)
-        if self._jeu.carteActuelle.nom == "InterieurMaison" and self._boiteOutils.interrupteurs["squirrelPose"].voir() and not self._boiteOutils.interrupteurs["BeliaRentree"].voir():
-            self._poseDepart = False
-        elif self._jeu.carteActuelle.nom == "EtageMaison" and not self._boiteOutils.interrupteurs[self._nom+"Etage"].voir():
-            self._poseDepart = False
         if y == 8:
             self._etapeAction = 20
         self._positionsSuivi, self._etapeSuivi = {"Tom":[(10,7),(7,6)], "Elie":[(10,9),(7,5)]}, 0
         self._xArrivee, self._yArrivee = -1, -1
+        (self._xEtage,self._yEtage) = (1,7) if self._nom == "Tom" else (1,6)
+        (self._xRDC,self._yRDC) = (1,3) if self._nom == "Tom" else (5,13)
+        self._gestionnaire.ajouterChangementCarteANotifier("Maison", "InterieurMaison", self._nom, "EtageMaison")
+        self._monteeEtage, self._descenteEtage = False, False
+
+    def onChangementCarte(self, carteQuittee, carteEntree):
+        if carteQuittee == "InterieurMaison" and carteEntree == "Maison" and self._boiteOutils.interrupteurs["squirrelPose"].voir() and not self._boiteOutils.interrupteurs["BeliaRentree"].voir() and not self._monteeEtage:
+            self._deplacerSurCarte("EtageMaison", self._xEtage, self._yEtage, 2, "Bas")
+            self._etapeTraitement, self._monteeEtage = 7, True
+        elif carteQuittee == "InterieurMaison" and carteEntree == "EtageMaison" and self._boiteOutils.interrupteurs["squirrelPose"].voir() and not self._boiteOutils.interrupteurs["BeliaRentree"].voir() and not self._monteeEtage:
+            self._deplacerSurCarte("EtageMaison", 1, 3, 2, "Bas")
+            self._etapeTraitement = 6
+            self._poseDepart, self._monteeEtage = False, True
+        elif carteQuittee == "Maison" and carteEntree == "InterieurMaison" and self._boiteOutils.interrupteurs["BeliaRentree"].voir() and not self._descenteEtage:
+            print(self._xRDC, self._yRDC, self._nom)
+            self._deplacerSurCarte("InterieurMaison", self._xRDC, self._yRDC, 2, "Bas", carteQuittee="EtageMaison")
+            self._etapeTraitement, self._descenteEtage = 10, True
 
     def _gererEtape(self):
         if self._jeu.carteActuelle.nom == "InterieurMaison":
             self._gererEtapeRDC()
-        elif self._jeu.carteActuelle.nom == "EtageMaison":
+        elif self._jeu.carteActuelle.nom == "EtageMaison" and self._boiteOutils.interrupteurs["squirrelPose"].voir() and not self._boiteOutils.interrupteurs["BeliaRentree"].voir():
             self._gererEtapeEtage()
 
     def _gererEtapeRDC(self):
@@ -943,24 +960,31 @@ class Enfant(PNJ):
             self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 1, 3)
             self._etapeTraitement += 1
         if self._etapeTraitement == 5 and self._deplacementBoucle is False and self._xTile == 1 and self._yTile == 3:
-            self._boiteOutils.supprimerPNJ(self._nom, self._c)
             self._boiteOutils.interrupteurs[self._nom+"Etage"].activer()
-            self._gestionnaire.ajouterEvenementATuer("concrets", "InterieurMaison", self._nom)
+            self._deplacerSurCarte("EtageMaison", self._xEtage, self._yEtage, 2, "Bas")
+            self._etapeTraitement, self._monteeEtage = 7, True
+        if self._etapeTraitement == 10:
+            self._poseDepart = True
+            if self._nom == "Tom":
+                self._lancerTrajet("RBas", False)
             self._etapeTraitement += 1
+        if self._etapeTraitement == 11 and self._deplacementBoucle is False:
+            if self._nom == "Elie":
+                self._genererLancerTrajetAleatoire(2,2)
 
     def _gererEtapeEtage(self):
-        if self._etapeTraitement == 0 and self._jeu.carteActuelle.deplacementPossible(Rect(1*32, 3*32, 32, 32), self._c, self._nom) and self._boiteOutils.interrupteurs["squirrelPose"].voir():
-            self._modifierPositionInitiale(1,3,2,"Bas")
+        if self._etapeTraitement == 6 and self._jeu.carteActuelle.deplacementPossible(Rect(1*32, 3*32, 32, 32), self._c, self._nom):
             self._poseDepart = True
-        if self._etapeTraitement == 1:
+            self._etapeTraitement += 1
+        if self._etapeTraitement == 7:
             (self._xArrivee,self._yArrivee) = (3,11) if self._nom == "Tom" else (3,10)
             self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, self._xArrivee, self._yArrivee)
             self._etapeTraitement += 1
-        if self._etapeTraitement == 2 and self._xTile == self._xArrivee and self._yTile == self._yArrivee and self._deplacementBoucle is False:
+        if self._etapeTraitement == 8 and self._xTile == self._xArrivee and self._yTile == self._yArrivee and self._deplacementBoucle is False:
             self._lancerTrajet(500,False)
             self._fuyard = True
             self._etapeTraitement += 1
-        if self._etapeTraitement == 3 and self._deplacementBoucle is False:
+        if self._etapeTraitement == 9 and self._deplacementBoucle is False:
             self._genererLancerTrajetAleatoire(2,2)
             if self._boiteOutils.interrupteurs["ConversationEnfants"].voir() is False and self._boiteOutils.penseeAGerer.voir() is False:
                 self._boiteOutils.ajouterPensee("Are we havin' nuts for dinner tonight? Will I ever taste some meat again?", faceset="Tom.png")
@@ -994,22 +1018,20 @@ class Enfant(PNJ):
         self._lancerTrajet(actions, False)
         Horloge.initialiser(id(self), 1, 1)
 
+    def _onJoueurInteractionQuelconque(self, x, y, c, direction):
+        if self._nom == "Tom" and self._etapeTraitement == 11 and self._boiteOutils.penseeAGerer.voir() is False:
+            self._boiteOutils.ajouterPensee("I'M HUNGRY!!!", faceset="Tom.png")
+
 class MembreFamille(PNJ):
     """Pattern decorator pour tous les membres de la famille : quelques comportements communs."""
     def __init__(self, pnj):
-        self._pnj, self._comportementParticulier = pnj, False
+        self.__dict__["_pnj"], self._comportementParticulier = pnj, False
 
     def __setattr__(self, attribut, valeur):
-        if attribut == "_pnj":
-            self.__dict__[attribut] = valeur
-        else:
-            self._pnj.__dict__[attribut] = valeur
+        return setattr(self.__dict__["_pnj"], attribut, valeur)
 
     def __getattr__(self, attribut):
-        if attribut == "_pnj":
-            return self.__dict__[attribut]
-        else:
-            return getattr(self._pnj, attribut)
+        return getattr(self.__dict__["_pnj"], attribut)
 
     def _gererEtape(self):
         if self._etapeTraitement == 1 and (self._etapeMarche == 1 or "V" in self._listeActions[self._etapeAction]) and self._boiteOutils.interrupteurs["JoueurEntre"].voir() is True:
@@ -1020,18 +1042,32 @@ class MembreFamille(PNJ):
             self._majInfosJoueur()
             if self._joueurBouge[0] is True:
                 self._lancerTrajet(self._boiteOutils.regardVersPnj("Joueur",-1,-1,evenementReference=self._nom),False)
-        self._pnj._gererEtape()
+        self.__dict__["_pnj"]._gererEtape()
+
+    def onChangementCarte(self, carteQuittee, carteEntree):
+        self.__dict__["_pnj"].onChangementCarte(carteQuittee, carteEntree)
+
+    def _onJoueurInteractionQuelconque(self, x, y, c, direction):
+        self.__dict__["_pnj"]._onJoueurInteractionQuelconque(x, y, c, direction)
 
 class TableSquirrel(EvenementConcret):
     def __init__(self, jeu, gestionnaire):
         EvenementConcret.__init__(self, jeu, gestionnaire)
-        self._ecureuilPose = False
+        self._ecureuilPose, self._ecureuilVisible = False, False
 
     def _onJoueurInteractionQuelconque(self, x, y, c, direction):
         if self._ecureuilPose is False:
-            self._ecureuilPose = True
+            self._ecureuilPose, self._ecureuilVisible = True, True
             self._jeu.carteActuelle.poserPNJ(Rect(5 * 32, 5 * 32, 32, 32), 3, Rect(0,0,32,32),  "squirrelDead.png", (0,0,0), "tableSquirrel")
             self._boiteOutils.interrupteurs["squirrelPose"].activer()
+
+    def onChangementCarte(self, carteQuittee, carteEntree):
+        self._ecureuilVisible = False
+
+    def traiter(self):
+        if self._ecureuilPose and not self._ecureuilVisible:
+            self._jeu.carteActuelle.poserPNJ(Rect(5 * 32, 5 * 32, 32, 32), 3, Rect(0,0,32,32),  "squirrelDead.png", (0,0,0), "tableSquirrel")
+            self._ecureuilVisible = True
 
 class SignaleurJoueur(Evenement):
     def __init__(self, jeu, gestionnaire, *parametres):
@@ -1051,6 +1087,5 @@ class SignaleurJoueur(Evenement):
             if self._joueurBouge[0] and (self._xJoueur[0], self._yJoueur[0]) in self._signaleurs[self._jeu.carteActuelle.nom].keys():
                 nomInterrupteur = self._signaleurs[self._jeu.carteActuelle.nom][self._xJoueur[0], self._yJoueur[0]]
                 self._boiteOutils.interrupteurs[nomInterrupteur].activer()
-                print(nomInterrupteur)
                 self._signaleurs[self._jeu.carteActuelle.nom].pop((self._xJoueur[0], self._yJoueur[0]))
 
