@@ -61,7 +61,7 @@ A certain number of graphics come from The Mana World, a promising open source 2
 * The barrel sound (Barrel.wav) is a work by Jorick Bronius (http://jorickbronius.wordpress.com) licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/jorickhoofd/sounds/178657/
 * The washing sound (Washing.wav) is a work by Brian R. Johnson published in the public domain (CC0). http://freesound.org/people/JohnsonBrandEditing/sounds/173938/ 
 * The wave sound (Wateragitation.wav) is a work by mystiscool licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/mystiscool/sounds/7055/
-* The door opening sound (doorOpening.wav) was produced with the amazing Bfxr software.
+* The door opening sound (doorOpening.wav) and the pickup sound (Pickup.wav) were produced with the amazing Bfxr software.
 
 ### 3.3 Music
 * Lost In The Meadows is a calm and enchanting music by Brandon Morris (HaelDB), which is licensed under the Creative Commons Attribution 3.0 (CC-BY). You should really listen to his tracks on OpenGameArt.org or Youtube. http://opengameart.org/content/lost-in-the-meadows, https://www.youtube.com/brandon75689 

@@ -117,175 +117,225 @@ class Narrateur(Evenement):
     def __init__(self, jeu, gestionnaire):
         super().__init__(jeu, gestionnaire)
         self._penseePossible, self._etape, self._coefNoircisseur, self._alpha = InterrupteurInverse(self._boiteOutils.penseeAGerer), 0, 0, 255
-        self._messageBoutonInteraction, self._premiereMortChasse = False, False
-    
+        self._messageBoutonInteraction, self._premiereMortChasse, self._traitement, etapeMax, i = False, False, dict(), 24, 0 
+        while i < etapeMax:
+            self._traitement[i] = getattr(self, "_traiter"+str(i)) #On référence les fonctions de traitement dans un dico : elles ont pour nom _traiter0, _traiter1...
+            i += 1
+
     def traiter(self):
-        x, y = self._gestionnaire.xJoueur, self._gestionnaire._yJoueur
-        if self._etape < 8:
-            if self._etape == 0:
-                self._boiteOutils.jouerSon("sonsForet", "boucleSonsForet", nombreEcoutes=0, volume=VOLUME_MUSIQUE/5)
-                self._boiteOutils.ajouterPensee("It was early spring in the woods and the snow had melted, at last. I could hunt again.")
-                self._boiteOutils.ajouterPensee("It was more than time. Winter had been harsh. No more food, no more money.")
-                self._boiteOutils.ajouterPensee("We were almost starving.")
-                self._boiteOutils.ajouterTransformation(True, "Alpha", alpha=self._coefNoircisseur)
-                self._coordonneesJoueur = self._boiteOutils.getCoordonneesJoueur()
-                Horloge.initialiser(id(self), "TempsDecouverte", 20000)
+        etapeActuelle = self._etape
+        self._traitement[self._etape]()
+        while etapeActuelle < self._etape:
+            etapeActuelle = self._etape
+            self._traitement[self._etape]()
+
+    def _traiter0(self):
+        self._boiteOutils.jouerSon("sonsForet", "boucleSonsForet", nombreEcoutes=0, volume=VOLUME_MUSIQUE/5)
+        self._boiteOutils.ajouterPensee("It was early spring in the woods and the snow had melted, at last. I could hunt again.")
+        self._boiteOutils.ajouterPensee("It was more than time. Winter had been harsh. No more food, no more money.")
+        self._boiteOutils.ajouterPensee("We were almost starving.")
+        self._boiteOutils.ajouterTransformation(True, "Alpha", alpha=self._coefNoircisseur)
+        self._coordonneesJoueur = self._boiteOutils.getCoordonneesJoueur()
+        Horloge.initialiser(id(self), "TempsDecouverte", 20000)
+        Horloge.initialiser(id(self), "Alpha", 100)
+        self._etape += 1
+
+    def _traiter1(self):
+        if Horloge.sonner(id(self), "Alpha"):
+            self._coefNoircisseur += 7
+            if self._coefNoircisseur > 255:
+                self._coefNoircisseur = 255
+            self._boiteOutils.ajouterTransformation(True, "Alpha", alpha=self._coefNoircisseur)
+            if self._coefNoircisseur == 255:
+                self._boiteOutils.retirerTransformation(True, "Alpha")
+                self._etape += 1
+            else:
                 Horloge.initialiser(id(self), "Alpha", 100)
+
+    def _traiter2(self):
+        if self._boiteOutils.interrupteurs["DecouverteSquirrels"].voir():
+            Horloge.initialiser(id(self), "SplashArrow", 3000)
+            self._etape += 1
+
+    def _traiter3(self):
+        if Horloge.sonner(id(self), "SplashArrow"):
+            self._boiteOutils.ajouterTransformation(True, "SplashText Arrow", texte="Press X to shoot an arrow", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=self._alpha)
+            self._etape += 1
+
+    def _traiter4(self):
+        if self._messageBoutonInteraction is False and self._premiereMortChasse is True:
+            self._messageBoutonInteraction = True
+            self._boiteOutils.retirerTransformation(True, "SplashText Arrow")
+            self._boiteOutils.ajouterTransformation(True, "SplashText Interaction1", texte="Press Z to interact", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=self._alpha)
+            self._boiteOutils.ajouterTransformation(True, "SplashText Interaction2", texte="Or W on an AZERTY keyboard", antialias=True, couleurTexte=(255,255,255), position=(10, 40), taille=20, alpha=self._alpha)
+            self._gestionnaire.evenements["abstraits"]["Divers"]["GestionnaireAnimaux"].nombre["SquirrelMinimal"] = 0 #On ne restaure plus les écureuils...
+            self._gestionnaire.evenements["abstraits"]["Divers"]["GestionnaireAnimaux"].restaurerMortsParFuite = True #Sauf quand ils meurent par fuite
+        if Horloge.sonner(id(self), "Début SplashText Titre"):
+            Horloge.initialiser(id(self), "Fin SplashText Titre", 5000)
+            self._boiteOutils.ajouterTransformation(True, "SplashText Titre1", texte="A", antialias=True, couleurTexte=(255,255,255), position=(10, 0))
+            self._boiteOutils.ajouterTransformation(True, "SplashText Titre2", texte="Humble", antialias=True, couleurTexte=(255,255,255), position=(10, FENETRE["largeurFenetre"]/4))
+            self._boiteOutils.ajouterTransformation(True, "SplashText Titre3", texte="Hunter", antialias=True, couleurTexte=(255,255,255), position=(10, FENETRE["largeurFenetre"]/2))
+        if Horloge.sonner(id(self), "Fin SplashText Titre"):
+            self._boiteOutils.retirerTransformation(True, "SplashText Titre1")
+            self._boiteOutils.retirerTransformation(True, "SplashText Titre2")
+            self._boiteOutils.retirerTransformation(True, "SplashText Titre3")
+        if self._boiteOutils.variables["SquirrelChasses"] == 1 and self._etape == 4:
+            self._boiteOutils.ajouterPensee("A squirrel... I won't feed anyone with that. I can merely sell its coat.")
+            self._boiteOutils.retirerTransformation(True, "SplashText Interaction1")
+            self._boiteOutils.retirerTransformation(True, "SplashText Interaction2")
+            Horloge.initialiser(id(self), "Début SplashText Titre", 12000)
+            self._boiteOutils.interrupteurs["MusiqueForet"].activer()
+            self._etape += 1
+        if self._boiteOutils.variables["SquirrelChasses"] == 2 and self._etape == 5:
+            self._boiteOutils.ajouterPensee("Truly, the gods haven't been fair with the humble hunter I am....")
+            Horloge.initialiser(id(self), "tempsFinChasse", 20000)
+            self._coordonneesJoueur = self._boiteOutils.getCoordonneesJoueur()
+            self._etape += 2
+
+    def _traiter5(self):
+        self._traiter4()
+
+    def _traiter6(self):
+        self._traiter4()
+
+    def _traiter7(self):
+        if Horloge.sonner(id(self), "tempsFinChasse") or self._boiteOutils.deplacementConsequentJoueur(self._coordonneesJoueur, 20):
+            self._boiteOutils.ajouterPensee("It seems we won't eat tonight either, there's nothing left to hunt. I should go home.")
+            self._boiteOutils.interrupteurs["finChasse1"].activer()
+            self._etape += 1
+
+    def _traiter8(self):
+        if self._boiteOutils.getCoordonneesJoueur() == (13,3):
+            self._boiteOutils.arreterSonEnFondu("boucleSonsForet", 3000)
+            self._boiteOutils.arreterSonEnFondu("Musique forêt meadows", 3000)
+            self._boiteOutils.interrupteurs["Rires"].activer()
+            self._etape += 1
+
+    def _traiter9(self):
+        if self._boiteOutils.getCoordonneesJoueur() == (11,13) or self._boiteOutils.getCoordonneesJoueur() == (11,14):
+            self._boiteOutils.interrupteurs["Rires"].desactiver()
+            self._boiteOutils.ajouterPensee("They froze when they saw me. They wanted to see what I'd caught.")
+            self._boiteOutils.interrupteurs["JoueurEntre"].activer()
+            self._gestionnaire.evenements["abstraits"]["Divers"]["SignaleurJoueur"].ajouterSignaleur("InterieurMaison", "JoueurEntre2", (10,4))
+            self._gestionnaire.evenements["abstraits"]["Divers"]["SignaleurJoueur"].ajouterSignaleur("InterieurMaison", "JoueurEntre3", (6,4))
+            Horloge.initialiser(id(self), "Attente squirrelPose", 15000)
+            self._etape += 1
+
+    def _traiter10(self):
+        if Horloge.sonner(id(self), "Attente squirrelPose") and not self._boiteOutils.interrupteurs["squirrelPose"].voir():
+            self._boiteOutils.ajouterTransformation(True, "SplashText InteractionTable1", texte="Press Z to interact with the table", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=self._alpha)
+            self._boiteOutils.ajouterTransformation(True, "SplashText InteractionTable2", texte="Or W on an AZERTY keyboard", antialias=True, couleurTexte=(255,255,255), position=(10, 40), taille=20, alpha=self._alpha)
+        if self._boiteOutils.interrupteurs["squirrelPose"].voir() is True:
+            self._boiteOutils.ajouterPensee("I'm sorry... I only got squirrels...", faceset="Chasseur.png")
+            self._boiteOutils.ajouterPensee("Tom, Elie, go play upstairs.", nom="thoughtUpstairs", faceset="Belia.png")
+            self._boiteOutils.ajouterPensee("Let's talk outside. I must wash some clothes anyway.", nom="thoughtOutside", faceset="Belia.png")
+            self._boiteOutils.jouerSon("Osare Unrest Middle", "Thème familier", volume=VOLUME_LONGUE_MUSIQUE, nombreEcoutes=0)
+            self._boiteOutils.retirerTransformation(True, "SplashText InteractionTable1")
+            self._boiteOutils.retirerTransformation(True, "SplashText InteractionTable2")
+            Horloge.initialiser(id(self), "Rires Upstairs", 6000)
+            self._etape += 1
+
+    def _traiter11(self):
+        if Horloge.sonner(id(self), "Rires Upstairs"):
+            self._boiteOutils.jouerSon("Laugh", "Rires")
+            self._etape += 1
+
+    def _traiter12(self):
+        if self._boiteOutils.interrupteurs["discussionEtang"].voir():
+            self._boiteOutils.ajouterPensee("We'll have to fetch some nuts for the children,", faceset="Belia.png")
+            self._boiteOutils.ajouterPensee("you should shake down the oak trees.", faceset="Belia.png")
+            i, positions = 0, [(12,2),(7,4),(5,9),(20,10),(23,12),(19,14),(7,15),(15,17),(7,19)]
+            while i < 9:
+                self._gestionnaire.evenements["concrets"]["Maison"]["Chene"+str(i)]=[Chene(self._jeu, self._gestionnaire, positions[i][0], positions[i][1], i), positions[i], "Aucune"]
+                i += 1
+            self._etape += 1
+
+    def _traiter13(self):
+        if self._boiteOutils.penseeAGerer.voir() is False:
+            Horloge.initialiser(id(self), "Discussion attente", 15000)
+            self._etape += 1
+
+    def _traiter14(self):
+        if Horloge.sonner(id(self), "Discussion attente"):
+            self._boiteOutils.ajouterPensee("How many hares have you seen today?", faceset="Belia.png")
+            self._boiteOutils.ajouterPensee("None. These woods are almost inhabited.", faceset="Chasseur.png")
+            self._boiteOutils.ajouterPensee("I don't know what to do. We can't even harvest our crops yet.", faceset="Belia.png")
+            self._etape += 1
+
+    def _traiter15(self):
+        if self._penseePossible.voir():
+            Horloge.initialiser(id(self), "Discussion attente", 15000)
+            self._etape += 1
+
+    def _traiter16(self):
+        if Horloge.sonner(id(self), "Discussion attente"):
+            self._boiteOutils.ajouterPensee("The other day, I saw Doug, the forest warden... And he told me that...", faceset="Chasseur.png")
+            self._boiteOutils.ajouterPensee("...that the heart of the forest conceals the most extraordinary game.", faceset="Chasseur.png")
+            self._boiteOutils.ajouterPensee("It might be dangerous, but it sure could feed us for days.", faceset="Chasseur.png")
+            self._boiteOutils.ajouterPensee("No one enters the heart of the forest. Not even the prince. Forget it.", faceset="Belia.png")
+            self._boiteOutils.ajouterPensee("I know... But I don't want us to starve.", faceset="Chasseur.png")
+            self._boiteOutils.ajouterPensee("Aren't we still alive? We shouldn't complain. Be thankful and pray the gods.", faceset="Belia.png")
+            self._etape += 1
+
+    def _traiter17(self):
+        if self._boiteOutils.interrupteurs["BeliaRentree"].voir():
+            self._boiteOutils.ajouterPensee("Praying the gods? Praying the gods?")
+            self._boiteOutils.ajouterPensee("I'd been praying them for years... What had they granted me?")
+            self._etape += 1
+
+    def _traiter18(self):
+        self._etape += 1
+
+    def _traiter19(self):
+        if self._boiteOutils.interrupteurs["nutsOnTable"].voir():
+            self._boiteOutils.ajouterPensee("I threw the nuts on the table and I went straight to bed.")
+            self._etape += 1
+
+    def _traiter20(self):
+        if self._boiteOutils.getCoordonneesJoueur() in [(7,3), (8,3), (9,3)]:
+            self._coefNoircisseur = 1
+            self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
+            self._boiteOutils.joueurLibre.desactiver()
+            self._boiteOutils.arreterSonEnFondu("Thème familier", 3000)
+            Horloge.initialiser(id(self), "Transition Noir", 1)
+            self._etape += 1
+
+    def _traiter21(self):
+        if Horloge.sonner(id(self), "Transition Noir"):
+            self._coefNoircisseur += 1
+            self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
+            if self._coefNoircisseur >= 12:
                 self._etape += 1
-            if self._etape == 1 and Horloge.sonner(id(self), "Alpha"):
-                self._coefNoircisseur += 7
-                if self._coefNoircisseur > 255:
-                    self._coefNoircisseur = 255
-                self._boiteOutils.ajouterTransformation(True, "Alpha", alpha=self._coefNoircisseur)
-                if self._coefNoircisseur == 255:
-                    self._boiteOutils.retirerTransformation(True, "Alpha")
-                    self._etape += 1
-                else:
-                    Horloge.initialiser(id(self), "Alpha", 100)
-            if self._etape == 2:
-                if self._boiteOutils.interrupteurs["DecouverteSquirrels"].voir():
-                    Horloge.initialiser(id(self), "SplashArrow", 3000)
-                    self._etape += 1
-            if self._etape == 3 and Horloge.sonner(id(self), "SplashArrow"):
-                self._boiteOutils.ajouterTransformation(True, "SplashText Arrow", texte="Press X to shoot an arrow", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=self._alpha)
-                self._etape += 1
-            if self._etape > 3 and self._etape < 7:
-                if self._messageBoutonInteraction is False and self._premiereMortChasse is True:
-                    self._messageBoutonInteraction = True
-                    self._boiteOutils.retirerTransformation(True, "SplashText Arrow")
-                    self._boiteOutils.ajouterTransformation(True, "SplashText Interaction1", texte="Press Z to interact", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=self._alpha)
-                    self._boiteOutils.ajouterTransformation(True, "SplashText Interaction2", texte="Or W on an AZERTY keyboard", antialias=True, couleurTexte=(255,255,255), position=(10, 40), taille=20, alpha=self._alpha)
-                    self._gestionnaire.evenements["abstraits"]["Divers"]["GestionnaireAnimaux"].nombre["SquirrelMinimal"] = 0 #On ne restaure plus les écureuils...
-                    self._gestionnaire.evenements["abstraits"]["Divers"]["GestionnaireAnimaux"].restaurerMortsParFuite = True #Sauf quand ils meurent par fuite
-                if Horloge.sonner(id(self), "Début SplashText Titre"):
-                    Horloge.initialiser(id(self), "Fin SplashText Titre", 5000)
-                    self._boiteOutils.ajouterTransformation(True, "SplashText Titre1", texte="A", antialias=True, couleurTexte=(255,255,255), position=(10, 0))
-                    self._boiteOutils.ajouterTransformation(True, "SplashText Titre2", texte="Humble", antialias=True, couleurTexte=(255,255,255), position=(10, FENETRE["largeurFenetre"]/4))
-                    self._boiteOutils.ajouterTransformation(True, "SplashText Titre3", texte="Hunter", antialias=True, couleurTexte=(255,255,255), position=(10, FENETRE["largeurFenetre"]/2))
-                if Horloge.sonner(id(self), "Fin SplashText Titre"):
-                    self._boiteOutils.retirerTransformation(True, "SplashText Titre1")
-                    self._boiteOutils.retirerTransformation(True, "SplashText Titre2")
-                    self._boiteOutils.retirerTransformation(True, "SplashText Titre3")
-                if self._boiteOutils.variables["SquirrelChasses"] == 1 and self._etape == 4:
-                    self._boiteOutils.ajouterPensee("A squirrel... I won't feed anyone with that. I can merely sell its coat.")
-                    self._boiteOutils.retirerTransformation(True, "SplashText Interaction1")
-                    self._boiteOutils.retirerTransformation(True, "SplashText Interaction2")
-                    Horloge.initialiser(id(self), "Début SplashText Titre", 12000)
-                    self._boiteOutils.interrupteurs["MusiqueForet"].activer()
-                    self._etape += 1
-                if self._boiteOutils.variables["SquirrelChasses"] == 2 and self._etape == 5:
-                    self._boiteOutils.ajouterPensee("Truly, the gods haven't been fair with the humble hunter I am....")
-                    Horloge.initialiser(id(self), "tempsFinChasse", 20000)
-                    self._coordonneesJoueur = self._boiteOutils.getCoordonneesJoueur()
-                    self._etape += 2
-            if self._etape == 7 and (Horloge.sonner(id(self), "tempsFinChasse") or self._boiteOutils.deplacementConsequentJoueur(self._coordonneesJoueur, 20)):
-                self._boiteOutils.ajouterPensee("It seems we won't eat tonight either, there's nothing left to hunt. I should go home.")
-                self._boiteOutils.interrupteurs["finChasse1"].activer()
-                self._etape += 1
-        elif self._etape >= 8 and self._etape < 12:
-            if self._etape == 8 and self._boiteOutils.getCoordonneesJoueur() == (13,3):
-                self._boiteOutils.arreterSonEnFondu("boucleSonsForet", 3000)
-                self._boiteOutils.arreterSonEnFondu("Musique forêt meadows", 3000)
-                self._boiteOutils.interrupteurs["Rires"].activer()
-                self._etape += 1
-            if self._etape == 9 and (self._boiteOutils.getCoordonneesJoueur() == (11,13) or self._boiteOutils.getCoordonneesJoueur() == (11,14)):
-                self._boiteOutils.interrupteurs["Rires"].desactiver()
-                self._boiteOutils.ajouterPensee("They froze when they saw me. They wanted to see what I'd caught.")
-                self._boiteOutils.interrupteurs["JoueurEntre"].activer()
-                self._gestionnaire.evenements["abstraits"]["Divers"]["SignaleurJoueur"].ajouterSignaleur("InterieurMaison", "JoueurEntre2", (10,4))
-                self._gestionnaire.evenements["abstraits"]["Divers"]["SignaleurJoueur"].ajouterSignaleur("InterieurMaison", "JoueurEntre3", (6,4))
-                Horloge.initialiser(id(self), "Attente squirrelPose", 15000)
-                self._etape += 1
-            if self._etape == 10 and Horloge.sonner(id(self), "Attente squirrelPose") and not self._boiteOutils.interrupteurs["squirrelPose"].voir():
-                self._boiteOutils.ajouterTransformation(True, "SplashText InteractionTable1", texte="Press Z to interact with the table", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=self._alpha)
-                self._boiteOutils.ajouterTransformation(True, "SplashText InteractionTable2", texte="Or W on an AZERTY keyboard", antialias=True, couleurTexte=(255,255,255), position=(10, 40), taille=20, alpha=self._alpha)
-            if self._etape == 10 and self._boiteOutils.interrupteurs["squirrelPose"].voir() is True:
-                self._boiteOutils.ajouterPensee("I'm sorry... I only got squirrels...", faceset="Chasseur.png")
-                self._boiteOutils.ajouterPensee("Tom, Elie, go play upstairs.", nom="thoughtUpstairs", faceset="Belia.png")
-                self._boiteOutils.ajouterPensee("Let's talk outside. I must wash some clothes anyway.", nom="thoughtOutside", faceset="Belia.png")
-                self._boiteOutils.jouerSon("Osare Unrest Middle", "Thème familier", volume=VOLUME_LONGUE_MUSIQUE, nombreEcoutes=0)
-                self._boiteOutils.retirerTransformation(True, "SplashText InteractionTable1")
-                self._boiteOutils.retirerTransformation(True, "SplashText InteractionTable2")
-                Horloge.initialiser(id(self), "Rires Upstairs", 6000)
-                self._etape += 1
-            if self._etape == 11 and Horloge.sonner(id(self), "Rires Upstairs"):
-                self._boiteOutils.jouerSon("Laugh", "Rires")
-                self._etape += 1
-        elif self._etape >= 12 and self._etape < 18:
-            if self._etape == 12 and self._boiteOutils.interrupteurs["discussionEtang"].voir():
-                self._boiteOutils.ajouterPensee("We'll have to fetch some nuts for the children,", faceset="Belia.png")
-                self._boiteOutils.ajouterPensee("you should shake down the oak trees.", faceset="Belia.png")
-                i, positions = 0, [(12,2),(7,4),(5,9),(20,10),(23,12),(19,14),(7,15),(15,17),(7,19)]
-                while i < 9:
-                    self._gestionnaire.evenements["concrets"]["Maison"]["Chene"+str(i)]=[Chene(self._jeu, self._gestionnaire, positions[i][0], positions[i][1], i), positions[i], "Aucune"]
-                    i += 1
-                self._etape += 1
-            if self._etape == 13 and self._boiteOutils.penseeAGerer.voir() is False:
-                Horloge.initialiser(id(self), "Discussion attente", 15000)
-                self._etape += 1
-            if self._etape == 14 and Horloge.sonner(id(self), "Discussion attente"):
-                self._boiteOutils.ajouterPensee("How many hares have you seen today?", faceset="Belia.png")
-                self._boiteOutils.ajouterPensee("None. These woods are almost inhabited.", faceset="Chasseur.png")
-                self._boiteOutils.ajouterPensee("I don't know what to do. We can't even harvest our crops yet.", faceset="Belia.png")
-                self._etape += 1
-            if self._etape == 15 and self._boiteOutils.penseeAGerer.voir() is False:
-                Horloge.initialiser(id(self), "Discussion attente", 15000)
-                self._etape += 1
-            if self._etape == 16 and Horloge.sonner(id(self), "Discussion attente"):
-                self._boiteOutils.ajouterPensee("The other day, I saw Doug, the forest warden... And he told me that...", faceset="Chasseur.png")
-                self._boiteOutils.ajouterPensee("...that the heart of the forest conceals the most extraordinary game.", faceset="Chasseur.png")
-                self._boiteOutils.ajouterPensee("It might be dangerous, but it sure could feed us for days.", faceset="Chasseur.png")
-                self._boiteOutils.ajouterPensee("No one enters the heart of the forest. Not even the prince. Forget it.", faceset="Belia.png")
-                self._boiteOutils.ajouterPensee("I know... But I don't want us to starve.", faceset="Chasseur.png")
-                self._boiteOutils.ajouterPensee("Aren't we still alive? We shouldn't complain. Be thankful and pray the gods.", faceset="Belia.png")
-                self._etape += 1
-            if self._etape == 17 and self._boiteOutils.interrupteurs["BeliaRentree"].voir():
-                self._boiteOutils.ajouterPensee("Praying the gods? Praying the gods?")
-                self._boiteOutils.ajouterPensee("I'd been praying them for years... What had they granted me?")
-                self._etape += 1
-        elif self._etape >= 18:
-            if self._etape == 18:
-                self._etape += 1
-            if self._etape == 19 and self._boiteOutils.interrupteurs["nutsOnTable"].voir():
-                self._boiteOutils.ajouterPensee("I threw the nuts on the table and I went straight to bed.")
-                self._etape += 1
-            if self._etape == 20 and self._boiteOutils.getCoordonneesJoueur() in [(7,3), (8,3), (9,3)]:
-                self._coefNoircisseur = 1
-                self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
-                self._boiteOutils.joueurLibre.desactiver()
-                self._boiteOutils.arreterSonEnFondu("Thème familier", 3000)
-                Horloge.initialiser(id(self), "Transition Noir", 1)
-                self._etape += 1
-            if self._etape == 21 and Horloge.sonner(id(self), "Transition Noir"):
-                self._coefNoircisseur += 1
-                self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
-                if self._coefNoircisseur >= 12:
-                    self._etape += 1
-                    self._boiteOutils.ajouterPensee("Truly, the gods haven't been fair with the humble hunter I am....")
-                else:
-                    Horloge.initialiser(id(self), "Transition Noir", 100)
-            if self._etape == 22:
-                self._gestionnaire.envoyerNotificationEvenement("Narrateur", "Belia", "InterieurMaison", "Nuit étage", x=9, y=3)
-                self._gestionnaire.envoyerNotificationEvenement("Narrateur", "Tom", "InterieurMaison", "Nuit étage", x=13, y=3)
-                self._gestionnaire.envoyerNotificationEvenement("Narrateur", "Elie", "InterieurMaison", "Nuit étage", x=13, y=7)
-                self._etape += 1
-            if self._etape == 23 and self._penseePossible.voir():
-                self._boiteOutils.teleporterJoueurSurPosition(7, 3, "Bas")
-                self._coefNoircisseur = 12
-                self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
+                self._boiteOutils.ajouterPensee("Truly, the gods haven't been fair with the humble hunter I am....")
+            else:
                 Horloge.initialiser(id(self), "Transition Noir", 100)
-                self._boiteOutils.joueurLibre.activer()
-                self._boiteOutils.ajouterPensee("I woke up at dawn. I had only one thing to do. Go hunting.")
+
+    def _traiter22(self):
+        self._gestionnaire.envoyerNotificationEvenement("Narrateur", "Belia", "InterieurMaison", "Nuit étage", x=9, y=3)
+        self._gestionnaire.envoyerNotificationEvenement("Narrateur", "Tom", "InterieurMaison", "Nuit étage", x=13, y=3)
+        self._gestionnaire.envoyerNotificationEvenement("Narrateur", "Elie", "InterieurMaison", "Nuit étage", x=13, y=7)
+        self._etape += 1
+
+    def _traiter23(self):
+        if self._penseePossible.voir():
+            self._boiteOutils.teleporterJoueurSurPosition(7, 3, "Bas")
+            self._coefNoircisseur = 12
+            self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
+            Horloge.initialiser(id(self), "Transition Noir", 100)
+            self._boiteOutils.joueurLibre.activer()
+            self._boiteOutils.ajouterPensee("I woke up at dawn. I had only one thing to do. Go hunting.")
+            self._etape += 1
+
+    def _traiter24(self):
+        if Horloge.sonner(id(self), "Transition Noir"):
+            self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
+            self._coefNoircisseur -= 1
+            if self._coefNoircisseur == 1:
+                self._boiteOutils.retirerTransformation(True, "Noir")
                 self._etape += 1
-            if self._etape == 24 and Horloge.sonner(id(self), "Transition Noir"):
-                self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
-                self._coefNoircisseur -= 1
-                if self._coefNoircisseur == 1:
-                    self._boiteOutils.retirerTransformation(True, "Noir")
-                    self._etape += 1
-                else:
-                    Horloge.initialiser(id(self), "Transition Noir", 100)
-                
+            else:
+                Horloge.initialiser(id(self), "Transition Noir", 100)
+
     def onMortAnimal(self, typeAnimal, viaChasse=False):
         if viaChasse and not self._premiereMortChasse:
             self._premiereMortChasse = True
