@@ -19,7 +19,7 @@
 import pygame
 from pygame.locals import *
 
-NOM_CARTE_LANCEMENT = "Clairiere"
+NOM_CARTE_LANCEMENT = "InterieurMaison"
 DOSSIER_RESSOURCES = "Resources"
 NOM_FICHIER_POLICE_PAR_DEFAUT = "Riven.ttf"
 
