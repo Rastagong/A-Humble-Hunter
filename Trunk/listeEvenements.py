@@ -324,7 +324,6 @@ class Narrateur(Evenement):
             self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
             Horloge.initialiser(id(self), "Transition Noir", 100)
             self._boiteOutils.joueurLibre.activer()
-            self._boiteOutils.ajouterPensee("I woke up at dawn. I had only one thing to do. Go hunting.")
             self._etape += 1
 
     def _traiter24(self):
