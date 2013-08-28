@@ -117,11 +117,12 @@ class Narrateur(Evenement):
     def __init__(self, jeu, gestionnaire):
         super().__init__(jeu, gestionnaire)
         self._penseePossible, self._etape, self._coefNoircisseur, self._alpha = InterrupteurInverse(self._boiteOutils.penseeAGerer), 0, 0, 255
-        self._messageBoutonInteraction, self._premiereMortChasse, self._traitement, etapeMax, i = False, False, dict(), 24, 0 
+        self._messageBoutonInteraction, self._premiereMortChasse, self._traitement, etapeMax, i = False, False, dict(), 30, 0 
         while i <= etapeMax:
             self._traitement[i] = getattr(self, "_traiter"+str(i)) #On référence les fonctions de traitement dans un dico : elles ont pour nom _traiter0, _traiter1...
             i += 1
-        self._etape = 8
+        ###
+        self._etape = 20
 
     def traiter(self):
         etapeActuelle = self._etape
@@ -188,7 +189,7 @@ class Narrateur(Evenement):
             self._boiteOutils.interrupteurs["MusiqueForet"].activer()
             self._etape += 1
         if self._boiteOutils.variables["SquirrelChasses"] == 2 and self._etape == 5:
-            self._boiteOutils.ajouterPensee("Truly, the gods haven't been fair with the humble hunter I am....")
+            self._boiteOutils.ajouterPensee("Truly, the gods haven't been fair with the humble hunter I am...")
             Horloge.initialiser(id(self), "tempsFinChasse", 20000)
             self._coordonneesJoueur = self._boiteOutils.getCoordonneesJoueur()
             self._etape += 2
@@ -307,7 +308,7 @@ class Narrateur(Evenement):
             self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
             if self._coefNoircisseur >= 12:
                 self._etape += 1
-                self._boiteOutils.ajouterPensee("Truly, the gods haven't been fair with the humble hunter I am....")
+                self._boiteOutils.ajouterPensee("Truly, the gods haven't been fair with the humble hunter I am...", tempsLecture=0)
             else:
                 Horloge.initialiser(id(self), "Transition Noir", 100)
 
@@ -321,20 +322,48 @@ class Narrateur(Evenement):
         if self._penseePossible.voir():
             self._boiteOutils.teleporterJoueurSurPosition(7, 3, "Bas")
             self._coefNoircisseur = 12
-            self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
-            Horloge.initialiser(id(self), "Transition Noir", 100)
+            self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur, permanente=True)
+            self._boiteOutils.jouerSon("Forest Night", "It's the night", nombreEcoutes=0, volume=0.7)
+            Horloge.initialiser(id(self), "Transition Noir", 500)
             self._boiteOutils.joueurLibre.activer()
             self._etape += 1
 
     def _traiter24(self):
         if Horloge.sonner(id(self), "Transition Noir"):
-            self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
+            self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur, permanente=True)
             self._coefNoircisseur -= 1
-            if self._coefNoircisseur == 1:
-                self._boiteOutils.retirerTransformation(True, "Noir")
+            if self._coefNoircisseur == 7:
                 self._etape += 1
+                Horloge.initialiser(id(self), "Door creak", 3000)
             else:
-                Horloge.initialiser(id(self), "Transition Noir", 100)
+                Horloge.initialiser(id(self), "Transition Noir", 500)
+
+    def _traiter25(self):
+        if Horloge.sonner(id(self), "Door creak"):
+            self._boiteOutils.jouerSon("DoorCreak", "Someone enters")
+            Horloge.initialiser(id(self), "Someone walks", 8000)
+            self._etape += 1
+
+    def _traiter26(self):
+        if Horloge.sonner(id(self), "Someone walks"):
+            self._boiteOutils.jouerSon("WoodenSteps", "Someone walks", nombreEcoutes=3)
+            Horloge.initialiser(id(self), "Someone talks", 5000)
+            self._etape += 1
+
+    def _traiter27(self):
+        if Horloge.sonner(id(self), "Someone talks"):
+            self._boiteOutils.jouerSon("Whisper", "Whisper in the night", crescendo=True, nombreEcoutes=2)
+            #self._boiteOutils.jouerSon("Eerie", "Fear in the night", crescendo=True, nombreEcoutes=0, volume=0.5)
+            self._etape += 1
+
+    def _traiter28(self):
+        pass
+
+    def _traiter29(self):
+        pass
+
+    def _traiter30(self):
+        pass
 
     def onMortAnimal(self, typeAnimal, viaChasse=False):
         if viaChasse and not self._premiereMortChasse:
@@ -726,10 +755,12 @@ class Belia(PNJ):
         super().__init__(jeu, gestionnaire, "Belia", x, y, c, fichier, couleurTransparente, persoCharset, repetitionActions, listeActions, directionDepart=directionDepart, vitesseDeplacement=vitesseDeplacement)
         self._listeSons, self._etapeSon = [("Sack",5,1), ("Cupboard",9,1), ("Cupboard",13,1), ("Knife",18,3)], 0
         self._penseePossible, self._penseeJour1Dite = InterrupteurInverse(self._boiteOutils.penseeAGerer), False
-        self._traitement, i, etapeMax = dict(), 1, 28
+        self._traitement, i, etapeMax = dict(), 1, 29
         while i <= etapeMax:
             self._traitement[i] = getattr(self, "_gererEtape"+str(i))
             i += 1
+        ###
+        self._etapeTraitement = 28
 
     def _gererEtape(self):
         etapeActuelle = self._etapeTraitement
@@ -933,6 +964,9 @@ class Belia(PNJ):
     def _gererEtape28(self):
         self._gererSons()
 
+    def _gererEtape29(self):
+        pass
+
     def _gererSons(self):
         if self._etapeAction == self._listeSons[self._etapeSon][1]:
             self._boiteOutils.jouerSon(self._listeSons[self._etapeSon][0], "Cuisine"+str(self._etapeSon), fixe=True, evenementFixe="Belia", duree=2500, nombreEcoutes=self._listeSons[self._etapeSon][2])
@@ -1043,10 +1077,12 @@ class Enfant(PNJ):
         (self._xRDC,self._yRDC) = (1,3) if self._nom == "Tom" else (5,13)
         self._gestionnaire.ajouterChangementCarteANotifier("Maison", "InterieurMaison", self._nom, "EtageMaison")
         self._monteeEtage, self._descenteEtage, self._penseeDite, self._penseePossible = False, False, False, InterrupteurInverse(self._boiteOutils.penseeAGerer)
-        self._traitement, i, etapeMax = dict(), 1, 12
+        self._traitement, i, etapeMax = dict(), 1, 13
         while i <= etapeMax:
             self._traitement[i] = getattr(self, "_gererEtape"+str(i))
             i += 1
+        ###
+        self._etapeTraitement = 12
 
     def onChangementCarte(self, carteQuittee, carteEntree):
         if carteQuittee == "InterieurMaison" and carteEntree == "Maison" and self._boiteOutils.interrupteurs["squirrelPose"].voir() and not self._boiteOutils.interrupteurs["BeliaRentree"].voir() and not self._monteeEtage:
@@ -1155,6 +1191,9 @@ class Enfant(PNJ):
         if self._deplacementBoucle is False and self._xTile == self._xTable and self._yTile == self._yTable:
             self._lancerTrajet("V"+self._directionTable+str(2500), True)
 
+    def _gererEtape13(self):
+        pass
+
     def _genererRegards(self, actions):
         directions, i = [actions[len(actions)-1], self._boiteOutils.getDirectionAuHasard()], 1
         while i < len(directions):
@@ -1219,6 +1258,7 @@ class MembreFamille(PNJ):
             self._finirDeplacementSP()
             self._deplacerSurCarte("EtageMaison", parametres2["x"], parametres2["y"], 2, "Bas", carteQuittee="InterieurMaison")
             self._lancerTrajet("Aucune", True)
+            self._etapeTraitement += 1
 
     def onChangementCarte(self, carteQuittee, carteEntree):
         self.__dict__["_pnj"].onChangementCarte(carteQuittee, carteEntree)

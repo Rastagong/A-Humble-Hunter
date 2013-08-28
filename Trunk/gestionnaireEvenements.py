@@ -48,7 +48,7 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
         elif NOM_CARTE_LANCEMENT == "Maison":
             self._evenements["concrets"]["Maison"]["Joueur"] = [ Joueur(self._jeu, self, 14, 0, 2, fichier="Chasseur.png"), (14, 0), "Bas", 2]
         elif NOM_CARTE_LANCEMENT == "InterieurMaison":
-            self._evenements["concrets"]["InterieurMaison"]["Joueur"] = [ Joueur(self._jeu, self, 13, 3, 2, fichier="Chasseur.png"), (7, 13), "Haut", 2]
+            self._evenements["concrets"]["InterieurMaison"]["Joueur"] = [ Joueur(self._jeu, self, 1, 4, 2, fichier="Chasseur.png"), (7, 13), "Haut", 2]
         elif NOM_CARTE_LANCEMENT == "EtageMaison":
             self._evenements["concrets"]["EtageMaison"]["Joueur"] = [Joueur(self._jeu, self, 3, 5, 2, fichier="Chasseur.png"), (3,5), "Bas", 2]
         j, self._positionJoueur = self._jeu.joueur, None
