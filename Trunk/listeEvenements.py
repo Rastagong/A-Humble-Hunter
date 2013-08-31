@@ -306,7 +306,7 @@ class Narrateur(Evenement):
         if Horloge.sonner(id(self), "Transition Noir"):
             self._coefNoircisseur += 1
             self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
-            if self._coefNoircisseur >= 12:
+            if self._coefNoircisseur == 12:
                 self._etape += 1
                 self._boiteOutils.ajouterPensee("Truly, the gods haven't been fair with the humble hunter I am...", tempsLecture=0)
             else:
@@ -321,10 +321,9 @@ class Narrateur(Evenement):
     def _traiter23(self):
         if self._penseePossible.voir():
             self._boiteOutils.teleporterJoueurSurPosition(7, 3, "Bas")
-            self._coefNoircisseur = 12
             self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur, permanente=True)
             self._boiteOutils.jouerSon("Forest Night", "It's the night", nombreEcoutes=0, volume=0.7)
-            Horloge.initialiser(id(self), "Transition Noir", 500)
+            Horloge.initialiser(id(self), "Transition Noir", 1000)
             self._boiteOutils.joueurLibre.activer()
             self._etape += 1
 
@@ -332,28 +331,29 @@ class Narrateur(Evenement):
         if Horloge.sonner(id(self), "Transition Noir"):
             self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur, permanente=True)
             self._coefNoircisseur -= 1
-            if self._coefNoircisseur == 7:
+            if self._coefNoircisseur == 8:
                 self._etape += 1
-                Horloge.initialiser(id(self), "Door creak", 3000)
+                Horloge.initialiser(id(self), "Door creak", 700)
             else:
-                Horloge.initialiser(id(self), "Transition Noir", 500)
+                Horloge.initialiser(id(self), "Transition Noir", 1000)
 
     def _traiter25(self):
         if Horloge.sonner(id(self), "Door creak"):
             self._boiteOutils.jouerSon("DoorCreak", "Someone enters")
-            Horloge.initialiser(id(self), "Someone walks", 8000)
+            Horloge.initialiser(id(self), "Someone walks", 7000)
             self._etape += 1
 
     def _traiter26(self):
         if Horloge.sonner(id(self), "Someone walks"):
             self._boiteOutils.jouerSon("WoodenSteps", "Someone walks", nombreEcoutes=3)
-            Horloge.initialiser(id(self), "Someone talks", 5000)
+            #self._boiteOutils.jouerSon("Eerie", "Fear in the night", crescendo=True, nombreEcoutes=0, volume=0.5)
+            Horloge.initialiser(id(self), "Someone enters", 4000)
             self._etape += 1
 
     def _traiter27(self):
-        if Horloge.sonner(id(self), "Someone talks"):
-            self._boiteOutils.jouerSon("Whisper", "Whisper in the night", crescendo=True, nombreEcoutes=2)
-            #self._boiteOutils.jouerSon("Eerie", "Fear in the night", crescendo=True, nombreEcoutes=0, volume=0.5)
+        if Horloge.sonner(id(self), "Someone enters") and self._jeu.carteActuelle.nom == "EtageMaison":
+            #self._boiteOutils.jouerSon("Whisper", "Whisper in the night", crescendo=True, nombreEcoutes=2)
+            self._gestionnaire.evenements["concrets"]["EtageMaison"]["DuckGod"] = [DuckGod(self._jeu, self._gestionnaire, 1, 3, 2, "Bas"), (1,3), "Bas"]
             self._etape += 1
 
     def _traiter28(self):
@@ -368,6 +368,53 @@ class Narrateur(Evenement):
     def onMortAnimal(self, typeAnimal, viaChasse=False):
         if viaChasse and not self._premiereMortChasse:
             self._premiereMortChasse = True
+
+class DuckGod(PNJ):
+    def __init__(self, jeu, gestionnaire, x, y, c, directionDepart):
+        super().__init__(jeu, gestionnaire, "DuckGod", x, y, c, "DuckGod.png", (0,0,0), (0,0), False, ["Aucune"], directionDepart=directionDepart, longueurSprite=24, largeurSprite=26, vitesseDeplacement=50)
+        i, self._traitement = 1, dict()
+        while i <= 2:
+            self._traitement[i] = getattr(self, "_gererEtape" + str(i))
+            i += 1
+        self._boiteOutils.ajouterTransformation(True, "Glow", nomPNJ="DuckGod", couche=2)
+    
+    def _ajusterPositionSource(self, enMarche, direction):
+        self._positionSource.left, self._positionSource.top = 0, 0
+        if "Bas" in direction:
+            pass
+        elif "Gauche" in direction:
+            self._positionSource.top = 1 * 26
+        elif "Haut" in direction:
+            self._positionSource.top = 2 * 26
+        elif "Droite" in direction:
+            self._positionSource.top = 3 * 26
+        self._positionSource.left = (self._etapeAnimation-1) * 24
+
+    def _determinerAnimation(self, surPlace=False):
+        if Horloge.sonner(id(self), 2) or surPlace is True:
+            self._etapeAnimation += 1
+            if self._etapeAnimation > 4:
+                self._etapeAnimation = 1
+            if surPlace is False:
+                Horloge.initialiser(id(self), 2, self._dureeAnimation)
+            return True
+        else:
+            return False
+
+    def _gererEtape(self):
+        etapeActuelle = self._etapeTraitement
+        self._traitement[self._etapeTraitement]()
+        while etapeActuelle < self._etapeTraitement:
+            etapeActuelle = self._etapeTraitement
+            self._traitement[self._etapeTraitement]()
+
+    def _gererEtape1(self):
+        self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 8, 10, regardFinal="Haut")
+        self._etapeTraitement += 1
+
+    def _gererEtape2(self):
+        pass
+
 
 class GestionnaireAnimaux(Evenement):
     def __init__(self, jeu, gestionnaire):
