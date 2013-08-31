@@ -209,6 +209,7 @@ class Narrateur(Evenement):
     def _traiter8(self):
         if self._boiteOutils.getCoordonneesJoueur() == (13,3):
             self._boiteOutils.arreterSonEnFondu("boucleSonsForet", 3000)
+            self._boiteOutils.interrupteurs["escalierLibre"].activer()
             self._boiteOutils.arreterSonEnFondu("Musique forêt meadows", 3000)
             self._boiteOutils.interrupteurs["Rires"].activer()
             self._etape += 1
@@ -309,6 +310,7 @@ class Narrateur(Evenement):
             if self._coefNoircisseur == 12:
                 self._etape += 1
                 self._boiteOutils.ajouterPensee("Truly, the gods haven't been fair with the humble hunter I am...", tempsLecture=0)
+                self._boiteOutils.interrupteurs["escalierLibre"].desactiver()
             else:
                 Horloge.initialiser(id(self), "Transition Noir", 100)
 
@@ -340,14 +342,13 @@ class Narrateur(Evenement):
     def _traiter25(self):
         if Horloge.sonner(id(self), "Door creak"):
             self._boiteOutils.jouerSon("DoorCreak", "Someone enters")
-            Horloge.initialiser(id(self), "Someone walks", 7000)
-            self._etape += 1
+            Horloge.initialiser(id(self), "Someone enters", 5000)
+            self._etape += 2
 
     def _traiter26(self):
         if Horloge.sonner(id(self), "Someone walks"):
-            self._boiteOutils.jouerSon("WoodenSteps", "Someone walks", nombreEcoutes=3)
+            #self._boiteOutils.jouerSon("WoodenSteps", "Someone walks", nombreEcoutes=3)
             #self._boiteOutils.jouerSon("Eerie", "Fear in the night", crescendo=True, nombreEcoutes=0, volume=0.5)
-            Horloge.initialiser(id(self), "Someone enters", 4000)
             self._etape += 1
 
     def _traiter27(self):
@@ -371,15 +372,19 @@ class Narrateur(Evenement):
 
 class DuckGod(PNJ):
     def __init__(self, jeu, gestionnaire, x, y, c, directionDepart):
-        super().__init__(jeu, gestionnaire, "DuckGod", x, y, c, "DuckGod.png", (0,0,0), (0,0), False, ["Aucune"], directionDepart=directionDepart, longueurSprite=24, largeurSprite=26, vitesseDeplacement=50)
+        super().__init__(jeu, gestionnaire, "DuckGod", x, y, c, "DuckGod.png", (0,0,0), (0,0), False, ["Aucune"], directionDepart=directionDepart,vitesseDeplacement=50)
+        self._positionSource = Rect(0,0,24,26)
         i, self._traitement = 1, dict()
-        while i <= 2:
+        while i <= 4:
             self._traitement[i] = getattr(self, "_gererEtape" + str(i))
             i += 1
         self._boiteOutils.ajouterTransformation(True, "Glow", nomPNJ="DuckGod", couche=2)
+        self._surPlace, self._poursuiteJoueur, self._attenteJoueur, self._premierMouvementJoueur = False, False, False, False
     
     def _ajusterPositionSource(self, enMarche, direction):
         self._positionSource.left, self._positionSource.top = 0, 0
+        if self._surPlace:
+            self._positionSource.left += 24 * 4
         if "Bas" in direction:
             pass
         elif "Gauche" in direction:
@@ -388,15 +393,17 @@ class DuckGod(PNJ):
             self._positionSource.top = 2 * 26
         elif "Droite" in direction:
             self._positionSource.top = 3 * 26
-        self._positionSource.left = (self._etapeAnimation-1) * 24
+        self._positionSource.left += (self._etapeAnimation-1) * 24
 
     def _determinerAnimation(self, surPlace=False):
-        if Horloge.sonner(id(self), 2) or surPlace is True:
+        if self._surPlace != surPlace:
+            self._etapeAnimation = 1
+        self._surPlace = surPlace
+        if Horloge.sonner(id(self), 2) or self._surPlace:
             self._etapeAnimation += 1
             if self._etapeAnimation > 4:
                 self._etapeAnimation = 1
-            if surPlace is False:
-                Horloge.initialiser(id(self), 2, self._dureeAnimation)
+            Horloge.initialiser(id(self), 2, self._dureeAnimation)
             return True
         else:
             return False
@@ -413,8 +420,41 @@ class DuckGod(PNJ):
         self._etapeTraitement += 1
 
     def _gererEtape2(self):
-        pass
+        if not self._poursuiteJoueur and not self._attenteJoueur and self._xTile == 8 and self._yTile == 10 and not self._deplacementBoucle:
+            self._attendreJoueur()
+        elif Horloge.sonner(id(self), "Attente joueur"):
+            self._etapeTraitement += 1
+        elif self._poursuiteJoueur and self._joueurProche and self._deplacementBoucle is False:
+            self._attendreJoueur()
+        if self._etapeMarche == 1 or self._listeActions[self._etapeAction][0] == "V":
+            self._majInfosJoueur()
+            horsChambre = False
+            if self._yJoueur[0] >= 10 or self._xJoueur[0] <= 2 or self._xJoueur[0] >= 11:
+                horsChambre = True
+            if (self._joueurBouge[0] and self._premierMouvementJoueur) or (horsChambre and not self._premierMouvementJoueur):
+                self._premierMouvementJoueur = True
+                self._poursuivreJoueur()
 
+    def _poursuivreJoueur(self):
+        self._poursuiteJoueur, self._vitesseDeplacement = True, 150
+        self._finirDeplacementSP()
+        self._lancerTrajetEtoile(self._boiteOutils.cheminVersJoueur, self._xTile, self._yTile, self._c)
+
+    def _attendreJoueur(self):
+        if not self._attenteJoueur:
+            Horloge.initialiser(id(self), "Attente joueur", 3000)
+        self._attenteJoueur, self._poursuiteJoueur = True, False
+        self._boiteOutils.ajouterTransformation(True, "SplashText Duck", nomPNJ="DuckGod", couche=self._c, texte="Come with me!", taille=12, antialias=True, couleurTexte=(255,255,255))
+        self._lancerTrajet(self._boiteOutils.deplacementSPVersPnj("Joueur", 3000, self._xTile, self._yTile), False)
+
+    def _gererEtape3(self):
+        self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 1, 3)
+        self._boiteOutils.retirerTransformation(True, "SplashText Duck")
+        self._etapeTraitement += 1
+
+    def _gererEtape4(self):
+        if self._xTile == 1 and self._yTile == 3 and self._deplacementBoucle is False:
+            pass
 
 class GestionnaireAnimaux(Evenement):
     def __init__(self, jeu, gestionnaire):

@@ -29,7 +29,7 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
 
     def _getInterrupteurs(self):
         a = ["DecouverteSquirrels", "MusiqueForet", "Rires", "finChasse1", "JoueurEntre", "JoueurEntre2", "JoueurEntre3", "squirrelPose", "BeliaSortie","discussionEtang"]
-        b = ["BeliaRentree", "TomEtage", "ElieEtage", "ConversationEnfants", "TomHungry", "nutsOnTable"]
+        b = ["BeliaRentree", "TomEtage", "ElieEtage", "ConversationEnfants", "TomHungry", "nutsOnTable", "escalierLibre"]
         return a + b
 
     def _getVariables(self):
@@ -85,6 +85,6 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
             self._evenements["concrets"]["InterieurMaison"]["TableNuts"] = [TableNuts(self._jeu, self, 7, 12), (7, 12), "Aucune"]
             self._evenements["concrets"]["InterieurMaison"]["TableNuts2"] = [TableNuts(self._jeu, self, 7, 13), (7, 13), "Aucune"]
         elif nomCarte == "EtageMaison"  and nomCarte not in self._cartesChargees:
-            self._evenements["concrets"]["EtageMaison"]["Sortie"] = [Teleporteur(self._jeu, self, "InterieurMaison", 1, 3, 2, "Bas"), (1,3), "Aucune" ]
+            self._evenements["concrets"]["EtageMaison"]["Sortie"] = [Teleporteur(self._jeu, self, "InterieurMaison", 1, 3, 2, "Bas", condition="escalierLibre"), (1,3), "Aucune" ]
         if nomCarte not in self._cartesChargees:
             self._cartesChargees.append(nomCarte)
