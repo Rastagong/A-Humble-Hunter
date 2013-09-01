@@ -375,10 +375,10 @@ class DuckGod(PNJ):
         super().__init__(jeu, gestionnaire, "DuckGod", x, y, c, "DuckGod.png", (0,0,0), (0,0), False, ["Aucune"], directionDepart=directionDepart,vitesseDeplacement=50)
         self._positionSource = Rect(0,0,24,26)
         i, self._traitement = 1, dict()
-        while i <= 4:
+        while i <= 8:
             self._traitement[i] = getattr(self, "_gererEtape" + str(i))
             i += 1
-        self._boiteOutils.ajouterTransformation(True, "Glow", nomPNJ="DuckGod", couche=2)
+        self._boiteOutils.ajouterTransformation(True, "Glow", nomPNJ="DuckGod", couche=2, permanente=True)
         self._surPlace, self._poursuiteJoueur, self._attenteJoueur, self._premierMouvementJoueur = False, False, False, False
     
     def _ajusterPositionSource(self, enMarche, direction):
@@ -407,6 +407,17 @@ class DuckGod(PNJ):
             return True
         else:
             return False
+
+    def onChangementCarte(self, carteQuittee, carteEntree):
+        if carteQuittee == "EtageMaison" and carteEntree == "InterieurMaison":
+            self._finirDeplacementSP()
+            self._deplacerSurCarte("InterieurMaison", 1, 3, 2, "Bas")
+            self._poseDepart = False
+            self._etapeTraitement += 1
+        elif carteQuittee == "InterieurMaison" and carteEntree == "Maison":
+            self._finirDeplacementSP()
+            self._poseDepart, self._etapeTraitement = False, 7
+            self._deplacerSurCarte("Maison", 3, 5, 2, "Bas")
 
     def _gererEtape(self):
         etapeActuelle = self._etapeTraitement
@@ -450,11 +461,41 @@ class DuckGod(PNJ):
     def _gererEtape3(self):
         self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 1, 3)
         self._boiteOutils.retirerTransformation(True, "SplashText Duck")
+        self._boiteOutils.interrupteurs["escalierLibre"].activer()
         self._etapeTraitement += 1
 
     def _gererEtape4(self):
         if self._xTile == 1 and self._yTile == 3 and self._deplacementBoucle is False:
-            pass
+            self._deplacerSurCarte("InterieurMaison", 1, 4, 2, "Bas")
+            self._etapeTraitement += 1
+
+    def _gererEtape5(self):
+        departMaison = False
+        if (self._xTile,self._yTile) != (1,3):
+            departMaison = True
+        elif self._boiteOutils.getCoordonneesJoueur() != (1,3):
+            self._poseDepart, departMaison = True, True
+        if departMaison:
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 13, 3)
+            self._etapeTraitement += 1
+
+    def _gererEtape6(self):
+        if (self._xTile,self._yTile) == (13,3):
+            self._deplacerSurCarte("Maison", 3, 7, 2, "Bas")
+            self._etapeTraitement += 1
+
+    def _gererEtape7(self):
+        departMaison = False
+        if (self._xTile,self._yTile) != (3,5):
+            departMaison = True
+        elif self._boiteOutils.getCoordonneesJoueur() != (3,5):
+            self._poseDepart, departMaison = True, True
+        if departMaison:
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 10, 17)
+            self._etapeTraitement += 1
+
+    def _gererEtape8(self):
+        pass
 
 class GestionnaireAnimaux(Evenement):
     def __init__(self, jeu, gestionnaire):
