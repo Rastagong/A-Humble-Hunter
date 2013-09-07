@@ -41,6 +41,7 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
         self._evenements["concrets"]["Maison"] = OrderedDict()
         self._evenements["concrets"]["InterieurMaison"] = OrderedDict()
         self._evenements["concrets"]["EtageMaison"] = OrderedDict()
+        self._evenements["concrets"]["Maison Dream"] = OrderedDict()
         if NOM_CARTE_LANCEMENT == "Clairiere":
             self._evenements["concrets"]["Clairiere"]["Joueur"] = [ Joueur(self._jeu, self, 21, 39, 2, fichier="Chasseur.png"), (21, 39), "Bas", 2]
         elif NOM_CARTE_LANCEMENT == "CheminClairiere":

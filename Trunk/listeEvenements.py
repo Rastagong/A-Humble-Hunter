@@ -414,10 +414,16 @@ class DuckGod(PNJ):
             self._deplacerSurCarte("InterieurMaison", 1, 3, 2, "Bas")
             self._poseDepart = False
             self._etapeTraitement += 1
-        elif carteQuittee == "InterieurMaison" and carteEntree == "Maison":
+        elif carteQuittee == "InterieurMaison" and carteEntree == "Maison Dream":
             self._finirDeplacementSP()
             self._poseDepart, self._etapeTraitement = False, 7
-            self._deplacerSurCarte("Maison", 3, 5, 2, "Bas")
+            self._transformationBrouillard()
+            self._deplacerSurCarte("Maison Dream", 3, 5, 2, "Bas")
+
+    def _transformationBrouillard(self):
+        self._boiteOutils.ajouterTransformation(True, "Fog", permanente=True)
+        self._boiteOutils.retirerTransformation(True, "Noir")
+        self._boiteOutils.retirerTransformation(True, "Glow")
 
     def _gererEtape(self):
         etapeActuelle = self._etapeTraitement
@@ -462,6 +468,7 @@ class DuckGod(PNJ):
         self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 1, 3)
         self._boiteOutils.retirerTransformation(True, "SplashText Duck")
         self._boiteOutils.interrupteurs["escalierLibre"].activer()
+        self._gestionnaire.evenements["concrets"]["InterieurMaison"]["SortieExterieur"][0].nomCarte = "Maison Dream"
         self._etapeTraitement += 1
 
     def _gererEtape4(self):
@@ -480,19 +487,21 @@ class DuckGod(PNJ):
             self._etapeTraitement += 1
 
     def _gererEtape6(self):
-        if (self._xTile,self._yTile) == (13,3):
-            self._deplacerSurCarte("Maison", 3, 7, 2, "Bas")
+        if (self._xTile,self._yTile) == (13,3) and self._deplacementBoucle is False:
+            self._deplacerSurCarte("Maison Dream", 3, 7, 2, "Bas")
             self._etapeTraitement += 1
 
     def _gererEtape7(self):
-        departMaison = False
-        if (self._xTile,self._yTile) != (3,5):
-            departMaison = True
-        elif self._boiteOutils.getCoordonneesJoueur() != (3,5):
-            self._poseDepart, departMaison = True, True
-        if departMaison:
-            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 10, 17)
-            self._etapeTraitement += 1
+        if self._gestionnaire.nomCarte == "Maison Dream":
+            departMaison = False
+            if (self._xTile,self._yTile) != (3,5):
+                departMaison = True
+                self._transformationBrouillard()
+            elif self._boiteOutils.getCoordonneesJoueur() != (3,5):
+                self._poseDepart, departMaison = True, True
+            if departMaison:
+                self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 10, 17)
+                self._etapeTraitement += 1
 
     def _gererEtape8(self):
         pass
