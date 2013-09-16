@@ -1,0 +1,3 @@
+# Automapping rules for the maps in "A Humble Hunter"
+# Please refer to Tiled documentation for more information: https://github.com/bjorn/tiled/wiki/Automapping
+./rule_trees.tmx
