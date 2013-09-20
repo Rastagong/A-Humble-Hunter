@@ -122,7 +122,7 @@ class Narrateur(Evenement):
             self._traitement[i] = getattr(self, "_traiter"+str(i)) #On référence les fonctions de traitement dans un dico : elles ont pour nom _traiter0, _traiter1...
             i += 1
         ###
-        self._etape = 20
+        self._etape = 28
 
     def traiter(self):
         etapeActuelle = self._etape
@@ -358,7 +358,9 @@ class Narrateur(Evenement):
             self._etape += 1
 
     def _traiter28(self):
-        pass
+        ####
+        self._boiteOutils.ajouterTransformation(True, "Fog", permanente=True)
+        self._etape += 1
 
     def _traiter29(self):
         pass
@@ -378,8 +380,9 @@ class DuckGod(PNJ):
         while i <= 8:
             self._traitement[i] = getattr(self, "_gererEtape" + str(i))
             i += 1
-        self._boiteOutils.ajouterTransformation(True, "Glow", nomPNJ="DuckGod", couche=2, permanente=True)
+        #self._boiteOutils.ajouterTransformation(True, "Glow", nomPNJ="DuckGod", couche=2, permanente=True)
         self._surPlace, self._poursuiteJoueur, self._attenteJoueur, self._premierMouvementJoueur = False, False, False, False
+        self._etapeTraitement = 7
     
     def _ajusterPositionSource(self, enMarche, direction):
         self._positionSource.left, self._positionSource.top = 0, 0

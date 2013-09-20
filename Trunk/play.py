@@ -15,7 +15,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 try: #If needed, the _path module must add the path to the Narro directory to sys.path so that the Narro Engine can be imported as a package
     import _path
 except:
