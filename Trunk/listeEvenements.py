@@ -122,7 +122,6 @@ class Narrateur(Evenement):
             self._traitement[i] = getattr(self, "_traiter"+str(i)) #On référence les fonctions de traitement dans un dico : elles ont pour nom _traiter0, _traiter1...
             i += 1
         ###
-        self._etape = 28
 
     def traiter(self):
         etapeActuelle = self._etape
@@ -309,7 +308,8 @@ class Narrateur(Evenement):
             self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
             if self._coefNoircisseur == 12:
                 self._etape += 1
-                self._boiteOutils.ajouterPensee("Truly, the gods haven't been fair with the humble hunter I am...", tempsLecture=0)
+                self._boiteOutils.ajouterPensee("Truly, the gods haven't been fair with the humble hunter I am...", vitesse=60)
+                self._boiteOutils.arreterSonEnFondu("Osare Unrest Middle", 3000)
                 self._boiteOutils.interrupteurs["escalierLibre"].desactiver()
             else:
                 Horloge.initialiser(id(self), "Transition Noir", 100)
@@ -358,9 +358,7 @@ class Narrateur(Evenement):
             self._etape += 1
 
     def _traiter28(self):
-        ####
-        self._boiteOutils.ajouterTransformation(True, "Fog", permanente=True)
-        self._etape += 1
+        pass
 
     def _traiter29(self):
         pass
@@ -380,9 +378,8 @@ class DuckGod(PNJ):
         while i <= 8:
             self._traitement[i] = getattr(self, "_gererEtape" + str(i))
             i += 1
-        #self._boiteOutils.ajouterTransformation(True, "Glow", nomPNJ="DuckGod", couche=2, permanente=True)
+        self._boiteOutils.ajouterTransformation(True, "Glow", nomPNJ="DuckGod", couche=2, permanente=True)
         self._surPlace, self._poursuiteJoueur, self._attenteJoueur, self._premierMouvementJoueur = False, False, False, False
-        self._etapeTraitement = 7
     
     def _ajusterPositionSource(self, enMarche, direction):
         self._positionSource.left, self._positionSource.top = 0, 0
@@ -900,7 +897,6 @@ class Belia(PNJ):
             self._traitement[i] = getattr(self, "_gererEtape"+str(i))
             i += 1
         ###
-        self._etapeTraitement = 28
 
     def _gererEtape(self):
         etapeActuelle = self._etapeTraitement
@@ -1222,7 +1218,6 @@ class Enfant(PNJ):
             self._traitement[i] = getattr(self, "_gererEtape"+str(i))
             i += 1
         ###
-        self._etapeTraitement = 12
 
     def onChangementCarte(self, carteQuittee, carteEntree):
         if carteQuittee == "InterieurMaison" and carteEntree == "Maison" and self._boiteOutils.interrupteurs["squirrelPose"].voir() and not self._boiteOutils.interrupteurs["BeliaRentree"].voir() and not self._monteeEtage:
