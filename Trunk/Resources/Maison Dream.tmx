@@ -14,6 +14,8 @@
  <tileset firstgid="2980" source="Pine Tree 4.tsx"/>
  <tileset firstgid="2981" source="Terrain Tree 1.tsx"/>
  <tileset firstgid="2982" source="Terrain Tree 2.tsx"/>
+ <tileset firstgid="2984" source="Terrain Tree 3.tsx"/>
+ <tileset firstgid="2985" source="Terrain Tree 3.tsx"/>
  <layer name="Tile Layer 1" width="47" height="21">
   <data>
    <tile gid="119"/>
@@ -2788,7 +2790,7 @@
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
-   <tile gid="0"/>
+   <tile gid="2983"/>
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -3732,7 +3734,7 @@
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
-   <tile gid="0"/>
+   <tile gid="2984"/>
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
