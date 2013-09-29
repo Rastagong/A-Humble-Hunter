@@ -54,6 +54,7 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
             self._evenements["concrets"]["EtageMaison"]["Joueur"] = [Joueur(self._jeu, self, 3, 5, 2, fichier="Chasseur.png"), (3,5), "Bas", 2]
         elif NOM_CARTE_LANCEMENT == "Maison Dream":
             self._evenements["concrets"]["Maison Dream"]["Joueur"] = [ Joueur(self._jeu, self, 5, 6, 2, fichier="Chasseur.png"), (5,6), "Bas", 2]
+            self._evenements["concrets"]["Maison Dream"]["DuckGod"] = [DuckGod(self._jeu, self, 3, 5, 2, "Bas"), (3, 5), "Bas"]
         j, self._positionJoueur = self._jeu.joueur, None
         self.registerPositionInitialeJoueur(NOM_CARTE_LANCEMENT)
         self._evenements["abstraits"]["Divers"] = OrderedDict()
