@@ -359,7 +359,7 @@ class Narrateur(Evenement):
             self._etape += 1
 
     def _traiter28(self):
-        self._boiteOutils.ajouterTransformation(True, "Fog", permanente=True)
+        self._boiteOutils.ajouterTransformation(True, "Fog", permanente=True) #Starting point instruction
         self._etape += 1
 
     def _traiter29(self):
@@ -381,9 +381,9 @@ class DuckGod(PNJ):
             self._traitement[i] = getattr(self, "_gererEtape" + str(i))
             i += 1
         ###
+        self._etapeTraitement = 7
         #self._boiteOutils.ajouterTransformation(True, "Glow", nomPNJ="DuckGod", couche=2, permanente=True)
         self._surPlace, self._poursuiteJoueur, self._attenteJoueur, self._premierMouvementJoueur = False, False, False, False
-        self._etapeTraitement = 7
     
     def _ajusterPositionSource(self, enMarche, direction):
         self._positionSource.left, self._positionSource.top = 0, 0
@@ -504,7 +504,7 @@ class DuckGod(PNJ):
             elif self._boiteOutils.getCoordonneesJoueur() != (3,5):
                 self._poseDepart, departMaison = True, True
             if departMaison:
-                self._initialiserDeplacement(1, direction=self._directionRegard)
+                self._initialiserDeplacement(1, direction=self._directionRegard) #Starting point instruction
                 self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 10, 17)
                 self._etapeTraitement += 1
 
