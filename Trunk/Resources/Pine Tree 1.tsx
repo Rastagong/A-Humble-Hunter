@@ -9,4 +9,9 @@
    <property name="Praticabilites" value="True,False,True"/>
   </properties>
  </tile>
+ <tile id="1">
+  <properties>
+   <property name="Praticabilites" value="True,False,True"/>
+  </properties>
+ </tile>
 </tileset>

@@ -117,7 +117,7 @@ class Narrateur(Evenement):
     def __init__(self, jeu, gestionnaire):
         super().__init__(jeu, gestionnaire)
         self._penseePossible, self._etape, self._coefNoircisseur, self._alpha = InterrupteurInverse(self._boiteOutils.penseeAGerer), 0, 0, 255
-        self._messageBoutonInteraction, self._premiereMortChasse, self._traitement, etapeMax, i = False, False, dict(), 30, 0 
+        self._messageBoutonInteraction, self._premiereMortChasse, self._traitement, etapeMax, i = False, False, dict(), 32, 0 
         while i <= etapeMax:
             self._traitement[i] = getattr(self, "_traiter"+str(i)) #On référence les fonctions de traitement dans un dico : elles ont pour nom _traiter0, _traiter1...
             i += 1
@@ -360,12 +360,32 @@ class Narrateur(Evenement):
 
     def _traiter28(self):
         self._boiteOutils.ajouterTransformation(True, "Fog", permanente=True) #Starting point instruction
+        Horloge.initialiser(id(self), "fogRises", 1)
+        self._alphaFog = 150
         self._etape += 1
 
     def _traiter29(self):
-        pass
+        if self._boiteOutils.interrupteurs["fogRises"].voir() and Horloge.sonner(id(self), "fogRises"):
+            self._alphaFog += 1
+            self._boiteOutils.ajouterTransformation(True, "Fog", permanente=True, alpha=self._alphaFog, minorChange=True)
+            Horloge.initialiser(id(self), "fogRises", 10)
+            if self._alphaFog == 250:
+                self._boiteOutils.interrupteurs["fogRises"].desactiver()
+                Horloge.initialiser(id(self), "Full fog", 5000)
+                self._etape += 1
 
     def _traiter30(self):
+        if Horloge.sonner(id(self), "Full fog"):
+            self._alphaFog -= 1
+            self._boiteOutils.ajouterTransformation(True, "Fog", permanente=True, alpha=self._alphaFog, minorChange=True)
+            Horloge.initialiser(id(self), "Full fog", 10)
+            if self._alphaFog == 150:
+                self._etape += 1
+
+    def _traiter31(self):
+        pass
+
+    def _traiter32(self):
         pass
 
     def onMortAnimal(self, typeAnimal, viaChasse=False):
@@ -377,7 +397,7 @@ class DuckGod(PNJ):
         super().__init__(jeu, gestionnaire, "DuckGod", x, y, c, "DuckGod.png", (0,0,0), (0,0), False, ["Aucune"], directionDepart=directionDepart,vitesseDeplacement=50)
         self._positionSource = Rect(0,0,24,26)
         i, self._traitement = 1, dict()
-        while i <= 8:
+        while i <= 15:
             self._traitement[i] = getattr(self, "_gererEtape" + str(i))
             i += 1
         ###
@@ -509,6 +529,37 @@ class DuckGod(PNJ):
                 self._etapeTraitement += 1
 
     def _gererEtape8(self):
+        if self._xTile == 10 and self._yTile == 17 and self._deplacementBoucle is False and self._joueurProche is True:
+            self._vitesseDeplacement = 170
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 63, 6)
+            self._etapeTraitement += 1
+
+    def _gererEtape9(self):
+        self._majInfosJoueur()
+        if self._xTile == 63 and self._yTile == 6 and self._deplacementBoucle is False:
+            self._boiteOutils.interrupteurs["fogRises"].activer()
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 93, 10)
+            self._etapeTraitement += 1
+
+    def _gererEtape10(self):
+        if self._boiteOutils.interrupteurs["fogRises"].voir() is False:
+            self._boiteOutils.supprimerPNJ(self._nom, self._c)
+            self._finirDeplacementSP()
+            self._etapeTraitement += 1
+
+    def _gererEtape11(self):
+        pass
+
+    def _gererEtape12(self):
+        pass
+
+    def _gererEtape13(self):
+        pass
+
+    def _gererEtape14(self):
+        pass
+
+    def _gererEtape15(self):
         pass
 
 class GestionnaireAnimaux(Evenement):
