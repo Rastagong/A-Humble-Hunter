@@ -356,10 +356,12 @@ class Narrateur(Evenement):
         if Horloge.sonner(id(self), "Someone enters") and self._jeu.carteActuelle.nom == "EtageMaison":
             #self._boiteOutils.jouerSon("Whisper", "Whisper in the night", crescendo=True, nombreEcoutes=2)
             self._gestionnaire.evenements["concrets"]["EtageMaison"]["DuckGod"] = [DuckGod(self._jeu, self._gestionnaire, 1, 3, 2, "Bas"), (1,3), "Bas"]
+            self._gestionnaire.ajouterChangementCarteANotifier("InterieurMaison", "Maison Dream", "Narrateur", "abstrait")
             self._etape += 1
 
     def _traiter28(self):
         self._boiteOutils.ajouterTransformation(True, "Fog", permanente=True) #Starting point instruction
+        self._boiteOutils.jouerSon("MorningNature", "Morning Nature Maison Dream", nombreEcoutes=0, volume=0.4)
         Horloge.initialiser(id(self), "fogRises", 1)
         self._alphaFog = 150
         self._etape += 1
@@ -380,10 +382,13 @@ class Narrateur(Evenement):
             self._boiteOutils.ajouterTransformation(True, "Fog", permanente=True, alpha=self._alphaFog, minorChange=True)
             Horloge.initialiser(id(self), "Full fog", 10)
             if self._alphaFog == 150:
+                Horloge.initialiser(id(self), "Player lost", 10000)
                 self._etape += 1
 
     def _traiter31(self):
-        pass
+        if Horloge.sonner(id(self), "Player lost"):
+            self._gestionnaire.evenements["concrets"]["Maison Dream"]["Crow"] = [Crow(self._jeu, self._gestionnaire, 83, 10, 2, "Bas"), (0,0), "Bas"]
+            self._etape += 1
 
     def _traiter32(self):
         pass
@@ -391,6 +396,10 @@ class Narrateur(Evenement):
     def onMortAnimal(self, typeAnimal, viaChasse=False):
         if viaChasse and not self._premiereMortChasse:
             self._premiereMortChasse = True
+
+    def onChangementCarte(self, carteQuittee, carteEntree):
+        if carteQuittee == "InterieurMaison" and carteEntree == "Maison Dream":
+            self._boiteOutils.arreterSonEnFondu("Forest Night", 3000)
 
 class DuckGod(PNJ):
     def __init__(self, jeu, gestionnaire, x, y, c, directionDepart):
@@ -529,13 +538,13 @@ class DuckGod(PNJ):
                 self._etapeTraitement += 1
 
     def _gererEtape8(self):
+        self._majInfosJoueur()
         if self._xTile == 10 and self._yTile == 17 and self._deplacementBoucle is False and self._joueurProche is True:
             self._vitesseDeplacement = 170
             self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 63, 6)
             self._etapeTraitement += 1
 
     def _gererEtape9(self):
-        self._majInfosJoueur()
         if self._xTile == 63 and self._yTile == 6 and self._deplacementBoucle is False:
             self._boiteOutils.interrupteurs["fogRises"].activer()
             self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 93, 10)
@@ -543,8 +552,10 @@ class DuckGod(PNJ):
 
     def _gererEtape10(self):
         if self._boiteOutils.interrupteurs["fogRises"].voir() is False:
-            self._boiteOutils.supprimerPNJ(self._nom, self._c)
             self._finirDeplacementSP()
+            self._poseDepart = False
+            self._boiteOutils.supprimerPNJ(self._nom, self._c)
+            self._lancerTrajet("Aucune", False)
             self._etapeTraitement += 1
 
     def _gererEtape11(self):
@@ -560,6 +571,60 @@ class DuckGod(PNJ):
         pass
 
     def _gererEtape15(self):
+        pass
+
+class Crow(PNJ):
+    def __init__(self, jeu, gestionnaire, x, y, c, directionDepart):
+        super().__init__(jeu, gestionnaire, "Crow", x, y, c, "Crow.png", (0,0,0), (0,0), False, ["Aucune"], directionDepart=directionDepart,vitesseDeplacement=50)
+        i, self._traitement, self._sonorite = 1, dict(), True
+        self._xArrivee, self._xArriveeOld, self._yArrivee, self._yArriveeOld = -1, -1, -1, -1
+        while i <= 6:
+            self._traitement[i] = getattr(self, "_gererEtape" + str(i))
+            i += 1
+        Horloge.initialiser(id(self), "Crow call", 1)
+        self._dureeAppel = False
+
+    def _gererEtape(self):
+        if Horloge.sonner(id(self), "Crow call") and self._sonorite:
+            self._boiteOutils.jouerSon("Crow Call", "Crow Call", fixe=True, evenementFixe=self._nom)
+            if self._dureeAppel is False:
+                self._dureeAppel = self._boiteOutils.getDureeInstanceSon("Crow Call")
+            Horloge.initialiser(id(self), "Crow call", self._dureeAppel + random.randint(3000,8000))
+        etapeActuelle = self._etapeTraitement
+        self._traitement[self._etapeTraitement]()
+        while etapeActuelle < self._etapeTraitement:
+            etapeActuelle = self._etapeTraitement
+            self._traitement[self._etapeTraitement]()
+
+    def _genererLancerTrajetAleatoire(self, x1, y1, x2, y2):
+        while (self._xArrivee == self._xArriveeOld and self._yArrivee == self._yArriveeOld) or (self._xArrivee == self._xTile and self._yArrivee == self._yTile) or self._jeu.carteActuelle.tilePraticable(self._xArrivee, self._yArrivee, self._c) is False:
+            self._xArrivee, self._yArrivee = random.randint(x1, x2), random.randint(y1, y2)
+        self._xArriveeOld, self._yArriveeOld = self._xArrivee, self._yArrivee
+        self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, self._xArrivee, self._yArrivee, balade=True, frequencePauseBalade=2)
+    
+
+    def _gererEtape1(self):
+        self._majInfosJoueur()
+        if self._joueurProche is True and self._etapeMarche == 1:
+            self._finirDeplacementSP()
+            self._etapeTraitement += 1
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 91, 23)
+        elif self._deplacementBoucle is False and ((self._xTile == self._xArrivee and self._yTile == self._yArrivee) or (self._xArrivee,self._yArrivee) == (-1,-1)):
+            self._genererLancerTrajetAleatoire(83, 10, 90, 13)
+
+    def _gererEtape2(self):
+        pass
+
+    def _gererEtape3(self):
+        pass
+
+    def _gererEtape4(self):
+        pass
+
+    def _gererEtape5(self):
+        pass
+
+    def _gererEtape6(self):
         pass
 
 class GestionnaireAnimaux(Evenement):
