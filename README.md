@@ -28,7 +28,7 @@ Made with Python 3, Pygame and my own RPG engine, the Narro Engine (v0.3). Repo:
 The source code of the program is licensed under the GNU GPL (refer to COPYING). Some assets and dependencies used by the program are published under the terms of different licenses.
 
 ### 3.1 Graphics
-* The arrow and nuts images comes from this impressive collection of 420 RPG icons by Ails, licensed under the Creative Commons Attribution-ShareAlike 3.0 (CC-BY-SA). http://ails.deviantart.com/art/420-Pixel-Art-Icons-for-RPG-129892453
+* The arrow, fire and nuts images comes from this impressive collection of 420 RPG icons by Ails, licensed under the Creative Commons Attribution-ShareAlike 3.0 (CC-BY-SA). http://ails.deviantart.com/art/420-Pixel-Art-Icons-for-RPG-129892453
 * The rabbit is a work by Stephen "Redshrike" Challener used in PixelFarm (https://bitbucket.org/tebruno99/pixelfarm), a project from tebruno99. It is published under the terms of both the Creative Commons Attribution 3.0 (CC-BY) and Creative Commons Attribution-ShareAlike 3.0 (CC-BY-SA) licenses. http://opengameart.org/content/bunny-rabbit-lpc-style-for-pixelfarm
 * Hyptosis' tiles are published under the terms of the Creative Commons Attribution 3.0 license. You can find them here: http://opengameart.org/content/lots-of-free-2d-tiles-and-sprites-by-hyptosis. You should also have a look at the games he contribued to, like the "Alice is dead" horror point'n'click. This guy is really talented. http://hyptosis.newgrounds.com/
 * The crow sprite is a work by DoubleLeggy, freely available and reusable. Check it out on DeviantArt: http://doubleleggy.deviantart.com/art/RE3-Monster-Sprites-v1-0-149653953
@@ -69,6 +69,8 @@ A certain number of graphics come from The Mana World, a promising open source 2
 * The eerie sound (Eerie.wav) is a work by Bradovic published in the public domain (CC0). http://freesound.org/people/Bradovic/sounds/171992/
 * The crow call sound (CrowCall.wav) is a work by Inchadney (http://www.inchadney.com/sounds.html) licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/inchadney/sounds/121348/
 * The whisper sound (Whisper.wav) is a work by George Bullen (http://freesound.org/people/geoneo0/) licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/geoneo0/sounds/193812/
+* Air Wind Whiff Blow, Copyright 2013 Iwan Gabovitch (http://qubodup.net/), CC-BY3 license. http://freesound.org/people/qubodup/sounds/194752/
+* The wooden hit sound (WoodenHit.wav) is a work by bellick published in the public domain (CC0). http://freesound.org/people/bellick/sounds/151459/
 
 ### 3.3 Music
 * Lost In The Meadows is a calm and enchanting music by Brandon Morris (HaelDB), which is licensed under the Creative Commons Attribution 3.0 (CC-BY). You should really listen to his tracks on OpenGameArt.org or Youtube. http://opengameart.org/content/lost-in-the-meadows, https://www.youtube.com/brandon75689 

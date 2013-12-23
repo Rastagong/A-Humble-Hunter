@@ -117,7 +117,7 @@ class Narrateur(Evenement):
     def __init__(self, jeu, gestionnaire):
         super().__init__(jeu, gestionnaire)
         self._penseePossible, self._etape, self._coefNoircisseur, self._alpha = InterrupteurInverse(self._boiteOutils.penseeAGerer), 0, 0, 255
-        self._messageBoutonInteraction, self._premiereMortChasse, self._traitement, etapeMax, i = False, False, dict(), 32, 0 
+        self._messageBoutonInteraction, self._premiereMortChasse, self._traitement, etapeMax, i = False, False, dict(), 37, 0 
         while i <= etapeMax:
             self._traitement[i] = getattr(self, "_traiter"+str(i)) #On référence les fonctions de traitement dans un dico : elles ont pour nom _traiter0, _traiter1...
             i += 1
@@ -391,6 +391,37 @@ class Narrateur(Evenement):
             self._etape += 1
 
     def _traiter32(self):
+        if self._gestionnaire.xJoueur == 166 and self._gestionnaire.yJoueur == 34:
+            self._boiteOutils.interrupteurs["JoueurVuWizards"].activer()
+            Horloge.initialiser(id(self), "Wizards disappear", 2000)
+            self._boiteOutils.jouerSon("WoodenHit", "WoodenHit")
+            self._etape += 1
+
+    def _traiter33(self):
+        if Horloge.sonner(id(self), "Wizards disappear"):
+            Horloge.initialiser(id(self), "Fog change", 1)
+            self._boiteOutils.jouerSon("Woosh", "Woosh wizards disappear")
+            self._fogChange, self._alphaFog = 1, 150
+            self._etape += 1
+
+    def _traiter34(self):
+        if Horloge.sonner(id(self), "Fog change"):
+            self._alphaFog += self._fogChange
+            self._boiteOutils.ajouterTransformation(True, "Fog", permanente=True, alpha=self._alphaFog, minorChange=True)
+            Horloge.initialiser(id(self), "Fog change", 10)
+            if self._alphaFog == 250:
+                self._boiteOutils.interrupteurs["Wizards disappear"].activer()
+                self._fogChange = -1
+            if self._alphaFog == 150 and self._fogChange == -1:
+                self._etape += 1
+
+    def _traiter35(self):
+        pass
+
+    def _traiter36(self):
+        pass
+
+    def _traiter37(self):
         pass
 
     def onMortAnimal(self, typeAnimal, viaChasse=False):
@@ -634,21 +665,50 @@ class Crow(PNJ):
         pass
 
 class WizardForest(PNJ):
-    dureeWhisper, horlogeInitialisee = False, False
-
     def __init__(self, jeu, gestionnaire, x, y, c, directionDepart, nom):
         directionSP = "V" + directionDepart + str(2500)
         super().__init__(jeu, gestionnaire, nom, x, y, c, "Wizard.png", (0,0,0), (0,0), True, [directionSP], directionDepart=directionDepart)
-        if WizardForest.horlogeInitialisee is False:
-            Horloge.initialiser(id(WizardForest), "Whisper now", 1)
-            WizardForest.horlogeInitialisee = True
+        self._joueurVu = False
+        if self._nom == "WizardForest1":
+            self._horloges, self._dureeWhisper = ["Whisper now1", "Whisper now2", "Whisper now3"], False
+            for horloge in self._horloges:
+                Horloge.initialiser(id(self), horloge, random.randint(1,10000))
 
     def _gererEtape(self):
-        if Horloge.sonner(id(WizardForest), "Whisper now"):
-            self._boiteOutils.jouerSon("Whisper", "Whisper in the night"+self._nom, nombreEcoutes=2, fixe=True, xFixe=169, yFixe=35)
-            if WizardForest.dureeWhisper is False:
-                WizardForest.dureeWhisper = self._boiteOutils.getDureeInstanceSon("Whisper in the night"+self._nom)
-            Horloge.initialiser(id(WizardForest), "Whisper now", WizardForest.dureeWhisper + 200)
+        if self._nom == "WizardForest1" and self._joueurVu is False:
+            for horloge in self._horloges: 
+                if Horloge.sonner(id(self), horloge):
+                    self._boiteOutils.jouerSon("Whisper", horloge, nombreEcoutes=2, fixe=True, xFixe=169, yFixe=35)
+                    if self._dureeWhisper is False:
+                        self._dureeWhisper = self._boiteOutils.getDureeInstanceSon(horloge)
+                    Horloge.initialiser(id(self), horloge, self._dureeWhisper + 200)
+        if self._joueurVu is False and self._boiteOutils.interrupteurs["JoueurVuWizards"].voir() is True:
+            self._joueurVu, self._etapeMarche = True, 1
+            self._finirDeplacementSP()
+            self._lancerTrajet("Aucune",False)
+            if self._nom == "WizardForest1":
+                for horloge in self._horloges:
+                    self._boiteOutils.arreterSonEnFondu(horloge, 1000)
+        if self._boiteOutils.interrupteurs["Wizards disappear"].voir() is True:
+            self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
+            self._boiteOutils.supprimerPNJ(self._nom, self._c)
+
+class Feu(PNJ):
+    def __init__(self, jeu, gestionnaire, x, y, c):
+        super().__init__(jeu, gestionnaire, "Feu", x, y, c, "Feu.png", (0,0,0), (0,0), True, ["VBas2500"], dureeAnimationSP=60)
+        self._positionSource = Rect(32,0,32,32)
+    
+    def _ajusterPositionSource(self, enMarche, direction):
+        if enMarche is True:
+            if self._pied.voir() is True:
+                self._positionSource.move_ip(-self._positionSource.width, 0)
+            else:
+                self._positionSource.move_ip(self._positionSource.width, 0)
+
+    def _gererEtape(self):
+        if self._boiteOutils.interrupteurs["Wizards disappear"].voir() is True:
+            self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
+            self._boiteOutils.supprimerPNJ(self._nom, self._c)
 
 class GestionnaireAnimaux(Evenement):
     def __init__(self, jeu, gestionnaire):
