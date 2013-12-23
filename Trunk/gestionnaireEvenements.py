@@ -88,7 +88,13 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
             self._evenements["concrets"]["InterieurMaison"]["TableSquirrel"] = [TableSquirrel(self._jeu, self), (5, 5), "Aucune"]
             self._evenements["concrets"]["InterieurMaison"]["TableNuts"] = [TableNuts(self._jeu, self, 7, 12), (7, 12), "Aucune"]
             self._evenements["concrets"]["InterieurMaison"]["TableNuts2"] = [TableNuts(self._jeu, self, 7, 13), (7, 13), "Aucune"]
-        elif nomCarte == "EtageMaison"  and nomCarte not in self._cartesChargees:
+        elif nomCarte == "EtageMaison" and nomCarte not in self._cartesChargees:
             self._evenements["concrets"]["EtageMaison"]["Sortie"] = [Teleporteur(self._jeu, self, "InterieurMaison", 1, 3, 2, "Bas", condition="escalierLibre"), (1,3), "Aucune" ]
+        elif nomCarte == "Maison Dream" and nomCarte not in self._cartesChargees:
+            i, listeWizards = 0, [(167,29,"Bas"),(168,29,"Bas"),(169,29,"Bas"),(170,29,"Bas"),(171,29,"Bas"),(167,30,"Bas"),(167,31,"Bas"),(171,30,"Bas"),(171,31,"Bas"),(167,32,"Bas"),(168,32,"Bas"),(169,32,"Bas"),(170,32,"Bas"),(171,32,"Bas"),(173,34,"Gauche"),(168,38,"Haut"),(169,38,"Haut"),(170,38,"Haut"),(165,34,"Droite")]
+            while i < len(listeWizards):
+                nom, x, y, directionDepart = "WizardForest"+str(i), listeWizards[i][0], listeWizards[i][1], listeWizards[i][2]
+                self._evenements["concrets"]["Maison Dream"][nom] = [WizardForest(self._jeu, self, x, y, 2, directionDepart, nom), (x,y), directionDepart]
+                i += 1
         if nomCarte not in self._cartesChargees:
             self._cartesChargees.append(nomCarte)

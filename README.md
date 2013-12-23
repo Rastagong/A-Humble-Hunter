@@ -31,6 +31,7 @@ The source code of the program is licensed under the GNU GPL (refer to COPYING).
 * The arrow and nuts images comes from this impressive collection of 420 RPG icons by Ails, licensed under the Creative Commons Attribution-ShareAlike 3.0 (CC-BY-SA). http://ails.deviantart.com/art/420-Pixel-Art-Icons-for-RPG-129892453
 * The rabbit is a work by Stephen "Redshrike" Challener used in PixelFarm (https://bitbucket.org/tebruno99/pixelfarm), a project from tebruno99. It is published under the terms of both the Creative Commons Attribution 3.0 (CC-BY) and Creative Commons Attribution-ShareAlike 3.0 (CC-BY-SA) licenses. http://opengameart.org/content/bunny-rabbit-lpc-style-for-pixelfarm
 * Hyptosis' tiles are published under the terms of the Creative Commons Attribution 3.0 license. You can find them here: http://opengameart.org/content/lots-of-free-2d-tiles-and-sprites-by-hyptosis. You should also have a look at the games he contribued to, like the "Alice is dead" horror point'n'click. This guy is really talented. http://hyptosis.newgrounds.com/
+* The crow sprite is a work by DoubleLeggy, freely available and reusable. Check it out on DeviantArt: http://doubleleggy.deviantart.com/art/RE3-Monster-Sprites-v1-0-149653953
 
 #### 3.1a The Liberated Pixel Cup
 The Liberated Pixel Cup assets (base\_out\_atlas.png, terrain\_atlas.png) were made for OpenGameArt.org by a bunch of awesome people I can't thank enough.  
@@ -61,11 +62,13 @@ A certain number of graphics come from The Mana World, a promising open source 2
 * The barrel sound (Barrel.wav) is a work by Jorick Bronius (http://jorickbronius.wordpress.com) licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/jorickhoofd/sounds/178657/
 * The washing sound (Washing.wav) is a work by Brian R. Johnson published in the public domain (CC0). http://freesound.org/people/JohnsonBrandEditing/sounds/173938/ 
 * The wave sound (Wateragitation.wav) is a work by mystiscool licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/mystiscool/sounds/7055/
-* The eerie sound (Eerie.wav) is a work by suonho (https://soundcloud.com/suonho) licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/suonho/sounds/58962/
 * The door creak sound (DoorCreak.wav) is a work by tmkappelt licensed under the Sampling+ 1.0. http://freesound.org/people/tmkappelt/sounds/85678/
 * the wooden steps sound (WoodenSteps.wav) is a work by Julio Olmo Poranzke (http://www.digitalbauhaus.de) published in the public domain (CC0). http://freesound.org/people/jop9798/sounds/142000/
 * The forest night sound (Forest Night.wav) is a work by Dobroide licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/dobroide/sounds/20574/
 * The door opening sound (doorOpening.wav) and the pickup sound (Pickup.wav) were produced with the amazing Bfxr software.
+* The eerie sound (Eerie.wav) is a work by Bradovic published in the public domain (CC0). http://freesound.org/people/Bradovic/sounds/171992/
+* The crow call sound (CrowCall.wav) is a work by Inchadney (http://www.inchadney.com/sounds.html) licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/inchadney/sounds/121348/
+* The whisper sound (Whisper.wav) is a work by George Bullen (http://freesound.org/people/geoneo0/) licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/geoneo0/sounds/193812/
 
 ### 3.3 Music
 * Lost In The Meadows is a calm and enchanting music by Brandon Morris (HaelDB), which is licensed under the Creative Commons Attribution 3.0 (CC-BY). You should really listen to his tracks on OpenGameArt.org or Youtube. http://opengameart.org/content/lost-in-the-meadows, https://www.youtube.com/brandon75689 

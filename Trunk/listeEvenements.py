@@ -361,7 +361,7 @@ class Narrateur(Evenement):
 
     def _traiter28(self):
         self._boiteOutils.ajouterTransformation(True, "Fog", permanente=True) #Starting point instruction
-        self._boiteOutils.jouerSon("MorningNature", "Morning Nature Maison Dream", nombreEcoutes=0, volume=0.4)
+        self._boiteOutils.jouerSon("Eerie", "Morning Dream", nombreEcoutes=0, volume=0.4)
         Horloge.initialiser(id(self), "fogRises", 1)
         self._alphaFog = 150
         self._etape += 1
@@ -605,15 +605,21 @@ class Crow(PNJ):
 
     def _gererEtape1(self):
         self._majInfosJoueur()
-        if self._joueurProche is True and self._etapeMarche == 1:
+        if self._boiteOutils.evenementVisible(self._nom, self._c) and self._boiteOutils.estimationDistanceRestante((self._xTile,self._yTile), (self._gestionnaire.xJoueur, self._gestionnaire.yJoueur)) <= 5: 
             self._finirDeplacementSP()
+            Horloge.initialiser(id(self), "Crow dialogue", 5000)
+            self._boiteOutils.ajouterTransformation(True, "SplashText Crow", nomPNJ="Crow", couche=self._c, texte="Are you lost, humble hunter?", taille=12, antialias=True, couleurTexte=(255,255,255))
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 94, 28, intelligence=False)
             self._etapeTraitement += 1
-            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 91, 23)
         elif self._deplacementBoucle is False and ((self._xTile == self._xArrivee and self._yTile == self._yArrivee) or (self._xArrivee,self._yArrivee) == (-1,-1)):
             self._genererLancerTrajetAleatoire(83, 10, 90, 13)
 
     def _gererEtape2(self):
-        pass
+        if self._deplacementBoucle is False and self._xTile == 94 and self._yTile == 28:
+            self._vitesseDeplacement = 100
+            self._boiteOutils.retirerTransformation(True, "SplashText Crow")
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 164, 42)
+            self._etapeTraitement += 1
 
     def _gererEtape3(self):
         pass
@@ -626,6 +632,23 @@ class Crow(PNJ):
 
     def _gererEtape6(self):
         pass
+
+class WizardForest(PNJ):
+    dureeWhisper, horlogeInitialisee = False, False
+
+    def __init__(self, jeu, gestionnaire, x, y, c, directionDepart, nom):
+        directionSP = "V" + directionDepart + str(2500)
+        super().__init__(jeu, gestionnaire, nom, x, y, c, "Wizard.png", (0,0,0), (0,0), True, [directionSP], directionDepart=directionDepart)
+        if WizardForest.horlogeInitialisee is False:
+            Horloge.initialiser(id(WizardForest), "Whisper now", 1)
+            WizardForest.horlogeInitialisee = True
+
+    def _gererEtape(self):
+        if Horloge.sonner(id(WizardForest), "Whisper now"):
+            self._boiteOutils.jouerSon("Whisper", "Whisper in the night"+self._nom, nombreEcoutes=2, fixe=True, xFixe=169, yFixe=35)
+            if WizardForest.dureeWhisper is False:
+                WizardForest.dureeWhisper = self._boiteOutils.getDureeInstanceSon("Whisper in the night"+self._nom)
+            Horloge.initialiser(id(WizardForest), "Whisper now", WizardForest.dureeWhisper + 200)
 
 class GestionnaireAnimaux(Evenement):
     def __init__(self, jeu, gestionnaire):
