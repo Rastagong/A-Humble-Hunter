@@ -122,7 +122,9 @@ class Narrateur(Evenement):
             self._traitement[i] = getattr(self, "_traiter"+str(i)) #On référence les fonctions de traitement dans un dico : elles ont pour nom _traiter0, _traiter1...
             i += 1
         ###
-        self._etape = 28
+        if LANCEMENT_ULTERIEUR is True:
+            self._etape = 32
+            self._fogEnPlace = False
 
     def traiter(self):
         etapeActuelle = self._etape
@@ -349,22 +351,21 @@ class Narrateur(Evenement):
     def _traiter26(self):
         if Horloge.sonner(id(self), "Someone walks"):
             #self._boiteOutils.jouerSon("WoodenSteps", "Someone walks", nombreEcoutes=3)
-            #self._boiteOutils.jouerSon("Eerie", "Fear in the night", crescendo=True, nombreEcoutes=0, volume=0.5)
             self._etape += 1
 
     def _traiter27(self):
         if Horloge.sonner(id(self), "Someone enters") and self._jeu.carteActuelle.nom == "EtageMaison":
-            #self._boiteOutils.jouerSon("Whisper", "Whisper in the night", crescendo=True, nombreEcoutes=2)
             self._gestionnaire.evenements["concrets"]["EtageMaison"]["DuckGod"] = [DuckGod(self._jeu, self._gestionnaire, 1, 3, 2, "Bas"), (1,3), "Bas"]
             self._gestionnaire.ajouterChangementCarteANotifier("InterieurMaison", "Maison Dream", "Narrateur", "abstrait")
             self._etape += 1
 
     def _traiter28(self):
-        self._boiteOutils.ajouterTransformation(True, "Fog", permanente=True) #Starting point instruction
-        self._boiteOutils.jouerSon("Eerie", "Morning Dream", nombreEcoutes=0, volume=0.4)
-        Horloge.initialiser(id(self), "fogRises", 1)
-        self._alphaFog = 150
-        self._etape += 1
+        if self._gestionnaire.nomCarte == "Maison Dream":
+            self._boiteOutils.ajouterTransformation(True, "Fog", permanente=True)
+            self._boiteOutils.jouerSon("Eerie", "Morning Dream", nombreEcoutes=0, volume=0.4)
+            Horloge.initialiser(id(self), "fogRises", 1)
+            self._alphaFog = 150
+            self._etape += 1
 
     def _traiter29(self):
         if self._boiteOutils.interrupteurs["fogRises"].voir() and Horloge.sonner(id(self), "fogRises"):
@@ -391,6 +392,11 @@ class Narrateur(Evenement):
             self._etape += 1
 
     def _traiter32(self):
+        if LANCEMENT_ULTERIEUR:
+            if not self._fogEnPlace:
+                self._boiteOutils.jouerSon("Eerie", "Morning Dream", nombreEcoutes=0, volume=0.4)
+                self._boiteOutils.ajouterTransformation(True, "Fog", permanente=True)
+                self._fogEnPlace = True
         if self._gestionnaire.xJoueur == 166 and self._gestionnaire.yJoueur == 34:
             self._boiteOutils.interrupteurs["JoueurVuWizards"].activer()
             Horloge.initialiser(id(self), "Wizards disappear", 2000)
@@ -400,7 +406,7 @@ class Narrateur(Evenement):
     def _traiter33(self):
         if Horloge.sonner(id(self), "Wizards disappear"):
             Horloge.initialiser(id(self), "Fog change", 1)
-            self._boiteOutils.jouerSon("Woosh", "Woosh wizards disappear")
+            self._boiteOutils.jouerSon("Woosh", "Woosh wizards disappear", volume=0.75)
             self._fogChange, self._alphaFog = 1, 150
             self._etape += 1
 
@@ -414,6 +420,7 @@ class Narrateur(Evenement):
                 self._fogChange = -1
             if self._alphaFog == 150 and self._fogChange == -1:
                 self._etape += 1
+            self._boiteOutils.interrupteurs["RetourDuckGod"].activer()
 
     def _traiter35(self):
         pass
@@ -434,16 +441,16 @@ class Narrateur(Evenement):
 
 class DuckGod(PNJ):
     def __init__(self, jeu, gestionnaire, x, y, c, directionDepart):
-        super().__init__(jeu, gestionnaire, "DuckGod", x, y, c, "DuckGod.png", (0,0,0), (0,0), False, ["Aucune"], directionDepart=directionDepart,vitesseDeplacement=50)
+        super().__init__(jeu, gestionnaire, "DuckGod", x, y, c, "DuckGod.png", (0,0,0), (0,0), False, ["Aucune"], directionDepart=directionDepart,vitesseDeplacement=50, eau=True)
         self._positionSource = Rect(0,0,24,26)
         i, self._traitement = 1, dict()
-        while i <= 15:
+        while i <= 22:
             self._traitement[i] = getattr(self, "_gererEtape" + str(i))
             i += 1
-        ###
-        self._etapeTraitement = 7
-        #self._boiteOutils.ajouterTransformation(True, "Glow", nomPNJ="DuckGod", couche=2, permanente=True)
         self._surPlace, self._poursuiteJoueur, self._attenteJoueur, self._premierMouvementJoueur = False, False, False, False
+        ###
+        if LANCEMENT_ULTERIEUR is True:
+            self._etapeTraitement = 9
     
     def _ajusterPositionSource(self, enMarche, direction):
         self._positionSource.left, self._positionSource.top = 0, 0
@@ -497,6 +504,7 @@ class DuckGod(PNJ):
             self._traitement[self._etapeTraitement]()
 
     def _gererEtape1(self):
+        self._boiteOutils.ajouterTransformation(True, "Glow", nomPNJ="DuckGod", couche=2, permanente=True)
         self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 8, 10, regardFinal="Haut")
         self._etapeTraitement += 1
 
@@ -564,7 +572,7 @@ class DuckGod(PNJ):
             elif self._boiteOutils.getCoordonneesJoueur() != (3,5):
                 self._poseDepart, departMaison = True, True
             if departMaison:
-                self._initialiserDeplacement(1, direction=self._directionRegard) #Starting point instruction
+                self._initialiserDeplacement(1, direction=self._directionRegard) 
                 self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 10, 17)
                 self._etapeTraitement += 1
 
@@ -573,11 +581,15 @@ class DuckGod(PNJ):
         if self._xTile == 10 and self._yTile == 17 and self._deplacementBoucle is False and self._joueurProche is True:
             self._vitesseDeplacement = 170
             self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 63, 6)
+            self._boiteOutils.ajouterTransformation(True, "SplashText Duck2", nomPNJ="DuckGod", couche=self._c, texte="This way, quick!", taille=12, antialias=True, couleurTexte=(255,255,255))
             self._etapeTraitement += 1
 
     def _gererEtape9(self):
         if self._xTile == 63 and self._yTile == 6 and self._deplacementBoucle is False:
+            self._boiteOutils.retirerTransformation(True, "SplashText Duck2")
             self._boiteOutils.interrupteurs["fogRises"].activer()
+            if LANCEMENT_ULTERIEUR:
+                self._boiteOutils.interrupteurs["fogRises"].desactiver()
             self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 93, 10)
             self._etapeTraitement += 1
 
@@ -590,18 +602,54 @@ class DuckGod(PNJ):
             self._etapeTraitement += 1
 
     def _gererEtape11(self):
-        pass
+        if self._boiteOutils.interrupteurs["RetourDuckGod"].voir() is True:
+            self._poseDepart = True
+            self._seTeleporter(228, 10, "Droite")
+            self._etapeTraitement += 1
 
     def _gererEtape12(self):
-        pass
+        if self._boiteOutils.evenementVisible(self._nom, self._c) and self._deplacementBoucle is False:
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 233, 10)
+            self._etapeTraitement += 1
 
     def _gererEtape13(self):
-        pass
+        if self._deplacementBoucle is False and self._xTile == 233 and self._yTile == 10:
+            self._vitesseDeplacement = 165
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 285, 21, eau=True)
+            self._etapeTraitement += 1
 
     def _gererEtape14(self):
-        pass
+        if self._deplacementBoucle is False and self._xTile == 285 and self._yTile == 21:
+            self._vitesseDeplacement = 120
+            self._deplacerSurCarte("Entree Maison Gods", 9, 5, 2, "Droite")
+            self._etapeTraitement += 1
 
     def _gererEtape15(self):
+        if self._jeu.carteActuelle.nom == "Entree Maison Gods":
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 3, 5)
+            self._etapeTraitement += 1
+
+    def _gererEtape16(self):
+        if self._deplacementBoucle is False and self._xTile == 3 and self._yTile == 5:
+            self._deplacerSurCarte("Maison Gods", 0,0, "Droite")
+            self._etapeTraitement += 1
+
+    def _gererEtape17(self):
+        pass
+
+    def _gererEtape18(self):
+        pass
+
+    def _gererEtape19(self):
+        pass
+
+    def _gererEtape20(self):
+        pass
+
+    def _gererEtape21(self):
+        pass
+
+    def _gererEtape22(self):
         pass
 
 class Crow(PNJ):
@@ -636,7 +684,7 @@ class Crow(PNJ):
 
     def _gererEtape1(self):
         self._majInfosJoueur()
-        if self._boiteOutils.evenementVisible(self._nom, self._c) and self._boiteOutils.estimationDistanceRestante((self._xTile,self._yTile), (self._gestionnaire.xJoueur, self._gestionnaire.yJoueur)) <= 5: 
+        if (self._deplacementBoucle is False or self._etapeMarche == 1) and self._boiteOutils.evenementVisible(self._nom, self._c) and self._boiteOutils.estimationDistanceRestante((self._xTile,self._yTile), (self._gestionnaire.xJoueur, self._gestionnaire.yJoueur)) <= 5: 
             self._finirDeplacementSP()
             Horloge.initialiser(id(self), "Crow dialogue", 5000)
             self._boiteOutils.ajouterTransformation(True, "SplashText Crow", nomPNJ="Crow", couche=self._c, texte="Are you lost, humble hunter?", taille=12, antialias=True, couleurTexte=(255,255,255))
@@ -685,10 +733,15 @@ class WizardForest(PNJ):
         if self._joueurVu is False and self._boiteOutils.interrupteurs["JoueurVuWizards"].voir() is True:
             self._joueurVu, self._etapeMarche = True, 1
             self._finirDeplacementSP()
-            self._lancerTrajet("Aucune",False)
+            if self._yTile <= 32 or self._xTile == 173:
+                self._lancerTrajet("RGauche",False)
+            elif self._xTile == 165:
+                self._lancerTrajet("RDroite",False)
+            else:
+                self._lancerTrajet("RHaut",False)
             if self._nom == "WizardForest1":
                 for horloge in self._horloges:
-                    self._boiteOutils.arreterSonEnFondu(horloge, 1000)
+                    self._boiteOutils.arreterSonEnFondu(horloge, 1)
         if self._boiteOutils.interrupteurs["Wizards disappear"].voir() is True:
             self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
             self._boiteOutils.supprimerPNJ(self._nom, self._c)
@@ -1677,3 +1730,9 @@ class SignaleurJoueur(Evenement):
                 self._boiteOutils.interrupteurs[nomInterrupteur].activer()
                 self._signaleurs[self._jeu.carteActuelle.nom].pop((self._xJoueur[0], self._yJoueur[0]))
 
+
+def annulerFog():
+    self._boiteOutils.retirerTransformation(True, "Fog")
+
+def ajouterFog():
+    self._boiteOutils.ajouterTransformation(True, "Fog", permanente=True)
