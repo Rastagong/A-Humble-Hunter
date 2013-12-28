@@ -123,8 +123,7 @@ class Narrateur(Evenement):
             i += 1
         ###
         if LANCEMENT_ULTERIEUR is True:
-            self._etape = 32
-            self._fogEnPlace = False
+            self._etape = 35
 
     def traiter(self):
         etapeActuelle = self._etape
@@ -392,11 +391,6 @@ class Narrateur(Evenement):
             self._etape += 1
 
     def _traiter32(self):
-        if LANCEMENT_ULTERIEUR:
-            if not self._fogEnPlace:
-                self._boiteOutils.jouerSon("Eerie", "Morning Dream", nombreEcoutes=0, volume=0.4)
-                self._boiteOutils.ajouterTransformation(True, "Fog", permanente=True)
-                self._fogEnPlace = True
         if self._gestionnaire.xJoueur == 166 and self._gestionnaire.yJoueur == 34:
             self._boiteOutils.interrupteurs["JoueurVuWizards"].activer()
             Horloge.initialiser(id(self), "Wizards disappear", 2000)
@@ -450,7 +444,7 @@ class DuckGod(PNJ):
         self._surPlace, self._poursuiteJoueur, self._attenteJoueur, self._premierMouvementJoueur = False, False, False, False
         ###
         if LANCEMENT_ULTERIEUR is True:
-            self._etapeTraitement = 9
+            self._etapeTraitement = 15
     
     def _ajusterPositionSource(self, enMarche, direction):
         self._positionSource.left, self._positionSource.top = 0, 0
@@ -588,8 +582,6 @@ class DuckGod(PNJ):
         if self._xTile == 63 and self._yTile == 6 and self._deplacementBoucle is False:
             self._boiteOutils.retirerTransformation(True, "SplashText Duck2")
             self._boiteOutils.interrupteurs["fogRises"].activer()
-            if LANCEMENT_ULTERIEUR:
-                self._boiteOutils.interrupteurs["fogRises"].desactiver()
             self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 93, 10)
             self._etapeTraitement += 1
 
@@ -620,18 +612,21 @@ class DuckGod(PNJ):
 
     def _gererEtape14(self):
         if self._deplacementBoucle is False and self._xTile == 285 and self._yTile == 21:
-            self._vitesseDeplacement = 120
             self._deplacerSurCarte("Entree Maison Gods", 9, 5, 2, "Droite")
             self._etapeTraitement += 1
 
     def _gererEtape15(self):
+        if LANCEMENT_ULTERIEUR:
+            self._initialiserDeplacement(1, direction=self._directionRegard)
+            self._vitesseDeplacement = 165
         if self._jeu.carteActuelle.nom == "Entree Maison Gods":
             self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 3, 5)
             self._etapeTraitement += 1
 
     def _gererEtape16(self):
         if self._deplacementBoucle is False and self._xTile == 3 and self._yTile == 5:
-            self._deplacerSurCarte("Maison Gods", 0,0, "Droite")
+            self._deplacerSurCarte("Maison Gods", 3, 4, 2, "Bas")
+            self._boiteOutils.jouerSon("Fall", "Duck Fall Maison Gods")
             self._etapeTraitement += 1
 
     def _gererEtape17(self):
@@ -1730,9 +1725,24 @@ class SignaleurJoueur(Evenement):
                 self._boiteOutils.interrupteurs[nomInterrupteur].activer()
                 self._signaleurs[self._jeu.carteActuelle.nom].pop((self._xJoueur[0], self._yJoueur[0]))
 
+class RetourMaisonDream(EvenementConcret):
+    def __init__(self, jeu, gestionnaire):
+        EvenementConcret.__init__(self, jeu, gestionnaire)
 
-def annulerFog():
+    def onJoueurDessus(self, x, y, c, direction):
+        if self._boiteOutils.interrupteurs["RetourMaisonDream"].voir():
+            self._boiteOutils.ajouterTransformation(True, "Fog", permanente=True)
+            self._boiteOutils.jouerSon("Eerie", "Morning Dream2", nombreEcoutes=0, volume=0.4)
+            self._boiteOutils.interrupteurs["RetourMaisonDream"].desactiver()
+
+
+def annulerFog(self):
     self._boiteOutils.retirerTransformation(True, "Fog")
+    self._boiteOutils.arreterSonEnFondu("Morning Dream", 1000)
+    self._boiteOutils.arreterSonEnFondu("Morning Dream2", 1000)
 
-def ajouterFog():
-    self._boiteOutils.ajouterTransformation(True, "Fog", permanente=True)
+def retourMaisonDream(self):
+    self._boiteOutils.interrupteurs["RetourMaisonDream"].activer()
+
+def sautMaisonGods(self):
+    self._boiteOutils.jouerSon("Fall", "Fall joueur")

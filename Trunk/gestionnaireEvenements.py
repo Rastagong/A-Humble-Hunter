@@ -29,8 +29,9 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
 
     def _getInterrupteurs(self):
         a = ["DecouverteSquirrels", "MusiqueForet", "Rires", "finChasse1", "JoueurEntre", "JoueurEntre2", "JoueurEntre3", "squirrelPose", "BeliaSortie","discussionEtang"]
-        b = ["BeliaRentree", "TomEtage", "ElieEtage", "ConversationEnfants", "TomHungry", "nutsOnTable", "escalierLibre", "fogRises", "JoueurVuWizards", "Wizards disappear", "RetourDuckGod"]
-        return a + b
+        b = ["BeliaRentree", "TomEtage", "ElieEtage", "ConversationEnfants", "TomHungry", "nutsOnTable", "escalierLibre", "fogRises", "JoueurVuWizards", "Wizards disappear"]
+        c = ["RetourDuckGod", "RetourMaisonDream"]
+        return a + b + c
 
     def _getVariables(self):
         return [("sceneChasse", 0), ("SquirrelChasses", 0), ("LapinChasses", 0), ("CartesForet", ["Clairiere","CheminClairiere"]), ("NombreGlands", 0)]
@@ -42,6 +43,8 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
         self._evenements["concrets"]["InterieurMaison"] = OrderedDict()
         self._evenements["concrets"]["EtageMaison"] = OrderedDict()
         self._evenements["concrets"]["Maison Dream"] = OrderedDict()
+        self._evenements["concrets"]["Entree Maison Gods"] = OrderedDict()
+        self._evenements["concrets"]["Maison Gods"] = OrderedDict()
         if NOM_CARTE_LANCEMENT == "Clairiere":
             self._evenements["concrets"]["Clairiere"]["Joueur"] = [ Joueur(self._jeu, self, 21, 39, 2, fichier="Chasseur.png"), (21, 39), "Bas", 2]
         elif NOM_CARTE_LANCEMENT == "CheminClairiere":
@@ -56,6 +59,9 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
             #self._evenements["concrets"]["Maison Dream"]["Joueur"] = [ Joueur(self._jeu, self, 10, 18, 2, fichier="Chasseur.png"), (5,6), "Bas", 2]
             self._evenements["concrets"]["Maison Dream"]["Joueur"] = [ Joueur(self._jeu, self, 169, 37, 2, fichier="Chasseur.png"), (5,6), "Bas", 2]
             self._evenements["concrets"]["Maison Dream"]["DuckGod"] = [DuckGod(self._jeu, self, 63, 6, 2, "Bas"), (3, 5), "Bas"] #Starting point instruction
+        elif NOM_CARTE_LANCEMENT == "Entree Maison Gods":
+            self._evenements["concrets"]["Entree Maison Gods"]["Joueur"] = [ Joueur(self._jeu, self, 9, 9, 2, fichier="Chasseur.png"), (9,9), "Haut", 2 ]
+            self._evenements["concrets"]["Entree Maison Gods"]["DuckGod"] = [DuckGod(self._jeu, self, 9, 5, 2, "Droite"), (9, 5), "Bas"] #Starting point instruction
         j, self._positionJoueur = self._jeu.joueur, None
         self.registerPositionInitialeJoueur(NOM_CARTE_LANCEMENT)
         self._evenements["abstraits"]["Divers"] = OrderedDict()
@@ -94,12 +100,14 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
         elif nomCarte == "Maison Dream" and nomCarte not in self._cartesChargees:
             self._evenements["concrets"]["Maison Dream"]["Feu"] = [Feu(self._jeu, self, 169, 34, 3), (169, 34), "Bas"]
             self._evenements["concrets"]["Maison Dream"]["VersMaisonGods"] = [Teleporteur(self._jeu, self, "Entree Maison Gods", 9, 9, 2, fonctionApres=annulerFog), (285,21), "Aucune"]
+            self._evenements["concrets"]["Maison Dream"]["RetourMaisonDream"] = [RetourMaisonDream(self._jeu, self), (285,22), "Aucune"]
             i, listeWizards = 0, [(167,29,"Bas"),(168,29,"Bas"),(169,29,"Bas"),(170,29,"Bas"),(171,29,"Bas"),(167,30,"Bas"),(167,31,"Bas"),(171,30,"Bas"),(171,31,"Bas"),(167,32,"Bas"),(168,32,"Bas"),(169,32,"Bas"),(170,32,"Bas"),(171,32,"Bas"),(173,34,"Gauche"),(168,38,"Haut"),(169,38,"Haut"),(170,38,"Haut"),(165,34,"Droite")]
             while i < len(listeWizards):
                 nom, x, y, directionDepart = "WizardForest"+str(i), listeWizards[i][0], listeWizards[i][1], listeWizards[i][2]
                 self._evenements["concrets"]["Maison Dream"][nom] = [WizardForest(self._jeu, self, x, y, 2, directionDepart, nom), (x,y), directionDepart]
                 i += 1
         elif nomCarte == "Entree Maison Gods" and nomCarte not in self._cartesChargees:
-            self._evenements["concrets"]["Entree Maison Gods"]["VersDream"] =  [Teleporteur(self._jeu, self, "Maison Dream", 285, 22, 2, fonctionApres=ajouterFog), (9,9), "Aucune"]
+            self._evenements["concrets"]["Entree Maison Gods"]["VersDream"] =  [Teleporteur(self._jeu, self, "Maison Dream", 285, 22, 2, fonctionApres=retourMaisonDream), (9,9), "Aucune"]
+            self._evenements["concrets"]["Entree Maison Gods"]["Trou"] =  [Teleporteur(self._jeu, self, "Maison Gods", 3, 4, 2, fonctionApres=sautMaisonGods, joueurBloque=True), (3,5), "Aucune"]
         if nomCarte not in self._cartesChargees:
             self._cartesChargees.append(nomCarte)
