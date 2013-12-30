@@ -788,6 +788,29 @@ class Feu(PNJ):
             self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
             self._boiteOutils.supprimerPNJ(self._nom, self._c)
 
+class Bruiteur(EvenementConcret):
+    def __init__(self, jeu, gestionnaire):
+        EvenementConcret.__init__(self, jeu, gestionnaire)
+        self._sonsLances, self._volume1, self._volume2 = False, VOLUME_MUSIQUE, 0.0
+
+    def traiter(self):
+        if self._sonsLances is False:
+            self._boiteOutils.jouerSon("Lava", "Lava", nombreEcoutes=0)
+            self._boiteOutils.jouerSon("TeaMusic", "Tea Music", volume=0, nombreEcoutes=0)
+            self._sonsLances = True
+        if self._gestionnaire.xJoueur < 59 and self._gestionnaire.yJoueur < 31:
+            self._volume1, self._volume2 = 1.0, 0
+        elif self._gestionnaire.xJoueur >= 59:
+            self._volume1, self._volume2 = 0, 1.0
+        else: #Zone de transition
+            self._volume1 = 1.0 - ((self._gestionnaire.yJoueur - 30) / 10)
+            distanceVolume2 = abs(71 - self._gestionnaire.xJoueur) + abs(41 - self._gestionnaire.yJoueur)
+            self._volume2 = 1.0 - (distanceVolume2 / 50)
+        if self._boiteOutils.getVolumeInstance("Lava") != self._volume1: 
+            self._boiteOutils.changerVolumeInstance("Lava", self._volume1)
+        if self._boiteOutils.getVolumeInstance("Tea Music") != self._volume1: 
+            self._boiteOutils.changerVolumeInstance("Tea Music", self._volume2)
+
 class God(PNJ):
     traitement = False
 
