@@ -1,4 +1,4 @@
-A-Humble-Hunter
+A Humble Hunter
 =====================
 A short interactive story written by @Rastagong (http://rastagong.net)  
 Made with Python 3, Pygame and my own RPG engine, the Narro Engine (v0.3). Repo: https://github.com/Rastagong/narro
@@ -71,6 +71,10 @@ A certain number of graphics come from The Mana World, a promising open source 2
 * The whisper sound (Whisper.wav) is a work by George Bullen (http://freesound.org/people/geoneo0/) licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/geoneo0/sounds/193812/
 * Air Wind Whiff Blow, Copyright 2013 Iwan Gabovitch (http://qubodup.net/), CC-BY3 license. http://freesound.org/people/qubodup/sounds/194752/
 * The wooden hit sound (WoodenHit.wav) is a work by bellick published in the public domain (CC0). http://freesound.org/people/bellick/sounds/151459/
+* The cave steps sound (CaveSteps.wav) is a work by Ludovic Kierasinski (http://www.anakronic.com/) licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/Slanesh/sounds/31756/
+* The dishes clinging sound (BruitsRepas.wav) is a work by timlaroche licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/timlaroche/sounds/71810/
+* The tea pouring sound (BruitThe.wav) is a work by LG licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/LG/sounds/18730/
+* The lava sound (Lava.wav) is a work by Audionautics licensed under the Creative Commons Attribution 3.0 (CC-BY). http://freesound.org/people/Audionautics/sounds/133901/
 
 ### 3.3 Music
 * Lost In The Meadows is a calm and enchanting music by Brandon Morris (HaelDB), which is licensed under the Creative Commons Attribution 3.0 (CC-BY). You should really listen to his tracks on OpenGameArt.org or Youtube. http://opengameart.org/content/lost-in-the-meadows, https://www.youtube.com/brandon75689 

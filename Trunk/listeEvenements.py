@@ -414,13 +414,58 @@ class Narrateur(Evenement):
                 self._fogChange = -1
             if self._alphaFog == 150 and self._fogChange == -1:
                 self._etape += 1
+                Horloge.initialiser(id(self), "Tea time1",1)
+                Horloge.initialiser(id(self), "Tea time2",1)
             self._boiteOutils.interrupteurs["RetourDuckGod"].activer()
 
     def _traiter35(self):
-        pass
+        if LANCEMENT_ULTERIEUR:
+            Horloge.initialiser(id(self), "Tea time1",1)
+            Horloge.initialiser(id(self), "Tea time2",1)
+        if self._gestionnaire.nomCarte == "Maison Gods":
+            if self._gestionnaire.xJoueur == 57 and self._gestionnaire.yJoueur == 31:
+                self._boiteOutils.ajouterPensee("...which is why I find his opinions undoubtedly distasteful.", faceset="Crow.png")
+                self._boiteOutils.ajouterPensee("Mistaking me for a Spirit of the lakes, really. What a lack of consideration.", faceset="Crow.png")
+                self._boiteOutils.ajouterPensee("Was I to lose my honour, I'd rather have chosen the skies.", faceset="Crow.png")
+                self._boiteOutils.ajouterPensee("Actually, I do understand his mistake. Just have look at you for a minute:", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("feathers, beaks, wings... There isn't much difference between us!", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("Now how dare you, Sir Duck?", faceset="Crow.png")
+                self._boiteOutils.ajouterPensee("I say, aren't we both ruling over the forests of the Middle South?", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("Well, I can't state otherwise...", faceset="Crow.png")
+                self._boiteOutils.ajouterPensee("Well, my dear, we could both rule over the Marine Realms.", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("I'm continuously mistaken for a a marine creature myself,", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("even though it should be common knowledge that I daren't leave my pond.", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("It has nothing to do with my current situation!", faceset="Crow.png")
+                self._boiteOutils.ajouterPensee("Surely, you've never seen Sir Falcon mistaken for Sir Salmon!", faceset="Crow.png")
+                self._boiteOutils.ajouterPensee("I'll grant you that.", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("Then tell me for which reason I don't deserve the same rank and dignity.", faceset="Crow.png")
+                self._boiteOutils.ajouterPensee("Se, there's a wide range of worthiness between the crow and the falcon.", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("A wide range of worthiness, really?", faceset="Crow.png")
+                self._boiteOutils.ajouterPensee("A wide range, indeed. You're nowhere as majestic.", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("Here are some biscuits for your argument. Please proceed. I enjoy it.", faceset="WizardGod.png")
+                self._boiteOutils.ajouterPensee("Well, thank you very much, Sir Wizard.", faceset="Crow.png")
+                self._boiteOutils.ajouterPensee("Learn, my friend, that our respective worthiness doesn't relie on the same qualities:", faceset="Crow.png")
+                self._boiteOutils.ajouterPensee("While Sir Falcon is respected for his majestic windspan, I, Sir Crow,", faceset="Crow.png")
+                self._boiteOutils.ajouterPensee("am feared by both men and fairies, for the news I bring truly are terrible.", faceset="Crow.png")
+                self._boiteOutils.ajouterPensee("This, my friend, used to be true centuries ago.", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("Nowadays most men have completely forgotten the fear you inspired them.", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("Would you venture into a city, would they certainly try to have you roasted.", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("Roasted, really? The tastes of the men haven't improved.", faceset="Crow.png")
+                self._boiteOutils.ajouterPensee("Would they try to do so, you do know what would happen to them.", faceset="Crow.png")
+                self._boiteOutils.ajouterPensee("Well, I sure do! But they don't. That's the problem of our times.", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("I'm glad we still have the men of the countryside and of the forests.", faceset="Crow.png")
+                self._boiteOutils.ajouterPensee("I sure am too.", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("Won't you come with us, Sir Wizard? We're drinking your tea and eating your biscuits.", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("Not many will remain.", faceset="DuckGod.png")
+                self._etape += 1
 
     def _traiter36(self):
-        pass
+        if Horloge.sonner(id(self), "Tea time1"):
+            self._boiteOutils.jouerSon("BruitsRepas", "Bruits repas Gods1", fixe=True, xFixe=71, yFixe=42)
+            Horloge.initialiser(id(self), "Tea time1", random.randint(3000,10000))
+        if Horloge.sonner(id(self), "Tea time2"):
+            self._boiteOutils.jouerSon("BruitThe", "Bruits repas Gods2", fixe=True, xFixe=71, yFixe=42)
+            Horloge.initialiser(id(self), "Tea time2", random.randint(10000,20000))
 
     def _traiter37(self):
         pass
@@ -438,7 +483,7 @@ class DuckGod(PNJ):
         super().__init__(jeu, gestionnaire, "DuckGod", x, y, c, "DuckGod.png", (0,0,0), (0,0), False, ["Aucune"], directionDepart=directionDepart,vitesseDeplacement=50, eau=True)
         self._positionSource = Rect(0,0,24,26)
         i, self._traitement = 1, dict()
-        while i <= 22:
+        while i <= 17:
             self._traitement[i] = getattr(self, "_gererEtape" + str(i))
             i += 1
         self._surPlace, self._poursuiteJoueur, self._attenteJoueur, self._premierMouvementJoueur = False, False, False, False
@@ -625,26 +670,11 @@ class DuckGod(PNJ):
 
     def _gererEtape16(self):
         if self._deplacementBoucle is False and self._xTile == 3 and self._yTile == 5:
-            self._deplacerSurCarte("Maison Gods", 3, 4, 2, "Bas")
+            self._boiteOutils.supprimerPNJ(self._nom, self._c)
             self._boiteOutils.jouerSon("Fall", "Duck Fall Maison Gods")
             self._etapeTraitement += 1
 
     def _gererEtape17(self):
-        pass
-
-    def _gererEtape18(self):
-        pass
-
-    def _gererEtape19(self):
-        pass
-
-    def _gererEtape20(self):
-        pass
-
-    def _gererEtape21(self):
-        pass
-
-    def _gererEtape22(self):
         pass
 
 class Crow(PNJ):
@@ -757,6 +787,78 @@ class Feu(PNJ):
         if self._boiteOutils.interrupteurs["Wizards disappear"].voir() is True:
             self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
             self._boiteOutils.supprimerPNJ(self._nom, self._c)
+
+class God(PNJ):
+    traitement = False
+
+    def __init__(self, jeu, gestionnaire, x, y, c, directionDepart, nom, fichier):
+        super().__init__(jeu, gestionnaire, nom, x, y, c, fichier, (0,0,0), (0,0), True, ["V"+directionDepart+str(2500)], directionDepart=directionDepart)
+        if God.traitement == False:
+            God.traitement = { "DuckGod": {"etapeMax":2, "fct":[]}, "CrowGod": {"etapeMax":2, "fct":[]}, "WizardGod": {"etapeMax":2, "fct":[]} }
+            for nom in God.traitement.keys():
+                i = 1
+                while i <= God.traitement[nom]["etapeMax"]:
+                    God.traitement[nom]["fct"].append( getattr(self, "_gererEtape" + nom + str(i)) )
+                    i += 1
+        if self._nom == "DuckGod":
+            self._surPlace, self._positionSource = False, Rect(0,0,24,26)
+
+    def _gererEtape(self):
+        etapeActuelle = self._etapeTraitement
+        God.traitement[self._nom]["fct"][self._etapeTraitement]()
+        while etapeActuelle < self._etapeTraitement:
+            etapeActuelle = self._etapeTraitement
+            God.traitement[self._nom]["fct"][self._etapeTraitement]()
+
+    def _ajusterPositionSource(self, enMarche, direction):
+        if self._nom != "DuckGod":
+            Mobile._ajusterPositionSource(self, enMarche, direction)
+            return
+        self._positionSource.left, self._positionSource.top = 0, 0
+        if self._surPlace:
+            self._positionSource.left += 24 * 4
+        if "Bas" in direction:
+            pass
+        elif "Gauche" in direction:
+            self._positionSource.top = 1 * 26
+        elif "Haut" in direction:
+            self._positionSource.top = 2 * 26
+        elif "Droite" in direction:
+            self._positionSource.top = 3 * 26
+        self._positionSource.left += (self._etapeAnimation-1) * 24
+
+    def _determinerAnimation(self, surPlace=False):
+        if self._nom != "DuckGod":
+            return Mobile._determinerAnimation(self, surPlace=surPlace)
+        if self._surPlace != surPlace:
+            self._etapeAnimation = 1
+        self._surPlace = surPlace
+        if Horloge.sonner(id(self), 2) or self._surPlace:
+            self._etapeAnimation += 1
+            if self._etapeAnimation > 4:
+                self._etapeAnimation = 1
+            Horloge.initialiser(id(self), 2, self._dureeAnimation)
+            return True
+        else:
+            return False
+
+    def _gererEtapeDuckGod1(self):
+        pass
+
+    def _gererEtapeDuckGod2(self):
+        pass
+
+    def _gererEtapeCrowGod1(self):
+        pass
+
+    def _gererEtapeCrowGod2(self):
+        pass
+
+    def _gererEtapeWizardGod1(self):
+        pass
+
+    def _gererEtapeWizardGod2(self):
+        pass
 
 class GestionnaireAnimaux(Evenement):
     def __init__(self, jeu, gestionnaire):
@@ -1704,6 +1806,21 @@ class TableNuts(ObjetAPoser):
     def _actionsApresPose(self, initiale=False):
         if initiale:
             self._boiteOutils.interrupteurs["nutsOnTable"].activer()
+
+class BruiteurPasJoueur(Evenement):
+    def __init__(self, jeu, gestionnaire):
+        Evenement.__init__(self, jeu, gestionnaire)
+        self._cartesGrottes = ["Entree Maison Gods", "Maison Gods"]
+        self._xJoueurOld, self._yJoueurOld, self._comptePas, self._nombreSonsJoues = -1, -1, -1, 0
+
+    def traiter(self):
+        if self._gestionnaire.nomCarte in self._cartesGrottes:
+            if self._gestionnaire.xJoueur != self._xJoueurOld or self._gestionnaire.yJoueur != self._yJoueurOld:
+                self._xJoueurOld, self._yJoueurOld = self._gestionnaire.xJoueur, self._gestionnaire.yJoueur
+                self._comptePas += 1
+                if self._comptePas == 3:
+                    self._comptePas, self._nombreSonsJoues = 0, self._nombreSonsJoues + 1
+                    self._boiteOutils.jouerSon("CaveSteps", "CaveSteps"+str(self._nombreSonsJoues), volume=0.3)
 
 class SignaleurJoueur(Evenement):
     def __init__(self, jeu, gestionnaire, *parametres):

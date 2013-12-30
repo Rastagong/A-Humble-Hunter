@@ -23,6 +23,7 @@ except:
 from constantes import *
 from narro.gestionnairevenements import *
 from narro.constantes import *
+import listeEvenements
 from listeEvenements import *
 
 class MonGestionnaireEvenements(GestionnaireEvenements):
@@ -72,6 +73,7 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
         self._evenements["abstraits"]["Divers"]["Narrateur"] = Narrateur(self._jeu, self)
         self._evenements["abstraits"]["Divers"]["GestionnaireAnimaux"] = GestionnaireAnimaux(self._jeu, self)
         self._evenements["abstraits"]["Divers"]["SignaleurJoueur"] = SignaleurJoueur(self._jeu, self)
+        #self._evenements["abstraits"]["Divers"]["BruiteurPasJoueur"] = BruiteurPasJoueur(self._jeu, self)
 
     def chargerEvenements(self, nomCarte):
         if nomCarte == "Clairiere" and nomCarte not in self._cartesChargees:
@@ -109,5 +111,13 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
         elif nomCarte == "Entree Maison Gods" and nomCarte not in self._cartesChargees:
             self._evenements["concrets"]["Entree Maison Gods"]["VersDream"] =  [Teleporteur(self._jeu, self, "Maison Dream", 285, 22, 2, fonctionApres=retourMaisonDream), (9,9), "Aucune"]
             self._evenements["concrets"]["Entree Maison Gods"]["Trou"] =  [Teleporteur(self._jeu, self, "Maison Gods", 3, 4, 2, fonctionApres=sautMaisonGods, joueurBloque=True), (3,5), "Aucune"]
+        elif nomCarte == "Maison Gods" and nomCarte not in self._cartesChargees:
+            self._evenements["concrets"]["Maison Gods"]["DuckGod"] = [God(self._jeu, self, 69, 42, 2, "Droite", "DuckGod", "DuckGod.png"), (69,42), "Droite"]
+            self._evenements["concrets"]["Maison Gods"]["CrowGod"] = [God(self._jeu, self, 73, 42, 2, "Gauche", "CrowGod", "Crow.png"), (73,42), "Gauche"]
+            self._evenements["concrets"]["Maison Gods"]["WizardGod"] = [God(self._jeu, self, 76, 36, 2, "Gauche", "WizardGod", "WizardGod.png"), (76,36), "Haut"]
+            self._evenements["concrets"]["Maison Gods"]["Bruiteur"] = [Bruiteur(self._jeu, self), (0,0), "Aucune"]
         if nomCarte not in self._cartesChargees:
             self._cartesChargees.append(nomCarte)
+
+    def _recharger(self):
+        pass
