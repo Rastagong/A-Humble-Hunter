@@ -32,6 +32,7 @@ The source code of the program is licensed under the GNU GPL (refer to COPYING).
 * The rabbit is a work by Stephen "Redshrike" Challener used in PixelFarm (https://bitbucket.org/tebruno99/pixelfarm), a project from tebruno99. It is published under the terms of both the Creative Commons Attribution 3.0 (CC-BY) and Creative Commons Attribution-ShareAlike 3.0 (CC-BY-SA) licenses. http://opengameart.org/content/bunny-rabbit-lpc-style-for-pixelfarm
 * Hyptosis' tiles are published under the terms of the Creative Commons Attribution 3.0 license. You can find them here: http://opengameart.org/content/lots-of-free-2d-tiles-and-sprites-by-hyptosis. You should also have a look at the games he contribued to, like the "Alice is dead" horror point'n'click. This guy is really talented. http://hyptosis.newgrounds.com/
 * The crow sprite is a work by DoubleLeggy, freely available and reusable. Check it out on DeviantArt: http://doubleleggy.deviantart.com/art/RE3-Monster-Sprites-v1-0-149653953
+* The sign image is a work by Nikke (http://www.ironbane.com/) licensed under the Creative Commons Attribution-ShareAlike 3.0 (CC-BY-SA). http://opengameart.org/content/sign-pack 
 
 #### 3.1a The Liberated Pixel Cup
 The Liberated Pixel Cup assets (base\_out\_atlas.png, terrain\_atlas.png) were made for OpenGameArt.org by a bunch of awesome people I can't thank enough.  
@@ -79,6 +80,7 @@ A certain number of graphics come from The Mana World, a promising open source 2
 ### 3.3 Music
 * Lost In The Meadows is a calm and enchanting music by Brandon Morris (HaelDB), which is licensed under the Creative Commons Attribution 3.0 (CC-BY). You should really listen to his tracks on OpenGameArt.org or Youtube. http://opengameart.org/content/lost-in-the-meadows, https://www.youtube.com/brandon75689 
 * Osare Unrest Theme is another music by Brandon Morris, licensed under the Creative Commons Attribution 3.0 (CC-BY). http://opengameart.org/content/osare-unrest-theme
+* The tea music is a wonderful piece from the album Cup of Tea, by Sláinte. This Celtic band was one of the first to make money on the Internet solely with donations, back in the days, on mp3.com. You can listen to the full album on the Free Music Archive (http://freemusicarchive.org/music/Slinte/Cup_of_Tea/), it is licensed under the Creative Commons Attribution-ShareAlike 3.0 (CC-BY-SA).
 
 ### 3.4 Miscellaneous
 * The Write Feather icon (Narro.ico) is a work by Double-J Design (http://www.doublejdesign.co.uk) published under the terms of the Creative Commons Attribution 3.0 license (CC-BY).

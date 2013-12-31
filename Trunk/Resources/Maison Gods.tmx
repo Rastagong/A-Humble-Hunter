@@ -6,6 +6,7 @@
  <tileset firstgid="1497" source="inn_x2.tsx"/>
  <tileset firstgid="1561" source="woodland_indoor.tsx"/>
  <tileset firstgid="1817" source="woodland_indoor_x3.tsx"/>
+ <tileset firstgid="1865" source="Sign.tsx"/>
  <imagelayer name="Image Layer 1" width="90" height="48">
   <image source="Background Lave.png"/>
  </imagelayer>
@@ -12143,7 +12144,7 @@
    <tile gid="0"/>
    <tile gid="1837"/>
    <tile gid="1837"/>
-   <tile gid="0"/>
+   <tile gid="1865"/>
    <tile gid="1588"/>
    <tile gid="1589"/>
    <tile gid="0"/>

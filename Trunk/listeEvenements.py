@@ -118,6 +118,7 @@ class Narrateur(Evenement):
         super().__init__(jeu, gestionnaire)
         self._penseePossible, self._etape, self._coefNoircisseur, self._alpha = InterrupteurInverse(self._boiteOutils.penseeAGerer), 0, 0, 255
         self._messageBoutonInteraction, self._premiereMortChasse, self._traitement, etapeMax, i = False, False, dict(), 37, 0 
+        self._penseeMaisonGods = False
         while i <= etapeMax:
             self._traitement[i] = getattr(self, "_traiter"+str(i)) #On référence les fonctions de traitement dans un dico : elles ont pour nom _traiter0, _traiter1...
             i += 1
@@ -423,40 +424,48 @@ class Narrateur(Evenement):
             Horloge.initialiser(id(self), "Tea time1",1)
             Horloge.initialiser(id(self), "Tea time2",1)
         if self._gestionnaire.nomCarte == "Maison Gods":
+            if self._penseeMaisonGods is False:
+                Horloge.initialiser(id(self), "Pensée Maison Gods", 2000)
+                self._penseeMaisonGods = True
+            if Horloge.sonner(id(self), "Pensée Maison Gods"):
+                self._boiteOutils.ajouterPensee("Where the hell???")
             if self._gestionnaire.xJoueur == 57 and self._gestionnaire.yJoueur == 31:
+                self._boiteOutils.interrupteurs["DébutConversation"].activer()
                 self._boiteOutils.ajouterPensee("...which is why I find his opinions undoubtedly distasteful.", faceset="Crow.png")
                 self._boiteOutils.ajouterPensee("Mistaking me for a Spirit of the lakes, really. What a lack of consideration.", faceset="Crow.png")
                 self._boiteOutils.ajouterPensee("Was I to lose my honour, I'd rather have chosen the skies.", faceset="Crow.png")
                 self._boiteOutils.ajouterPensee("Actually, I do understand his mistake. Just have look at you for a minute:", faceset="DuckGod.png")
-                self._boiteOutils.ajouterPensee("feathers, beaks, wings... There isn't much difference between us!", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("feathers, beak, wings... There isn't much difference between us!", faceset="DuckGod.png")
                 self._boiteOutils.ajouterPensee("Now how dare you, Sir Duck?", faceset="Crow.png")
                 self._boiteOutils.ajouterPensee("I say, aren't we both ruling over the forests of the Middle South?", faceset="DuckGod.png")
                 self._boiteOutils.ajouterPensee("Well, I can't state otherwise...", faceset="Crow.png")
                 self._boiteOutils.ajouterPensee("Well, my dear, we could both rule over the Marine Realms.", faceset="DuckGod.png")
-                self._boiteOutils.ajouterPensee("I'm continuously mistaken for a a marine creature myself,", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("I'm myself continuously mistaken for a spirit of the sea,", faceset="DuckGod.png")
                 self._boiteOutils.ajouterPensee("even though it should be common knowledge that I daren't leave my pond.", faceset="DuckGod.png")
                 self._boiteOutils.ajouterPensee("It has nothing to do with my current situation!", faceset="Crow.png")
                 self._boiteOutils.ajouterPensee("Surely, you've never seen Sir Falcon mistaken for Sir Salmon!", faceset="Crow.png")
                 self._boiteOutils.ajouterPensee("I'll grant you that.", faceset="DuckGod.png")
                 self._boiteOutils.ajouterPensee("Then tell me for which reason I don't deserve the same rank and dignity.", faceset="Crow.png")
-                self._boiteOutils.ajouterPensee("Se, there's a wide range of worthiness between the crow and the falcon.", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("See, there's a wide range of worthiness between the crow and the falcon.", faceset="DuckGod.png")
                 self._boiteOutils.ajouterPensee("A wide range of worthiness, really?", faceset="Crow.png")
                 self._boiteOutils.ajouterPensee("A wide range, indeed. You're nowhere as majestic.", faceset="DuckGod.png")
-                self._boiteOutils.ajouterPensee("Here are some biscuits for your argument. Please proceed. I enjoy it.", faceset="WizardGod.png")
+                self._boiteOutils.ajouterPensee("I'm very sorry to interrupt your argument, which is delightful to hear...", faceset="WizardGod.png")
+                self._boiteOutils.ajouterPensee("But I've brought biscuits. Now please continue. I enjoy it. I'll join you soon.", faceset="WizardGod.png")
                 self._boiteOutils.ajouterPensee("Well, thank you very much, Sir Wizard.", faceset="Crow.png")
-                self._boiteOutils.ajouterPensee("Learn, my friend, that our respective worthiness doesn't relie on the same qualities:", faceset="Crow.png")
+                self._boiteOutils.ajouterPensee("Learn, my friend, that our respective worthiness don't relie on the same qualities:", faceset="Crow.png")
                 self._boiteOutils.ajouterPensee("While Sir Falcon is respected for his majestic windspan, I, Sir Crow,", faceset="Crow.png")
                 self._boiteOutils.ajouterPensee("am feared by both men and fairies, for the news I bring truly are terrible.", faceset="Crow.png")
-                self._boiteOutils.ajouterPensee("This, my friend, used to be true centuries ago.", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("This, my friend, used to be true in our youth, centuries ago.", faceset="DuckGod.png")
                 self._boiteOutils.ajouterPensee("Nowadays most men have completely forgotten the fear you inspired them.", faceset="DuckGod.png")
                 self._boiteOutils.ajouterPensee("Would you venture into a city, would they certainly try to have you roasted.", faceset="DuckGod.png")
-                self._boiteOutils.ajouterPensee("Roasted, really? The tastes of the men haven't improved.", faceset="Crow.png")
+                self._boiteOutils.ajouterPensee("Roasted, really? The taste of men hasn't improved with time.", faceset="Crow.png")
                 self._boiteOutils.ajouterPensee("Would they try to do so, you do know what would happen to them.", faceset="Crow.png")
                 self._boiteOutils.ajouterPensee("Well, I sure do! But they don't. That's the problem of our times.", faceset="DuckGod.png")
                 self._boiteOutils.ajouterPensee("I'm glad we still have the men of the countryside and of the forests.", faceset="Crow.png")
                 self._boiteOutils.ajouterPensee("I sure am too.", faceset="DuckGod.png")
-                self._boiteOutils.ajouterPensee("Won't you come with us, Sir Wizard? We're drinking your tea and eating your biscuits.", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("Won't you come with us, Sir Wizard? We're eating your biscuits.", faceset="DuckGod.png")
                 self._boiteOutils.ajouterPensee("Not many will remain.", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("I'm almost done by now, please don't worry about me.", faceset="WizardGod.png")
                 self._etape += 1
 
     def _traiter36(self):
@@ -800,15 +809,28 @@ class Bruiteur(EvenementConcret):
             self._sonsLances = True
         if self._gestionnaire.xJoueur < 59 and self._gestionnaire.yJoueur < 31:
             self._volume1, self._volume2 = 1.0, 0
-        elif self._gestionnaire.xJoueur >= 59:
+        elif self._gestionnaire.xJoueur >= 67:
             self._volume1, self._volume2 = 0, 1.0
         else: #Zone de transition
             self._volume1 = 1.0 - ((self._gestionnaire.yJoueur - 30) / 10)
-            distanceVolume2 = abs(71 - self._gestionnaire.xJoueur) + abs(41 - self._gestionnaire.yJoueur)
-            self._volume2 = 1.0 - (distanceVolume2 / 50)
+            distanceY = 41 - self._gestionnaire.yJoueur
+            if self._gestionnaire.xJoueur < 59 and distanceY >= 8:
+                self._volume2 = 1.0 - (distanceY / 10.5)
+            elif self._gestionnaire.xJoueur < 59 and distanceY >= 5:
+                self._volume2 = 1.0 - (distanceY / 10)
+            elif self._gestionnaire.xJoueur < 59:
+                self._volume2 = 0.5
+            elif self._gestionnaire.xJoueur > 59: 
+                distanceX = 67 - self._gestionnaire.xJoueur
+                if distanceX >= 6:
+                    self._volume2 = 1.0 - (distanceX / 17.5)
+                elif distanceX >= 2:
+                    self._volume2 = 1.0 - (distanceX / 17)
+                elif distanceX == 1:
+                    self._volume2 = 0.9
         if self._boiteOutils.getVolumeInstance("Lava") != self._volume1: 
             self._boiteOutils.changerVolumeInstance("Lava", self._volume1)
-        if self._boiteOutils.getVolumeInstance("Tea Music") != self._volume1: 
+        if self._boiteOutils.getVolumeInstance("Tea Music") != self._volume2: 
             self._boiteOutils.changerVolumeInstance("Tea Music", self._volume2)
 
 class God(PNJ):
@@ -878,10 +900,16 @@ class God(PNJ):
         pass
 
     def _gererEtapeWizardGod1(self):
-        pass
+        if self._boiteOutils.interrupteurs["DébutConversation"].voir() is True:
+            self._lancerTrajet(False, "VHaut76000", "Gauche", "Gauche", "Gauche", "Bas","Bas","Bas","Bas","Gauche","Gauche","Gauche","VBas10000","Droite","Droite","Droite","Haut","Haut","Haut","Haut","Droite","Droite","Droite","VHaut2500")
+            self._etapeTraitement += 1
 
     def _gererEtapeWizardGod2(self):
         pass
+
+    def _gererEtapeWizardGod3(self):
+        if self._deplacementBoucle is False and self._xTile == 71 and self._yTile == 40:
+            self._lan
 
 class GestionnaireAnimaux(Evenement):
     def __init__(self, jeu, gestionnaire):
