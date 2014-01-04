@@ -436,7 +436,7 @@ class Narrateur(Evenement):
             if self._gestionnaire.xJoueur == 57 and self._gestionnaire.yJoueur == 31:
                 self._boiteOutils.interrupteurs["DébutConversation"].activer()
                 self._boiteOutils.ajouterPensee("...which is why I find his opinions undoubtedly distasteful.", faceset="Crow.png")
-                self._boiteOutils.ajouterPensee("Mistaking me for a Spirit of the lakes, really. What a lack of consideration.", faceset="Crow.png")
+                self._boiteOutils.ajouterPensee("Mistaking me for a Lord of the lakes, really. What a lack of consideration.", faceset="Crow.png")
                 self._boiteOutils.ajouterPensee("Was I to lose my honour, I'd rather have chosen the skies.", faceset="Crow.png")
                 self._boiteOutils.ajouterPensee("Actually, I do understand his mistake. Just have look at you for a minute:", faceset="DuckGod.png")
                 self._boiteOutils.ajouterPensee("feathers, beak, wings... There isn't much difference between us!", faceset="DuckGod.png")
@@ -444,7 +444,7 @@ class Narrateur(Evenement):
                 self._boiteOutils.ajouterPensee("I say, aren't we both ruling over the forests of the Middle South?", faceset="DuckGod.png")
                 self._boiteOutils.ajouterPensee("Well, I can't state otherwise...", faceset="Crow.png")
                 self._boiteOutils.ajouterPensee("Well, my dear, we could both rule over the Marine Realms.", faceset="DuckGod.png")
-                self._boiteOutils.ajouterPensee("I'm myself continuously mistaken for a spirit of the sea,", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("I'm myself continuously mistaken for a Lord of the sea,", faceset="DuckGod.png")
                 self._boiteOutils.ajouterPensee("even though it should be common knowledge that I daren't leave my pond.", faceset="DuckGod.png")
                 self._boiteOutils.ajouterPensee("It has nothing to do with my current situation!", faceset="Crow.png")
                 self._boiteOutils.ajouterPensee("Surely, you've never seen Sir Falcon mistaken for Sir Salmon!", faceset="Crow.png")
@@ -483,10 +483,27 @@ class Narrateur(Evenement):
 
     def _traiter36(self):
         self._gererSonsThe()
+        if self._gestionnaire.xJoueur == 60 and self._gestionnaire.yJoueur == 35:
+            self._boiteOutils.changerBloc(60, 39, 1, "woodland_indoor_x3.png", (0,64,32,32), (0,0,0), False)
+            self._boiteOutils.changerBloc(60, 38, 1, "woodland_indoor_x3.png", (0,32,32,32), (0,0,0), False)
+            self._boiteOutils.changerBloc(60, 37, 3, "woodland_indoor_x3.png", (0,0,32,32), (0,0,0), True)
+            self._etape += 1
 
     def _traiter37(self):
-        if Horloge.sonner(id(self), "Stop The"):
-                self._etape += 1
+        self._gererSonsThe()
+        if self._gestionnaire.yJoueur == 40:
+            self._boiteOutils.ajouterPensee(".........", faceset="WizardGod.png")
+            self._boiteOutils.ajouterPensee("Sir Duck, surely there must be a misunderstanding.", faceset="Crow.png")
+            self._boiteOutils.ajouterPensee("To be honest, I don't really see why.", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("Why does one have to be so obviou with you all the time?", faceset="Crow.png")
+            self._boiteOutils.ajouterPensee("Your friend is no Spirit Lord, he is a man.", faceset="Crow.png")
+            self._boiteOutils.ajouterPensee("He is a hunter. And he lives on our very own lands,", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("in the realm of the forest.", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("That does not quite explain the need to invite him for tea.", faceset="WizardGod.png")
+            self._boiteOutils.ajouterPensee("The only reason why I visited him in his dream is because...", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("...I heard him say pronounce something which you might consider insulting.", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("He said that “the gods hadn't been fair with the humble hunter he is”.", faceset="DuckGod.png")
+            self._etape += 1
 
     def _traiter38(self):
         pass
@@ -919,6 +936,11 @@ class God(PNJ):
             self._lancerTrajet("RGauche", False)
             self._etapeTraitement += 1
 
+    def _suivreJoueurDuRegard(self):
+        self._majInfosJoueur()
+        if self._joueurBouge[0]:
+            self._lancerTrajet(self._boiteOutils.regardVersPnj("Joueur", self._xTile, self._yTile), False)
+
     def _gererEtapeDuckGod1(self):
         self._invitesConversation()
 
@@ -951,13 +973,13 @@ class God(PNJ):
             self._etapeTraitement += 1
 
     def _gererEtapeDuckGod6(self):
-        pass
+        self._suivreJoueurDuRegard()
 
     def _gererEtapeCrowGod1(self):
         self._invitesConversation()
 
     def _gererEtapeCrowGod2(self):
-        pass
+        self._suivreJoueurDuRegard()
 
     def _gererEtapeWizardGod1(self):
         if self._boiteOutils.interrupteurs["DébutConversation"].voir() is True and self._etapeMarche == 1:
@@ -978,8 +1000,8 @@ class God(PNJ):
             self._boiteOutils.ajouterPensee("Who's that? I didn't expect anyone else.", faceset="WizardGod.png")
             self._boiteOutils.ajouterPensee("Oh, don't worry, I know who that is.", faceset="DuckGod.png")
             self._boiteOutils.ajouterPensee("I thought I would bring... er... an acquaintance.", faceset="DuckGod.png")
-            self._boiteOutils.ajouterPensee("You do suprise me, Sir Duck. But then go on, let this Spirit enter.", faceset="WizardGod.png")
-            self._boiteOutils.ajouterPensee("He's not exactly a spirit but... you'll see.", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("You do suprise me, Sir Duck. But then go on, let this Lord enter.", faceset="WizardGod.png")
+            self._boiteOutils.ajouterPensee("He's not exactly a Lord but... you'll see.", faceset="DuckGod.png")
             self._etapeTraitement += 1
 
     def _gererEtapeWizardGod4(self):
@@ -988,7 +1010,7 @@ class God(PNJ):
             self._etapeTraitement += 1
 
     def _gererEtapeWizardGod5(self):
-        pass
+        self._suivreJoueurDuRegard()
 
 class GestionnaireAnimaux(Evenement):
     def __init__(self, jeu, gestionnaire):
