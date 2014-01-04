@@ -29,6 +29,8 @@ from narro.pnj import *
 from narro.constantes import *
 from narro import directions
 import os, random
+if SESSION_DEBUG:
+    import pdb
 
 class LanceurMusique(Evenement):
     def __init__(self, jeu, gestionnaire):
@@ -488,6 +490,10 @@ class Narrateur(Evenement):
     def _traiter37(self):
         if Horloge.sonner(id(self), "Stop The"):
                 self._boiteOutils.ajouterPensee("Who's that? I didn't expect anyone else.", faceset="WizardGod.png")
+                self._boiteOutils.ajouterPensee("Oh, don't worry, I know who that is.", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("I thought I would bring... er... an acquaintance.", faceset="DuckGod.png")
+                self._boiteOutils.ajouterPensee("You do suprise me, Sir Duck. But then go on, let this Spirit enter.", faceset="WizardGod.png")
+                self._boiteOutils.ajouterPensee("He's not exactly a spirit but... you'll see.", faceset="DuckGod.png")
                 self._etape += 1
 
     def _traiter38(self):
@@ -841,11 +847,12 @@ class Bruiteur(EvenementConcret):
                     self._volume2 = 1.0 - (distanceX / 17)
                 elif distanceX == 1:
                     self._volume2 = 0.9
-        if self._boiteOutils.getVolumeInstance("Lava") != self._volume1: 
-            self._boiteOutils.changerVolumeInstance("Lava", self._volume1)
-        if self._boiteOutils.interrupteurs["MusiqueThe"].voir() is True:
-            if self._boiteOutils.getVolumeInstance("Tea Music") != self._volume2: 
-                self._boiteOutils.changerVolumeInstance("Tea Music", self._volume2)
+        if not JEU_MUET:
+            if self._boiteOutils.getVolumeInstance("Lava") != self._volume1: 
+                self._boiteOutils.changerVolumeInstance("Lava", self._volume1)
+            if self._boiteOutils.interrupteurs["MusiqueThe"].voir() is True:
+                if self._boiteOutils.getVolumeInstance("Tea Music") != self._volume2: 
+                    self._boiteOutils.changerVolumeInstance("Tea Music", self._volume2)
 
 class SkullRing(EvenementConcret):
     def __init__(self, jeu, gestionnaire):
@@ -862,26 +869,25 @@ class SkullRing(EvenementConcret):
             self._boiteOutils.arreterPensees()
 
 class God(PNJ):
-    traitement = False
+    etapesMax = { "DuckGod": 4, "CrowGod": 2, "WizardGod": 5 }
+    wizardQuestion, duckOuverture = False, False
 
     def __init__(self, jeu, gestionnaire, x, y, c, directionDepart, nom, fichier):
         super().__init__(jeu, gestionnaire, nom, x, y, c, fichier, (0,0,0), (0,0), True, ["V"+directionDepart+str(2500)], directionDepart=directionDepart)
-        if God.traitement == False:
-            God.traitement = { "DuckGod": {"etapeMax":2, "fct":[]}, "CrowGod": {"etapeMax":2, "fct":[]}, "WizardGod": {"etapeMax":2, "fct":[]} }
-            for nom in God.traitement.keys():
-                i = 1
-                while i <= God.traitement[nom]["etapeMax"]:
-                    God.traitement[nom]["fct"].append( getattr(self, "_gererEtape" + nom + str(i)) )
-                    i += 1
+        i, self.traitement = 1, {}
+        while i <= God.etapesMax[nom]:
+            self.traitement[i] = getattr(self, "_gererEtape" + nom + str(i))
+            i += 1
         if self._nom == "DuckGod":
             self._surPlace, self._positionSource = False, Rect(0,0,24,26)
+        self._penseePossible = InterrupteurInverse(self._boiteOutils.penseeAGerer)
 
     def _gererEtape(self):
         etapeActuelle = self._etapeTraitement
-        God.traitement[self._nom]["fct"][self._etapeTraitement]()
+        self.traitement[self._etapeTraitement]()
         while etapeActuelle < self._etapeTraitement:
             etapeActuelle = self._etapeTraitement
-            God.traitement[self._nom]["fct"][self._etapeTraitement]()
+            self.traitement[self._etapeTraitement]()
 
     def _ajusterPositionSource(self, enMarche, direction):
         if self._nom != "DuckGod":
@@ -915,29 +921,62 @@ class God(PNJ):
         else:
             return False
 
+    def _invitesConversation(self):
+        if self._boiteOutils.interrupteurs["JoueurSonneMaisonGods"].voir() is True and self._etapeMarche == 1:
+            self._finirDeplacementSP()
+            self._lancerTrajet("RGauche", False)
+            self._etapeTraitement += 1
+
     def _gererEtapeDuckGod1(self):
-        pass
+        self._invitesConversation()
 
     def _gererEtapeDuckGod2(self):
+        if God.wizardQuestion == True:
+            self._lancerTrajet("VHaut2500", True)
+            Horloge.initialiser(id(self), "Discussion visiteur", 13000)
+            self._etapeTraitement += 1
+
+    def _gererEtapeDuckGod3(self):
+        if Horloge.sonner(id(self), "Discussion visiteur"):
+            self._finirDeplacementSP()
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 60, 35, regardFinal="Bas")
+            God.duckOuverture = True
+            self._etapeTraitement += 1
+
+    def _gererEtapeDuckGod4(self):
         pass
 
     def _gererEtapeCrowGod1(self):
-        pass
+        self._invitesConversation()
 
     def _gererEtapeCrowGod2(self):
         pass
 
     def _gererEtapeWizardGod1(self):
-        if self._boiteOutils.interrupteurs["DébutConversation"].voir() is True:
-            self._lancerTrajet(False, "VHaut76000", "Gauche", "Gauche", "Gauche", "Bas","Bas","Bas","Bas","Gauche","Gauche","Gauche","VBas10000","Droite","Droite","Droite","Haut","Haut","Haut","Haut","Droite","Droite","Droite","VHaut2500")
+        if self._boiteOutils.interrupteurs["DébutConversation"].voir() is True and self._etapeMarche == 1:
+            self._lancerTrajet("VHaut63000", "Gauche", "Gauche", "Gauche", "Bas","Bas","Bas","Bas","Gauche","Gauche","Gauche","VBas10000","Droite","Droite","Droite","Haut","Haut","Haut","Haut","Droite","Droite","Droite","VHaut2500", False)
             self._etapeTraitement += 1
 
     def _gererEtapeWizardGod2(self):
-        pass
+        if self._boiteOutils.interrupteurs["JoueurSonneMaisonGods"].voir() is True and (self._deplacementBoucle is False or self._etapeMarche == 1 or "V" in self._listeActions[self._etapeAction]):
+            self._finirDeplacementSP()
+            self._lancerTrajet("RGauche",False)
+            self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, 69, 41, regardFinal="Bas")
+            self._etapeTraitement += 1
 
     def _gererEtapeWizardGod3(self):
-        if self._deplacementBoucle is False and self._xTile == 71 and self._yTile == 40:
-            self._lan
+        if self._deplacementBoucle is False and self._xTile == 69 and self._yTile == 41:
+            God.wizardQuestion = True
+            self._lancerTrajet("VBas2500",True)
+            self._etapeTraitement += 1
+
+    def _gererEtapeWizardGod4(self):
+        if God.duckOuverture is True:
+            self._lancerTrajet("Aucune", False)
+            self._etapeTraitement += 1
+
+    def _gererEtapeWizardGod5(self):
+        pass
 
 class GestionnaireAnimaux(Evenement):
     def __init__(self, jeu, gestionnaire):
