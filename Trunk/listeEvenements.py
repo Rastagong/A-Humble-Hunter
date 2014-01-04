@@ -117,7 +117,7 @@ class Narrateur(Evenement):
     def __init__(self, jeu, gestionnaire):
         super().__init__(jeu, gestionnaire)
         self._penseePossible, self._etape, self._coefNoircisseur, self._alpha = InterrupteurInverse(self._boiteOutils.penseeAGerer), 0, 0, 255
-        self._messageBoutonInteraction, self._premiereMortChasse, self._traitement, etapeMax, i = False, False, dict(), 37, 0 
+        self._messageBoutonInteraction, self._premiereMortChasse, self._traitement, etapeMax, i = False, False, dict(), 38, 0 
         self._penseeMaisonGods = False
         while i <= etapeMax:
             self._traitement[i] = getattr(self, "_traiter"+str(i)) #On référence les fonctions de traitement dans un dico : elles ont pour nom _traiter0, _traiter1...
@@ -481,8 +481,16 @@ class Narrateur(Evenement):
 
     def _traiter36(self):
         self._gererSonsThe()
+        if self._boiteOutils.interrupteurs["JoueurSonneMaisonGods"].voir():
+            Horloge.initialiser(id(self), "Stop The", 5000)
+            self._etape += 1
 
     def _traiter37(self):
+        if Horloge.sonner(id(self), "Stop The"):
+                self._boiteOutils.ajouterPensee("Who's that? I didn't expect anyone else.", faceset="WizardGod.png")
+                self._etape += 1
+
+    def _traiter38(self):
         pass
 
     def onMortAnimal(self, typeAnimal, viaChasse=False):
