@@ -418,11 +418,13 @@ class Narrateur(Evenement):
                 Horloge.initialiser(id(self), "Tea time1",1)
                 Horloge.initialiser(id(self), "Tea time2",1)
             self._boiteOutils.interrupteurs["RetourDuckGod"].activer()
+            self._boiteOutils.interrupteurs["MusiqueThe"].activer()
 
     def _traiter35(self):
         if LANCEMENT_ULTERIEUR:
             Horloge.initialiser(id(self), "Tea time1",1)
             Horloge.initialiser(id(self), "Tea time2",1)
+            self._boiteOutils.interrupteurs["MusiqueThe"].activer()
         if self._gestionnaire.nomCarte == "Maison Gods":
             if self._penseeMaisonGods is False:
                 Horloge.initialiser(id(self), "Pensée Maison Gods", 2000)
@@ -468,13 +470,17 @@ class Narrateur(Evenement):
                 self._boiteOutils.ajouterPensee("I'm almost done by now, please don't worry about me.", faceset="WizardGod.png")
                 self._etape += 1
 
+    def _gererSonsThe(self):
+        if self._boiteOutils.interrupteurs["MusiqueThe"].voir() is True:
+            if Horloge.sonner(id(self), "Tea time1"):
+                self._boiteOutils.jouerSon("BruitsRepas", "Bruits repas Gods1", fixe=True, xFixe=71, yFixe=42)
+                Horloge.initialiser(id(self), "Tea time1", random.randint(3000,10000))
+            if Horloge.sonner(id(self), "Tea time2"):
+                self._boiteOutils.jouerSon("BruitThe", "Bruits repas Gods2", fixe=True, xFixe=71, yFixe=42)
+                Horloge.initialiser(id(self), "Tea time2", random.randint(10000,20000))
+
     def _traiter36(self):
-        if Horloge.sonner(id(self), "Tea time1"):
-            self._boiteOutils.jouerSon("BruitsRepas", "Bruits repas Gods1", fixe=True, xFixe=71, yFixe=42)
-            Horloge.initialiser(id(self), "Tea time1", random.randint(3000,10000))
-        if Horloge.sonner(id(self), "Tea time2"):
-            self._boiteOutils.jouerSon("BruitThe", "Bruits repas Gods2", fixe=True, xFixe=71, yFixe=42)
-            Horloge.initialiser(id(self), "Tea time2", random.randint(10000,20000))
+        self._gererSonsThe()
 
     def _traiter37(self):
         pass
@@ -829,8 +835,23 @@ class Bruiteur(EvenementConcret):
                     self._volume2 = 0.9
         if self._boiteOutils.getVolumeInstance("Lava") != self._volume1: 
             self._boiteOutils.changerVolumeInstance("Lava", self._volume1)
-        if self._boiteOutils.getVolumeInstance("Tea Music") != self._volume2: 
-            self._boiteOutils.changerVolumeInstance("Tea Music", self._volume2)
+        if self._boiteOutils.interrupteurs["MusiqueThe"].voir() is True:
+            if self._boiteOutils.getVolumeInstance("Tea Music") != self._volume2: 
+                self._boiteOutils.changerVolumeInstance("Tea Music", self._volume2)
+
+class SkullRing(EvenementConcret):
+    def __init__(self, jeu, gestionnaire):
+        EvenementConcret.__init__(self, jeu, gestionnaire)
+        self._fait = False
+
+    def _onJoueurInteractionQuelconque(self, x, y, c, direction):
+        if self._fait is False:
+            self._fait = True
+            self._boiteOutils.interrupteurs["JoueurSonneMaisonGods"].activer()
+            self._boiteOutils.interrupteurs["MusiqueThe"].desactiver()
+            self._boiteOutils.arreterSonEnFondu("Tea Music", 3000)
+            self._boiteOutils.jouerSon("DoorBell", "DoorBell")
+            self._boiteOutils.arreterPensees()
 
 class God(PNJ):
     traitement = False

@@ -31,7 +31,7 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
     def _getInterrupteurs(self):
         a = ["DecouverteSquirrels", "MusiqueForet", "Rires", "finChasse1", "JoueurEntre", "JoueurEntre2", "JoueurEntre3", "squirrelPose", "BeliaSortie","discussionEtang"]
         b = ["BeliaRentree", "TomEtage", "ElieEtage", "ConversationEnfants", "TomHungry", "nutsOnTable", "escalierLibre", "fogRises", "JoueurVuWizards", "Wizards disappear"]
-        c = ["RetourDuckGod", "RetourMaisonDream","DébutConversation"]
+        c = ["RetourDuckGod", "RetourMaisonDream","DébutConversation", "JoueurSonneMaisonGods", "MusiqueThe"]
         return a + b + c
 
     def _getVariables(self):
@@ -117,6 +117,7 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
             self._evenements["concrets"]["Maison Gods"]["WizardGod"] = [God(self._jeu, self, 77, 36, 2, "Gauche", "WizardGod", "WizardGod.png"), (77,36), "Haut"]
             self._evenements["concrets"]["Maison Gods"]["Bruiteur"] = [Bruiteur(self._jeu, self), (0,0), "Aucune"]
             self._evenements["concrets"]["Maison Gods"]["Panneau"] = [Panneau(self._jeu, self, "It reads: ring the skull bell", "Haut", splashTexte=True, tailleTexte=24), (64,38), "Aucune"]
+            self._evenements["concrets"]["Maison Gods"]["SkullRing"] = [SkullRing(self._jeu, self), (61,39), "Aucune"]
         if nomCarte not in self._cartesChargees:
             self._cartesChargees.append(nomCarte)
 
