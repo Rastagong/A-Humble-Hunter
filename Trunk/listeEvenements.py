@@ -807,18 +807,17 @@ class Bruiteur(EvenementConcret):
             self._boiteOutils.jouerSon("Lava", "Lava", nombreEcoutes=0)
             self._boiteOutils.jouerSon("TeaMusic", "Tea Music", volume=0, nombreEcoutes=0)
             self._sonsLances = True
-        if self._gestionnaire.xJoueur < 59 and self._gestionnaire.yJoueur < 31:
+        if self._gestionnaire.xJoueur < 59 and self._gestionnaire.yJoueur < 15:
             self._volume1, self._volume2 = 1.0, 0
         elif self._gestionnaire.xJoueur >= 67:
             self._volume1, self._volume2 = 0, 1.0
         else: #Zone de transition
             self._volume1 = 1.0 - ((self._gestionnaire.yJoueur - 30) / 10)
             distanceY = 41 - self._gestionnaire.yJoueur
-            if self._gestionnaire.xJoueur < 59 and distanceY >= 8:
-                self._volume2 = 1.0 - (distanceY / 10.5)
-            elif self._gestionnaire.xJoueur < 59 and distanceY >= 5:
-                self._volume2 = 1.0 - (distanceY / 10)
-            elif self._gestionnaire.xJoueur < 59:
+            if self._gestionnaire.xJoueur < 59 and distanceY > 2:
+                positionTransition = (((38 - self._gestionnaire.yJoueur) - 23) / -1) + 1
+                self._volume2 = (0.5/24) * positionTransition
+            elif self._gestionnaire.xJoueur < 59 and distanceY <= 2:
                 self._volume2 = 0.5
             elif self._gestionnaire.xJoueur > 59: 
                 distanceX = 67 - self._gestionnaire.xJoueur
