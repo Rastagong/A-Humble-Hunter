@@ -483,17 +483,9 @@ class Narrateur(Evenement):
 
     def _traiter36(self):
         self._gererSonsThe()
-        if self._boiteOutils.interrupteurs["JoueurSonneMaisonGods"].voir():
-            Horloge.initialiser(id(self), "Stop The", 5000)
-            self._etape += 1
 
     def _traiter37(self):
         if Horloge.sonner(id(self), "Stop The"):
-                self._boiteOutils.ajouterPensee("Who's that? I didn't expect anyone else.", faceset="WizardGod.png")
-                self._boiteOutils.ajouterPensee("Oh, don't worry, I know who that is.", faceset="DuckGod.png")
-                self._boiteOutils.ajouterPensee("I thought I would bring... er... an acquaintance.", faceset="DuckGod.png")
-                self._boiteOutils.ajouterPensee("You do suprise me, Sir Duck. But then go on, let this Spirit enter.", faceset="WizardGod.png")
-                self._boiteOutils.ajouterPensee("He's not exactly a spirit but... you'll see.", faceset="DuckGod.png")
                 self._etape += 1
 
     def _traiter38(self):
@@ -869,8 +861,8 @@ class SkullRing(EvenementConcret):
             self._boiteOutils.arreterPensees()
 
 class God(PNJ):
-    etapesMax = { "DuckGod": 4, "CrowGod": 2, "WizardGod": 5 }
-    wizardQuestion, duckOuverture = False, False
+    etapesMax = { "DuckGod": 6, "CrowGod": 2, "WizardGod": 5 }
+    wizardQuestion, duckOuverture, duckAccueil = False, False, False
 
     def __init__(self, jeu, gestionnaire, x, y, c, directionDepart, nom, fichier):
         super().__init__(jeu, gestionnaire, nom, x, y, c, fichier, (0,0,0), (0,0), True, ["V"+directionDepart+str(2500)], directionDepart=directionDepart)
@@ -944,6 +936,21 @@ class God(PNJ):
             self._etapeTraitement += 1
 
     def _gererEtapeDuckGod4(self):
+        if self._deplacementBoucle is False and self._xTile == 60 and self._yTile == 35:
+            self._boiteOutils.changerBloc(60, 39, 1, "woodland_indoor_x3.png", (32,64,32,32), (0,0,0), True)
+            self._boiteOutils.changerBloc(60, 38, 1, "woodland_indoor_x3.png", (32,32,32,32), (0,0,0), True)
+            self._boiteOutils.changerBloc(60, 37, 3, "woodland_indoor_x3.png", (32,0,32,32), (0,0,0), True)
+            self._boiteOutils.jouerSon("DoorOpening", "Door Maison Gods")
+            self._boiteOutils.ajouterPensee("Good morning, humble hunter. I knew you would make it.", faceset="DuckGod.png")
+            self._lancerTrajet("VBas3000","Droite","Droite","Droite","Droite","Droite","Droite","Droite","Droite","Droite","RGauche",False)
+            self._etapeTraitement += 1
+
+    def _gererEtapeDuckGod5(self):
+        if self._deplacementBoucle is False and self._xTile == 69 and self._yTile == 35:
+            God.duckAccueil = True
+            self._etapeTraitement += 1
+
+    def _gererEtapeDuckGod6(self):
         pass
 
     def _gererEtapeCrowGod1(self):
@@ -968,6 +975,11 @@ class God(PNJ):
         if self._deplacementBoucle is False and self._xTile == 69 and self._yTile == 41:
             God.wizardQuestion = True
             self._lancerTrajet("VBas2500",True)
+            self._boiteOutils.ajouterPensee("Who's that? I didn't expect anyone else.", faceset="WizardGod.png")
+            self._boiteOutils.ajouterPensee("Oh, don't worry, I know who that is.", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("I thought I would bring... er... an acquaintance.", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("You do suprise me, Sir Duck. But then go on, let this Spirit enter.", faceset="WizardGod.png")
+            self._boiteOutils.ajouterPensee("He's not exactly a spirit but... you'll see.", faceset="DuckGod.png")
             self._etapeTraitement += 1
 
     def _gererEtapeWizardGod4(self):
