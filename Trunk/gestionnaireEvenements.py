@@ -31,7 +31,7 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
     def _getInterrupteurs(self):
         a = ["DecouverteSquirrels", "MusiqueForet", "Rires", "finChasse1", "JoueurEntre", "JoueurEntre2", "JoueurEntre3", "squirrelPose", "BeliaSortie","discussionEtang"]
         b = ["BeliaRentree", "TomEtage", "ElieEtage", "ConversationEnfants", "TomHungry", "nutsOnTable", "escalierLibre", "fogRises", "JoueurVuWizards", "Wizards disappear"]
-        c = ["RetourDuckGod", "RetourMaisonDream","DébutConversation", "JoueurSonneMaisonGods", "MusiqueThe"]
+        c = ["RetourDuckGod", "RetourMaisonDream","DébutConversation", "JoueurSonneMaisonGods", "MusiqueThe", "DialogueVisiteur", "GodsAssis"]
         return a + b + c
 
     def _getVariables(self):

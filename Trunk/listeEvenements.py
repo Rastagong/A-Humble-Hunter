@@ -119,7 +119,7 @@ class Narrateur(Evenement):
     def __init__(self, jeu, gestionnaire):
         super().__init__(jeu, gestionnaire)
         self._penseePossible, self._etape, self._coefNoircisseur, self._alpha = InterrupteurInverse(self._boiteOutils.penseeAGerer), 0, 0, 255
-        self._messageBoutonInteraction, self._premiereMortChasse, self._traitement, etapeMax, i = False, False, dict(), 38, 0 
+        self._messageBoutonInteraction, self._premiereMortChasse, self._traitement, etapeMax, i = False, False, dict(), 40, 0 
         self._penseeMaisonGods = False
         while i <= etapeMax:
             self._traitement[i] = getattr(self, "_traiter"+str(i)) #On référence les fonctions de traitement dans un dico : elles ont pour nom _traiter0, _traiter1...
@@ -493,19 +493,38 @@ class Narrateur(Evenement):
         self._gererSonsThe()
         if self._gestionnaire.yJoueur == 40:
             self._boiteOutils.ajouterPensee(".........", faceset="WizardGod.png")
-            self._boiteOutils.ajouterPensee("Sir Duck, surely there must be a misunderstanding.", faceset="Crow.png")
-            self._boiteOutils.ajouterPensee("To be honest, I don't really see why.", faceset="DuckGod.png")
-            self._boiteOutils.ajouterPensee("Why does one have to be so obviou with you all the time?", faceset="Crow.png")
+            self._boiteOutils.ajouterPensee("Sir Duck, surely there HAS TO BE a misunderstanding.", faceset="Crow.png")
+            self._boiteOutils.ajouterPensee("Does it? To be honest, I don't really see how.", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("Where to begin? Firstly, this is a man. Secondly, he shouldn't be here.", faceset="Crow.png")
+            self._boiteOutils.ajouterPensee("I passed by him earlier. I thought the witches had taken care of him.", faceset="Crow.png")
+            self._boiteOutils.ajouterPensee("Well, he found his way around as expected. I'm glad.", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("Yes, I did visit him in his dream and then led him there.", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("So you felt the urgent need to invite a man for tea without announcing him.", faceset="WizardGod.png")
+            self._boiteOutils.ajouterPensee("Absolutely, Sir Wizard. I found his story quite distracting, you'll see.", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("But let's all sit first. Music!", faceset="DuckGod.png")
+            self._etape += 1
+
+    def _traiter38(self):
+        if self._penseePossible.voir():
+            self._boiteOutils.interrupteurs["DialogueVisiteur"].activer()
+            self._placesDisponibles = [(69,42), (69,43), (73,43)]
+            self._etape += 1
+
+    def _traiter39(self):
+        if (self._gestionnaire.xJoueur,self._gestionnaire.yJoueur) in self._placesDisponibles and self._boiteOutils.interrupteurs["GodsAssis"].voir() is True:
             self._boiteOutils.ajouterPensee("Your friend is no Spirit Lord, he is a man.", faceset="Crow.png")
             self._boiteOutils.ajouterPensee("He is a hunter. And he lives on our very own lands,", faceset="DuckGod.png")
             self._boiteOutils.ajouterPensee("in the realm of the forest.", faceset="DuckGod.png")
             self._boiteOutils.ajouterPensee("That does not quite explain the need to invite him for tea.", faceset="WizardGod.png")
-            self._boiteOutils.ajouterPensee("The only reason why I visited him in his dream is because...", faceset="DuckGod.png")
-            self._boiteOutils.ajouterPensee("...I heard him say pronounce something which you might consider insulting.", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("The only reason why I met him in his dreams and brought him there is because...", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("...I heard him say something you would find quite interesting.", faceset="DuckGod.png")
             self._boiteOutils.ajouterPensee("He said that “the gods hadn't been fair with the humble hunter he is”.", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("That is more than interesting, it's insulting. But it doesn't surprise me.", faceset="Crow.png")
+            self._boiteOutils.ajouterPensee("And what are we to do for this disrespectful hunter exactly?.", faceset="WizardGod.png")
+            self._boiteOutils.ajouterPensee("Well, assess his situation.", faceset="DuckGod.png")
             self._etape += 1
 
-    def _traiter38(self):
+    def _traiter40(self):
         pass
 
     def onMortAnimal(self, typeAnimal, viaChasse=False):
@@ -878,8 +897,10 @@ class SkullRing(EvenementConcret):
             self._boiteOutils.arreterPensees()
 
 class God(PNJ):
-    etapesMax = { "DuckGod": 6, "CrowGod": 2, "WizardGod": 5 }
+    etapesMax = { "DuckGod": 7, "CrowGod": 3, "WizardGod": 6 }
     wizardQuestion, duckOuverture, duckAccueil = False, False, False
+    placesDisponibles = [(69,42), (69,43), (73,43)]
+    godsAssis = {"DuckGod":False, "CrowGod":False, "WizardGod":False}
 
     def __init__(self, jeu, gestionnaire, x, y, c, directionDepart, nom, fichier):
         super().__init__(jeu, gestionnaire, nom, x, y, c, fichier, (0,0,0), (0,0), True, ["V"+directionDepart+str(2500)], directionDepart=directionDepart)
@@ -890,6 +911,7 @@ class God(PNJ):
         if self._nom == "DuckGod":
             self._surPlace, self._positionSource = False, Rect(0,0,24,26)
         self._penseePossible = InterrupteurInverse(self._boiteOutils.penseeAGerer)
+        self._xArrivee, self._yArrivee, self._enRoute = -1, -1, False
 
     def _gererEtape(self):
         etapeActuelle = self._etapeTraitement
@@ -938,8 +960,28 @@ class God(PNJ):
 
     def _suivreJoueurDuRegard(self):
         self._majInfosJoueur()
-        if self._joueurBouge[0]:
+        if self._joueurBouge[0] and self._enRoute is False:
             self._lancerTrajet(self._boiteOutils.regardVersPnj("Joueur", self._xTile, self._yTile), False)
+        if self._boiteOutils.interrupteurs["DialogueVisiteur"].voir():
+            if self._nom == "CrowGod":
+                self._lancerTrajet("VGauche2500", True)
+                God.godsAssis[self._nom] = True
+                self._etapeTraitement += 1
+            elif self._deplacementBoucle is False and self._xTile == self._xArrivee and self._yTile == self._yArrivee:
+                self._lancerTrajet("VDroite2500" if self._xTile == 69 else "VGauche2500", True)
+                God.godsAssis[self._nom] = True
+                self._etapeTraitement += 1
+            elif self._etapeMarche == 1 and (self._xTile != self._xArrivee or self._yTile != self._yArrivee) and (self._enRoute is False or (self._xArrivee,self._yArrivee) == (self._gestionnaire.xJoueur,self._gestionnaire.yJoueur)):
+                self._enRoute = True
+                if self._gestionnaire.xJoueur == self._xArrivee and self._gestionnaire.yJoueur == self._yArrivee:
+                    God.placesDisponibles.append((self._xArrivee,self._yArrivee))
+                self._xArrivee, self._yArrivee = God.placesDisponibles[0] 
+                God.placesDisponibles.remove((self._xArrivee,self._yArrivee))
+                self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, self._xArrivee, self._yArrivee)
+
+    def _verifierGodsAssis(self):
+        if self._boiteOutils.interrupteurs["GodsAssis"].voir() is False and False not in God.godsAssis.values():
+            self._boiteOutils.interrupteurs["GodsAssis"].activer()
 
     def _gererEtapeDuckGod1(self):
         self._invitesConversation()
@@ -975,11 +1017,17 @@ class God(PNJ):
     def _gererEtapeDuckGod6(self):
         self._suivreJoueurDuRegard()
 
+    def _gererEtapeDuckGod7(self):
+        self._verifierGodsAssis()
+
     def _gererEtapeCrowGod1(self):
         self._invitesConversation()
 
     def _gererEtapeCrowGod2(self):
         self._suivreJoueurDuRegard()
+
+    def _gererEtapeCrowGod3(self):
+        self._verifierGodsAssis()
 
     def _gererEtapeWizardGod1(self):
         if self._boiteOutils.interrupteurs["DébutConversation"].voir() is True and self._etapeMarche == 1:
@@ -1006,11 +1054,15 @@ class God(PNJ):
 
     def _gererEtapeWizardGod4(self):
         if God.duckOuverture is True:
+            self._finirDeplacementSP()
             self._lancerTrajet("Aucune", False)
             self._etapeTraitement += 1
 
     def _gererEtapeWizardGod5(self):
         self._suivreJoueurDuRegard()
+
+    def _gererEtapeWizardGod6(self):
+        self._verifierGodsAssis()
 
 class GestionnaireAnimaux(Evenement):
     def __init__(self, jeu, gestionnaire):
