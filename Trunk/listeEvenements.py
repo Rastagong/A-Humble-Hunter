@@ -119,7 +119,7 @@ class Narrateur(Evenement):
     def __init__(self, jeu, gestionnaire):
         super().__init__(jeu, gestionnaire)
         self._penseePossible, self._etape, self._coefNoircisseur, self._alpha = InterrupteurInverse(self._boiteOutils.penseeAGerer), 0, 0, 255
-        self._messageBoutonInteraction, self._premiereMortChasse, self._traitement, etapeMax, i = False, False, dict(), 45, 0 
+        self._messageBoutonInteraction, self._premiereMortChasse, self._traitement, etapeMax, i = False, False, dict(), 47, 0 
         self._penseeMaisonGods = False
         while i <= etapeMax:
             self._traitement[i] = getattr(self, "_traiter"+str(i)) #On référence les fonctions de traitement dans un dico : elles ont pour nom _traiter0, _traiter1...
@@ -591,6 +591,22 @@ class Narrateur(Evenement):
             self._etape += 1
 
     def _traiter45(self):
+        if self._boiteOutils.interrupteurs["CakeEaten"].voir() is True and self._gestionnaire.yJoueur == 35 and self._gestionnaire.xJoueur >= 83:
+            self._boiteOutils.joueurLibre.desactiver()
+            self._coefNoircisseur = 1
+            self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
+            Horloge.initialiser(id(self), "Noir", 100)
+            self._etape += 1
+
+    def _traiter46(self):
+        if Horloge.sonner(id(self), "Noir"):
+            self._coefNoircisseur += 1
+            self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
+            Horloge.initialiser(id(self), "Noir", 100)
+            if self._coefNoircisseur == 12:
+                self._etape += 1
+
+    def _traiter47(self):
         pass
 
     def onMortAnimal(self, typeAnimal, viaChasse=False):
@@ -1262,7 +1278,7 @@ class Bottle(EvenementConcret):
             elif self._couleur == "Green":
                 self._boiteOutils.ajouterPensee("The green bottle was filled with tiny blood-red petals. The label read:")
                 self._boiteOutils.ajouterPensee("“Devil Tea from the Heart of the Forest. To drink in emergency. Immediate effects.”", tempsLecture=0)
-        elif self._boiteOutils.interrupteurs["JoueurServiteur"].voir() is True and self._boiteOutils.interrupteurs["TeapotFilled"].voir() is False and self._boiteOutils.interrupteurs["TeapotInHands"].voir() is True:
+        elif self._penseePossible.voir() is True and self._boiteOutils.interrupteurs["JoueurServiteur"].voir() is True and self._boiteOutils.interrupteurs["TeapotFilled"].voir() is False and self._boiteOutils.interrupteurs["TeapotInHands"].voir() is True:
             if self._filling is False:
                 self._boiteOutils.jouerSon("BruitThe", "BruitTheFilling")
                 Horloge.initialiser(id(self), "Filling over", 3000)
@@ -1307,6 +1323,7 @@ class Cake(EvenementConcret):
         if self._nombreAppuis >= 2 and self._cakeEaten is False and self._messagePrinted is True:
             self._boiteOutils.retirerTransformation(True, "SplashText Cake")
             self._boiteOutils.ajouterTransformation(True, "SplashText Cake", texte="You have eaten a piece of cake", antialias=True, position=(10,30), couleurTexte=(255,255,255), taille=30, alpha=255)
+            self._boiteOutils.interrupteurs["CakeEaten"].activer()
             self._boiteOutils.changerBloc(100, 34, 3, None, None, None, True, vide=True)
             self._cakeEaten = True
             Horloge.initialiser(id(self), "Splash", 3000)

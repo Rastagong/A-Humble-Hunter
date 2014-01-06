@@ -33,7 +33,7 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
         b = ["BeliaRentree", "TomEtage", "ElieEtage", "ConversationEnfants", "TomHungry", "nutsOnTable", "escalierLibre", "fogRises", "JoueurVuWizards", "Wizards disappear"]
         c = ["RetourDuckGod", "RetourMaisonDream","DébutConversation", "JoueurSonneMaisonGods", "MusiqueThe", "DialogueVisiteur", "GodsAssis","NouvelleMission","MissionTerminee"]
         d = ["TeaServed","PasswordGiven1","BackRoomToOpen", "TeapotInHands", "TeapotFilled", "PasswordGiven2", "LastDoorToOpen","JoueurOrdreTea","JoueurServiteur"]
-        e = ["ParalysieGods1", "ParalysieGods2","KeyFound"]
+        e = ["ParalysieGods1", "ParalysieGods2","KeyFound","CakeEaten"]
         return a + b + c + d + e
 
     def _getVariables(self):
