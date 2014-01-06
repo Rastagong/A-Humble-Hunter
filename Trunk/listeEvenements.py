@@ -119,7 +119,7 @@ class Narrateur(Evenement):
     def __init__(self, jeu, gestionnaire):
         super().__init__(jeu, gestionnaire)
         self._penseePossible, self._etape, self._coefNoircisseur, self._alpha = InterrupteurInverse(self._boiteOutils.penseeAGerer), 0, 0, 255
-        self._messageBoutonInteraction, self._premiereMortChasse, self._traitement, etapeMax, i = False, False, dict(), 40, 0 
+        self._messageBoutonInteraction, self._premiereMortChasse, self._traitement, etapeMax, i = False, False, dict(), 45, 0 
         self._penseeMaisonGods = False
         while i <= etapeMax:
             self._traitement[i] = getattr(self, "_traiter"+str(i)) #On référence les fonctions de traitement dans un dico : elles ont pour nom _traiter0, _traiter1...
@@ -484,16 +484,14 @@ class Narrateur(Evenement):
     def _traiter36(self):
         self._gererSonsThe()
         if self._gestionnaire.xJoueur == 60 and self._gestionnaire.yJoueur == 35:
-            self._boiteOutils.changerBloc(60, 39, 1, "woodland_indoor_x3.png", (0,64,32,32), (0,0,0), False)
-            self._boiteOutils.changerBloc(60, 38, 1, "woodland_indoor_x3.png", (0,32,32,32), (0,0,0), False)
-            self._boiteOutils.changerBloc(60, 37, 3, "woodland_indoor_x3.png", (0,0,32,32), (0,0,0), True)
+            fermerPorte(self._boiteOutils, 60, 37)
             self._etape += 1
 
     def _traiter37(self):
         self._gererSonsThe()
         if self._gestionnaire.yJoueur == 40:
             self._boiteOutils.ajouterPensee(".........", faceset="WizardGod.png")
-            self._boiteOutils.ajouterPensee("Sir Duck, surely there HAS TO BE a misunderstanding.", faceset="Crow.png")
+            self._boiteOutils.ajouterPensee("Sir Duck, surely there has to be a misunderstanding on the guest.", faceset="Crow.png")
             self._boiteOutils.ajouterPensee("Does it? To be honest, I don't really see how.", faceset="DuckGod.png")
             self._boiteOutils.ajouterPensee("Where to begin? Firstly, this is a man. Secondly, he shouldn't be here.", faceset="Crow.png")
             self._boiteOutils.ajouterPensee("I passed by him earlier. I thought the witches had taken care of him.", faceset="Crow.png")
@@ -505,26 +503,94 @@ class Narrateur(Evenement):
             self._etape += 1
 
     def _traiter38(self):
+        self._gererSonsThe()
         if self._penseePossible.voir():
             self._boiteOutils.interrupteurs["DialogueVisiteur"].activer()
             self._placesDisponibles = [(69,42), (69,43), (73,43)]
             self._etape += 1
 
     def _traiter39(self):
+        self._gererSonsThe()
         if (self._gestionnaire.xJoueur,self._gestionnaire.yJoueur) in self._placesDisponibles and self._boiteOutils.interrupteurs["GodsAssis"].voir() is True:
-            self._boiteOutils.ajouterPensee("Your friend is no Spirit Lord, he is a man.", faceset="Crow.png")
-            self._boiteOutils.ajouterPensee("He is a hunter. And he lives on our very own lands,", faceset="DuckGod.png")
-            self._boiteOutils.ajouterPensee("in the realm of the forest.", faceset="DuckGod.png")
-            self._boiteOutils.ajouterPensee("That does not quite explain the need to invite him for tea.", faceset="WizardGod.png")
-            self._boiteOutils.ajouterPensee("The only reason why I met him in his dreams and brought him there is because...", faceset="DuckGod.png")
-            self._boiteOutils.ajouterPensee("...I heard him say something you would find quite interesting.", faceset="DuckGod.png")
-            self._boiteOutils.ajouterPensee("He said that “the gods hadn't been fair with the humble hunter he is”.", faceset="DuckGod.png")
-            self._boiteOutils.ajouterPensee("That is more than interesting, it's insulting. But it doesn't surprise me.", faceset="Crow.png")
-            self._boiteOutils.ajouterPensee("And what are we to do for this disrespectful hunter exactly?.", faceset="WizardGod.png")
-            self._boiteOutils.ajouterPensee("Well, assess his situation.", faceset="DuckGod.png")
+            self._boiteOutils.interrupteurs["MusiqueThe"].activer()
+            self._boiteOutils.ajouterPensee("So what are we to do with this peasant?", faceset="Crow.png")
+            self._boiteOutils.ajouterPensee("He is a hunter. And he lives on our very own lands, Sir Crow,", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("in the Realm of the Forest. He's been there for years.", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("That certainly is unusual. I'm astonished by this peasant of yours.", faceset="Crow.png")
+            self._boiteOutils.ajouterPensee("I'll just ignore you, you know. The thing is, he has a funny claim.", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("He believes “we haven't been fair with the humble hunter he is”.", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("We haven't been fair with him, really? Today's men have become insulting.", faceset="Crow.png")
+            self._boiteOutils.ajouterPensee("Can such a daring man be as humble as he believes he is?", faceset="Crow.png")
+            self._boiteOutils.ajouterPensee("Quite funny, isn't it? I knew he would amuse you.", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("“Amuse” isn't quite the word, but he certainly is original.", faceset="WizardGod.png")
+            self._boiteOutils.ajouterPensee("It isn't a very probing reason to bring a stranger at my home though.", faceset="WizardGod.png")
+            self._boiteOutils.ajouterPensee("It isn't, indeed! Shall we punish him? I'd like to see him swim in lava.", faceset="Crow.png")
+            self._boiteOutils.ajouterPensee("Actually, I wondered whether we couldn't assist him.", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("In what honour should we alter the fate of a mortal?", faceset="Crow.png")
+            self._boiteOutils.ajouterPensee("In the name of charity. He deserves it.", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("This hunter is born poor, and is likely to die poor as well.", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("Sir Duck, I don't even understand you.", faceset="Crow.png")
+            self._boiteOutils.ajouterPensee("Nonsense, Sir Duck. You do know we mustn't intervene arbitrarily.", faceset="WizardGod.png")
+            self._boiteOutils.ajouterPensee("Still, this man believes in our existence. That's rare in our modern world.", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("I don't care, Sir Duck. And as Lord Master of the Forest Realm,", faceset="WizardGod.png")
+            self._boiteOutils.ajouterPensee("I hereby sentence him to become my man-servant in this dream, forever.", faceset="WizardGod.png")
+            self._boiteOutils.ajouterPensee("But...", faceset="DuckGod.png")
+            self._boiteOutils.ajouterPensee("Enough. I've spoken. Let's drink. Oh, there's almost nothing left.", faceset="WizardGod.png")
             self._etape += 1
 
     def _traiter40(self):
+        self._gererSonsThe()
+        if self._penseePossible.voir():
+            if self._boiteOutils.interrupteurs["NouvelleMission"].voir() is False:
+                self._boiteOutils.ajouterPensee("Now “humble” hunter, come here, will you? I've got work for you.", faceset="WizardGod.png")
+            else:
+                self._boiteOutils.ajouterPensee("Humble hunter, I need your help again.", faceset="WizardGod.png")
+            self._boiteOutils.interrupteurs["JoueurOrdreTea"].activer()
+            self._etape += 1
+
+    def _traiter41(self):
+        self._gererSonsThe()
+        if self._boiteOutils.interrupteurs["MissionTerminee"].voir() is True:
+            if self._boiteOutils.variables["TeaGiven"] == "Green":
+                self._etape += 1
+            elif self._boiteOutils.variables["TeaGiven"] == "Blue":
+                self._boiteOutils.interrupteurs["MissionTerminee"].desactiver()
+                self._boiteOutils.interrupteurs["JoueurOrdreTea"].desactiver()
+                self._boiteOutils.interrupteurs["JoueurServiteur"].desactiver()
+                self._boiteOutils.interrupteurs["TeaServed"].desactiver()
+                self._boiteOutils.interrupteurs["TeapotFilled"].desactiver()
+                self._boiteOutils.interrupteurs["NouvelleMission"].activer()
+                self._boiteOutils.variables["TeaGiven"] = None
+                Horloge.initialiser(id(self), "Nouvelle mission", 12000)
+        elif Horloge.sonner(id(self), "Nouvelle mission"):
+            self._etape = 40
+
+    def _traiter42(self):
+        self._gererSonsThe()
+        self._boiteOutils.ajouterPensee("I say, this lime-flower tea has a unique savour.", faceset="DuckGod.png")
+        self._boiteOutils.ajouterPensee("Surprisingly, I do agree! Have you found a millenial tree?", faceset="Crow.png")
+        self._boiteOutils.ajouterPensee("Something disturbs me... This is no lime-... Oh no, he didn't.", faceset="WizardGod.png", tempsLecture=0)
+        self._etape += 1
+
+    def _traiter43(self):
+        self._gererSonsThe()
+        if self._penseePossible.voir():
+            self._boiteOutils.arreterSonEnFondu("Tea Music", 3000)
+            self._boiteOutils.interrupteurs["MusiqueThe"].desactiver()
+            self._boiteOutils.interrupteurs["ParalysieGods1"].activer()
+            self._boiteOutils.ajouterPensee("Well played, clever hunter, well played. This is some Devil Tea.", faceset="WizardGod.png")
+            self._boiteOutils.ajouterPensee("The Devil gave me some last week.", faceset="WizardGod.png")
+            self._boiteOutils.ajouterPensee("I'm afraid we're bound to fall asleep without any further notice.", faceset="WizardGod.png")
+            self._boiteOutils.ajouterPensee("We'll certainly have a nightmare too. Good luck to you, dear f...", faceset="WizardGod.png", tempsLecture=0)
+            self._etape += 1
+
+    def _traiter44(self):
+        if self._penseePossible.voir():
+            self._boiteOutils.ajouterPensee("*loud snores*")
+            self._boiteOutils.interrupteurs["ParalysieGods2"].activer()
+            self._etape += 1
+
+    def _traiter45(self):
         pass
 
     def onMortAnimal(self, typeAnimal, viaChasse=False):
@@ -876,11 +942,12 @@ class Bruiteur(EvenementConcret):
                 elif distanceX == 1:
                     self._volume2 = 0.9
         if not JEU_MUET:
+            if self._boiteOutils.interrupteurs["MusiqueThe"].voir() is False:
+                self._volume2 = 0
             if self._boiteOutils.getVolumeInstance("Lava") != self._volume1: 
                 self._boiteOutils.changerVolumeInstance("Lava", self._volume1)
-            if self._boiteOutils.interrupteurs["MusiqueThe"].voir() is True:
-                if self._boiteOutils.getVolumeInstance("Tea Music") != self._volume2: 
-                    self._boiteOutils.changerVolumeInstance("Tea Music", self._volume2)
+            if self._boiteOutils.getVolumeInstance("Tea Music") != self._volume2: 
+                self._boiteOutils.changerVolumeInstance("Tea Music", self._volume2)
 
 class SkullRing(EvenementConcret):
     def __init__(self, jeu, gestionnaire):
@@ -897,7 +964,7 @@ class SkullRing(EvenementConcret):
             self._boiteOutils.arreterPensees()
 
 class God(PNJ):
-    etapesMax = { "DuckGod": 7, "CrowGod": 3, "WizardGod": 6 }
+    etapesMax = { "DuckGod": 8, "CrowGod": 4, "WizardGod": 8 }
     wizardQuestion, duckOuverture, duckAccueil = False, False, False
     placesDisponibles = [(69,42), (69,43), (73,43)]
     godsAssis = {"DuckGod":False, "CrowGod":False, "WizardGod":False}
@@ -912,6 +979,7 @@ class God(PNJ):
             self._surPlace, self._positionSource = False, Rect(0,0,24,26)
         self._penseePossible = InterrupteurInverse(self._boiteOutils.penseeAGerer)
         self._xArrivee, self._yArrivee, self._enRoute = -1, -1, False
+        self._sleeping = False
 
     def _gererEtape(self):
         etapeActuelle = self._etapeTraitement
@@ -969,6 +1037,7 @@ class God(PNJ):
                 self._etapeTraitement += 1
             elif self._deplacementBoucle is False and self._xTile == self._xArrivee and self._yTile == self._yArrivee:
                 self._lancerTrajet("VDroite2500" if self._xTile == 69 else "VGauche2500", True)
+                self._actionTea = self._listeActions[0]
                 God.godsAssis[self._nom] = True
                 self._etapeTraitement += 1
             elif self._etapeMarche == 1 and (self._xTile != self._xArrivee or self._yTile != self._yArrivee) and (self._enRoute is False or (self._xArrivee,self._yArrivee) == (self._gestionnaire.xJoueur,self._gestionnaire.yJoueur)):
@@ -982,6 +1051,20 @@ class God(PNJ):
     def _verifierGodsAssis(self):
         if self._boiteOutils.interrupteurs["GodsAssis"].voir() is False and False not in God.godsAssis.values():
             self._boiteOutils.interrupteurs["GodsAssis"].activer()
+        if self._boiteOutils.interrupteurs["ParalysieGods1"].voir():
+            self._finirDeplacementSP()
+            self._etapeTraitement += 1
+
+    def _gererParalysie(self):
+        if self._sleeping:
+            return
+        elif self._boiteOutils.interrupteurs["ParalysieGods2"].voir():
+            self._lancerTrajet("Aucune", False)
+            self._sleeping = True
+        else:
+            self._majInfosJoueur()
+            if self._joueurBouge[0]:
+                self._lancerTrajet(self._boiteOutils.regardVersPnj("Joueur", self._xTile, self._yTile), False)
 
     def _gererEtapeDuckGod1(self):
         self._invitesConversation()
@@ -1001,9 +1084,7 @@ class God(PNJ):
 
     def _gererEtapeDuckGod4(self):
         if self._deplacementBoucle is False and self._xTile == 60 and self._yTile == 35:
-            self._boiteOutils.changerBloc(60, 39, 1, "woodland_indoor_x3.png", (32,64,32,32), (0,0,0), True)
-            self._boiteOutils.changerBloc(60, 38, 1, "woodland_indoor_x3.png", (32,32,32,32), (0,0,0), True)
-            self._boiteOutils.changerBloc(60, 37, 3, "woodland_indoor_x3.png", (32,0,32,32), (0,0,0), True)
+            ouvrirPorte(self._boiteOutils, 60, 37)
             self._boiteOutils.jouerSon("DoorOpening", "Door Maison Gods")
             self._boiteOutils.ajouterPensee("Good morning, humble hunter. I knew you would make it.", faceset="DuckGod.png")
             self._lancerTrajet("VBas3000","Droite","Droite","Droite","Droite","Droite","Droite","Droite","Droite","Droite","RGauche",False)
@@ -1020,6 +1101,9 @@ class God(PNJ):
     def _gererEtapeDuckGod7(self):
         self._verifierGodsAssis()
 
+    def _gererEtapeDuckGod8(self):
+        self._gererParalysie()
+
     def _gererEtapeCrowGod1(self):
         self._invitesConversation()
 
@@ -1028,6 +1112,9 @@ class God(PNJ):
 
     def _gererEtapeCrowGod3(self):
         self._verifierGodsAssis()
+
+    def _gererEtapeCrowGod4(self):
+        self._gererParalysie()
 
     def _gererEtapeWizardGod1(self):
         if self._boiteOutils.interrupteurs["DébutConversation"].voir() is True and self._etapeMarche == 1:
@@ -1063,7 +1150,181 @@ class God(PNJ):
 
     def _gererEtapeWizardGod6(self):
         self._verifierGodsAssis()
+        if self._boiteOutils.interrupteurs["JoueurOrdreTea"].voir() is True:
+            self._etapeTraitement += 1
 
+    def _onJoueurInteractionQuelconque(self, x, y, c, direction):
+        if self._nom == "WizardGod": 
+            if self._boiteOutils.interrupteurs["JoueurOrdreTea"].voir() is True:
+                self._finirDeplacementSP()
+                self._lancerTrajet(self._boiteOutils.deplacementSPVersPnj("Joueur", 5000, self._xTile, self._yTile), False)
+                self._boiteOutils.ajouterPensee("Take the teapot and go fill it in the back room.", faceset="WizardGod.png")
+                self._boiteOutils.interrupteurs["JoueurServiteur"].activer()
+                self._boiteOutils.interrupteurs["JoueurOrdreTea"].desactiver()
+            elif self._boiteOutils.interrupteurs["BackRoomToOpen"].voir() is True and self._boiteOutils.interrupteurs["PasswordGiven1"].voir() is False:
+                self._finirDeplacementSP()
+                self._lancerTrajet(self._boiteOutils.deplacementSPVersPnj("Joueur", 5000, self._xTile, self._yTile), False)
+                self._boiteOutils.ajouterPensee("Oh you need a password for the door, that's right.", faceset="WizardGod.png")
+                self._boiteOutils.ajouterPensee("It's MY GOOD OLD ALE.", faceset="WizardGod.png")
+                self._boiteOutils.ajouterPensee("You'll find a blue and a green bottle. Fill the teapot with the blue one.", faceset="WizardGod.png", tempsLecture=0)
+                self._boiteOutils.interrupteurs["PasswordGiven1"].activer()
+            elif self._boiteOutils.interrupteurs["ParalysieGods2"].voir() is True and self._boiteOutils.interrupteurs["KeyFound"].voir() is False:
+                self._boiteOutils.ajouterPensee("I found a key under the hood of Sir Wizard.", tempsLecture=0)
+                self._boiteOutils.interrupteurs["KeyFound"].activer()
+
+    def _gererEtapeWizardGod7(self):
+        if self._deplacementBoucle is False:
+            self._lancerTrajet(self._actionTea, True)
+        if self._boiteOutils.interrupteurs["TeaServed"].voir() is True and self._boiteOutils.interrupteurs["MissionTerminee"].voir() is False:
+            self._boiteOutils.ajouterPensee("Thanks for this, daring hunter.", faceset="WizardGod.png")
+            self._boiteOutils.interrupteurs["MissionTerminee"].activer()
+        if self._boiteOutils.interrupteurs["ParalysieGods1"].voir() is True:
+            self._finirDeplacementSP()
+            self._etapeTraitement += 1
+
+    def _gererEtapeWizardGod8(self):
+        self._gererParalysie()
+
+class Teapot(EvenementConcret):
+    surTable = Interrupteur(True)
+    initInterrupteurGlobal = False
+
+    def __init__(self, jeu, gestionnaire):
+        EvenementConcret.__init__(self, jeu, gestionnaire)
+        if not Teapot.initInterrupteurGlobal:
+            self._boiteOutils.interrupteurs["TeapotInHands"], Teapot.initInterrupteurGlobal = InterrupteurInverse(Teapot.surTable), True
+
+    def _onJoueurInteractionQuelconque(self, x, y, c, direction):
+        if self._boiteOutils.interrupteurs["JoueurServiteur"].voir() is False:
+            return
+        Teapot.surTable.inverser()
+        if Teapot.surTable.voir() is True:
+            self._boiteOutils.changerBloc(70, 42, 3, "woodland_indoor.png", (11*32, 10*32, 32,32), (0,0,0), False)
+            if self._boiteOutils.interrupteurs["TeapotFilled"].voir():
+                self._boiteOutils.interrupteurs["TeaServed"].activer()
+        else:
+            self._boiteOutils.changerBloc(70, 42, 3, "", [], [], True, vide=True)
+
+class SpeakingDoor(EvenementConcret):
+    def __init__(self, jeu, gestionnaire, x, y):
+        EvenementConcret.__init__(self, jeu, gestionnaire)
+        self._ouverture, self._passwordAsked, self._x, self._y = False, False, x, y
+
+    def _onJoueurInteractionQuelconque(self, x, y, c, direction):
+        if self._ouverture is False and self._boiteOutils.interrupteurs["JoueurServiteur"].voir():
+            if self._x == 92 and self._y == 40:
+                self._interactionBackroom()
+            elif self._x == 100 and self._y == 40:
+                self._interactionLastDoor()
+
+    def _interactionBackroom(self):
+        if self._boiteOutils.interrupteurs["PasswordGiven1"].voir() is False:
+            if self._passwordAsked is False:
+                self._boiteOutils.ajouterPensee("You're not the master of this house. I won't open unless you have a password.", tempsLecture=0)
+                self._boiteOutils.interrupteurs["BackRoomToOpen"].activer()
+                self._passwordAsked = True
+            else:
+                self._boiteOutils.ajouterPensee("So what's the password? My master will certainly not reveal it to a man.", tempsLecture=0)
+        else:
+            self._boiteOutils.ajouterPensee("What? You know the password? Well, er um, you can pass, I guess.", tempsLecture=0)
+            Horloge.initialiser(id(self), "Ouverture", 2000)
+            self._ouverture = True
+
+    def _interactionLastDoor(self):
+        if self._boiteOutils.interrupteurs["KeyFound"].voir() is False and self._boiteOutils.interrupteurs["ParalysieGods2"].voir() is True:
+            if self._passwordAsked is False:
+                self._boiteOutils.ajouterPensee("Look, mortal, I'm locked. And I doubt you have the key.", tempsLecture=0)
+                self._passwordAsked = True
+            else:
+                self._boiteOutils.ajouterPensee("Why do you even come back? You don't have the key, it's pointless.", tempsLecture=0)
+        elif self._boiteOutils.interrupteurs["KeyFound"].voir() is True:
+            self._boiteOutils.ajouterPensee("What? You...you've found the key? Dammit. That was unexpected.", tempsLecture=0)
+            Horloge.initialiser(id(self), "Ouverture", 2000)
+
+    def traiter(self):
+        if Horloge.sonner(id(self), "Ouverture"):
+            ouvrirPorte(self._boiteOutils, self._x, self._y)
+
+class Bottle(EvenementConcret):
+    def __init__(self, jeu, gestionnaire, couleur):
+        EvenementConcret.__init__(self, jeu, gestionnaire)
+        self._couleur, self._filling, self._splash  = couleur, False, False
+        self._penseePossible = InterrupteurInverse(self._boiteOutils.penseeAGerer)
+
+    def _onJoueurInteractionQuelconque(self, x, y, c, direction):
+        if self._penseePossible.voir() and self._filling is False:
+            self._boiteOutils.ajouterTransformation(True, "SplashText Tea", texte="Press Z quickly to fill the teapot", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=255)
+            Horloge.initialiser(id(self), "SplashText", 5000)
+            self._splash = True
+            if self._couleur == "Blue":
+                self._boiteOutils.ajouterPensee("The blue bottle was filled with lime flowers. The label read:")
+                self._boiteOutils.ajouterPensee("“Lime Flower Tea from the Middle South. To drink in the morning.”", tempsLecture=0)
+            elif self._couleur == "Green":
+                self._boiteOutils.ajouterPensee("The green bottle was filled with tiny blood-red petals. The label read:")
+                self._boiteOutils.ajouterPensee("“Devil Tea from the Heart of the Forest. To drink in emergency. Immediate effects.”", tempsLecture=0)
+        elif self._boiteOutils.interrupteurs["JoueurServiteur"].voir() is True and self._boiteOutils.interrupteurs["TeapotFilled"].voir() is False and self._boiteOutils.interrupteurs["TeapotInHands"].voir() is True:
+            if self._filling is False:
+                self._boiteOutils.jouerSon("BruitThe", "BruitTheFilling")
+                Horloge.initialiser(id(self), "Filling over", 3000)
+            self._filling = True
+            Horloge.initialiser(id(self), "Filling deadline", 1000)
+
+    def traiter(self):
+        if self._filling:
+            if Horloge.sonner(id(self), "Filling over"):
+                self._boiteOutils.interrupteurs["TeapotFilled"].activer()
+                self._boiteOutils.retirerTransformation(True, "SplashText Tea")
+                self._boiteOutils.ajouterTransformation(True, "SplashText Filled", texte="Teapot filled with the {0} bottle".format(self._couleur.lower()), antialias=True, couleurTexte=(255,255,255), position=(10,10), taille=30, alpha=255)
+                Horloge.arreterSonnerie(id(self), "Filling deadline")
+                Horloge.initialiser(id(self), "SplashText", 5000)
+                self._boiteOutils.variables["TeaGiven"] = self._couleur
+                self._filling = False
+            if Horloge.sonner(id(self), "Filling deadline"):
+                self._filling = False
+                Horloge.arreterSonnerie(id(self), "Filling over")
+        if self._splash:
+            if Horloge.sonner(id(self), "SplashText"):
+                self._boiteOutils.retirerTransformation(True, "SplashText Tea")
+                self._boiteOutils.retirerTransformation(True, "SplashText Filled")
+                self._splash = False
+
+class Cake(EvenementConcret):
+    def __init__(self, jeu, gestionnaire):
+        EvenementConcret.__init__(self, jeu, gestionnaire)
+        self._nombreAppuis, self._penseePossible, self._cakeEaten = 0, InterrupteurInverse(self._boiteOutils.penseeAGerer), False
+        self._messagePrinted = False
+
+    def _onJoueurInteractionQuelconque(self, x, y, c, direction):
+        self._nombreAppuis += 1
+        if self._penseePossible.voir() is True:
+            if self._cakeEaten is False:
+                self._boiteOutils.ajouterPensee("I saw a piece of strawberry cake. It looked delicious.")
+            self._boiteOutils.ajouterPensee("There was a note nearby. It read:")
+            self._boiteOutils.ajouterPensee("“Eat me, then rest. You might reach a sweeter dream. Or a nightmare.”", tempsLecture=0)
+            self._boiteOutils.ajouterTransformation(True, "SplashText Cake", texte="Press Z again to eat the cake", antialias=True, position=(10,30), couleurTexte=(255,255,255), taille=30, alpha=255)
+            Horloge.initialiser(id(self), "Splash", 3000)
+            self._messagePrinted = True
+        if self._nombreAppuis >= 2 and self._cakeEaten is False and self._messagePrinted is True:
+            self._boiteOutils.retirerTransformation(True, "SplashText Cake")
+            self._boiteOutils.ajouterTransformation(True, "SplashText Cake", texte="You have eaten a piece of cake", antialias=True, position=(10,30), couleurTexte=(255,255,255), taille=30, alpha=255)
+            self._boiteOutils.changerBloc(100, 34, 3, None, None, None, True, vide=True)
+            self._cakeEaten = True
+            Horloge.initialiser(id(self), "Splash", 3000)
+
+    def traiter(self):
+        if Horloge.sonner(id(self), "Splash"):
+            self._boiteOutils.retirerTransformation(True, "SplashText Cake")
+
+def fermerPorte(boiteOutils, x, y):
+    boiteOutils.changerBloc(x, y, 3, "woodland_indoor_x3.png", (0,0,32,32), (0,0,0), True)
+    boiteOutils.changerBloc(x, y+1, 1, "woodland_indoor_x3.png", (0,32,32,32), (0,0,0), False)
+    boiteOutils.changerBloc(x, y+2, 1, "woodland_indoor_x3.png", (0,64,32,32), (0,0,0), True)
+            
+def ouvrirPorte(boiteOutils, x, y):
+    boiteOutils.changerBloc(x, y, 3, "woodland_indoor_x3.png", (32,0,32,32), (0,0,0), True)
+    boiteOutils.changerBloc(x, y+1, 1, "woodland_indoor_x3.png", (32,32,32,32), (0,0,0), True)
+    boiteOutils.changerBloc(x, y+2, 1, "woodland_indoor_x3.png", (32,64,32,32), (0,0,0), True)
+            
 class GestionnaireAnimaux(Evenement):
     def __init__(self, jeu, gestionnaire):
         super().__init__(jeu, gestionnaire)

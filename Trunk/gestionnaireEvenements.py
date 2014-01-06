@@ -31,11 +31,13 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
     def _getInterrupteurs(self):
         a = ["DecouverteSquirrels", "MusiqueForet", "Rires", "finChasse1", "JoueurEntre", "JoueurEntre2", "JoueurEntre3", "squirrelPose", "BeliaSortie","discussionEtang"]
         b = ["BeliaRentree", "TomEtage", "ElieEtage", "ConversationEnfants", "TomHungry", "nutsOnTable", "escalierLibre", "fogRises", "JoueurVuWizards", "Wizards disappear"]
-        c = ["RetourDuckGod", "RetourMaisonDream","DébutConversation", "JoueurSonneMaisonGods", "MusiqueThe", "DialogueVisiteur", "GodsAssis"]
-        return a + b + c
+        c = ["RetourDuckGod", "RetourMaisonDream","DébutConversation", "JoueurSonneMaisonGods", "MusiqueThe", "DialogueVisiteur", "GodsAssis","NouvelleMission","MissionTerminee"]
+        d = ["TeaServed","PasswordGiven1","BackRoomToOpen", "TeapotInHands", "TeapotFilled", "PasswordGiven2", "LastDoorToOpen","JoueurOrdreTea","JoueurServiteur"]
+        e = ["ParalysieGods1", "ParalysieGods2","KeyFound"]
+        return a + b + c + d + e
 
     def _getVariables(self):
-        return [("sceneChasse", 0), ("SquirrelChasses", 0), ("LapinChasses", 0), ("CartesForet", ["Clairiere","CheminClairiere"]), ("NombreGlands", 0)]
+        return [("sceneChasse", 0), ("SquirrelChasses", 0), ("LapinChasses", 0), ("CartesForet", ["Clairiere","CheminClairiere"]), ("NombreGlands", 0), ("TeaGiven", None)]
 
     def _initialiserEvenements(self):
         self._evenements["concrets"]["Clairiere"] = OrderedDict()
@@ -118,6 +120,17 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
             self._evenements["concrets"]["Maison Gods"]["Bruiteur"] = [Bruiteur(self._jeu, self), (0,0), "Aucune"]
             self._evenements["concrets"]["Maison Gods"]["Panneau"] = [Panneau(self._jeu, self, "It reads: ring the skull bell", "Haut", splashTexte=True, tailleTexte=24), (64,38), "Aucune"]
             self._evenements["concrets"]["Maison Gods"]["SkullRing"] = [SkullRing(self._jeu, self), (61,39), "Aucune"]
+            self._evenements["concrets"]["Maison Gods"]["Teapot1"] = [Teapot(self._jeu, self), (70,41), "Aucune"]
+            self._evenements["concrets"]["Maison Gods"]["Teapot2"] = [Teapot(self._jeu, self), (71,41), "Aucune"]
+            self._evenements["concrets"]["Maison Gods"]["Teapot3"] = [Teapot(self._jeu, self), (72,41), "Aucune"]
+            self._evenements["concrets"]["Maison Gods"]["Teapot4"] = [Teapot(self._jeu, self), (70,42), "Aucune"]
+            self._evenements["concrets"]["Maison Gods"]["Teapot5"] = [Teapot(self._jeu, self), (70,43), "Aucune"]
+            self._evenements["concrets"]["Maison Gods"]["Teapot6"] = [Teapot(self._jeu, self), (72,43), "Aucune"]
+            self._evenements["concrets"]["Maison Gods"]["BackRoomDoor"] = [SpeakingDoor(self._jeu, self, 92, 40), (92,41), "Aucune"]
+            self._evenements["concrets"]["Maison Gods"]["LastDoor"] = [SpeakingDoor(self._jeu, self, 100, 40), (100,41), "Aucune"]
+            self._evenements["concrets"]["Maison Gods"]["BlueBottle"] = [Bottle(self._jeu, self, "Blue"), (88,36), "Aucune"]
+            self._evenements["concrets"]["Maison Gods"]["GreenBottle"] = [Bottle(self._jeu, self, "Green"), (87,36), "Aucune"]
+            self._evenements["concrets"]["Maison Gods"]["Cake"] = [Cake(self._jeu, self), (100,35), "Aucune"]
         if nomCarte not in self._cartesChargees:
             self._cartesChargees.append(nomCarte)
 
