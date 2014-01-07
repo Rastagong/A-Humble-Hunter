@@ -193,10 +193,13 @@ class Narrateur(Evenement):
             self._boiteOutils.interrupteurs["MusiqueForet"].activer()
             self._etape += 1
         if self._boiteOutils.variables["SquirrelChasses"] == 2 and self._etape == 5:
+            self._boiteOutils.ajouterPensee("I've never had any luck in these woods. Never.")
+            self._etape += 1
+        if self._boiteOutils.variables["SquirrelChasses"] == 3 and self._etape == 6:
             self._boiteOutils.ajouterPensee("Truly, the gods haven't been fair with the humble hunter I am...")
             Horloge.initialiser(id(self), "tempsFinChasse", 20000)
             self._coordonneesJoueur = self._boiteOutils.getCoordonneesJoueur()
-            self._etape += 2
+            self._etape += 1
 
     def _traiter5(self):
         self._traiter4()
@@ -276,12 +279,12 @@ class Narrateur(Evenement):
 
     def _traiter16(self):
         if Horloge.sonner(id(self), "Discussion attente"):
-            self._boiteOutils.ajouterPensee("The other day, I saw Doug, the forest warden... And he told me that...", faceset="Chasseur.png")
-            self._boiteOutils.ajouterPensee("...that the heart of the forest conceals the most extraordinary game.", faceset="Chasseur.png")
-            self._boiteOutils.ajouterPensee("It might be dangerous, but it sure could feed us for days.", faceset="Chasseur.png")
-            self._boiteOutils.ajouterPensee("No one enters the heart of the forest. Not even the prince. Forget it.", faceset="Belia.png")
-            self._boiteOutils.ajouterPensee("I know... But I don't want us to starve.", faceset="Chasseur.png")
-            self._boiteOutils.ajouterPensee("Aren't we still alive? We shouldn't complain. Be thankful and pray the gods.", faceset="Belia.png")
+            self._boiteOutils.ajouterPensee("There might be one solution, but I don't dread to think of it..", faceset="Chasseur.png")
+            self._boiteOutils.ajouterPensee("I've never been in the heart of the forest. The path is long,", faceset="Chasseur.png")
+            self._boiteOutils.ajouterPensee("the Old Door is locked, but who knows what kind of game I could find there.", faceset="Chasseur.png")
+            self._boiteOutils.ajouterPensee("Don't you think about it. No man, hunter or prince, dares to enter there.", faceset="Belia.png")
+            self._boiteOutils.ajouterPensee("But I could try. At least to know whether the old tales are true.", faceset="Chasseur.png")
+            self._boiteOutils.ajouterPensee("Things will get better, we shouldn't complain. Be thankful and pray the gods.", faceset="Belia.png")
             self._etape += 1
 
     def _traiter17(self):
@@ -1401,7 +1404,7 @@ class GestionnaireAnimaux(Evenement):
         if self._etape == 0 and self._boiteOutils.variables["sceneChasse"] == 1:
             if self._jeu.carteActuelle.nom == "Clairiere":
                 self._typesAnimaux = ["Squirrel"]
-                self._nombre = {"Squirrel":3, "SquirrelMinimal":3}
+                self._nombre = {"Squirrel":4, "SquirrelMinimal":4}
                 self._parametresGeneration = dict()
                 positionsArbres = self._genererPositionsCachettes("base_out_atlas.png", 2, (832, 672, 32, 32))
                 positionsSapins = self._genererPositionsCachettes("base_out_atlas.png", 2, (800, 544, 32, 32))
@@ -1419,7 +1422,7 @@ class GestionnaireAnimaux(Evenement):
             del self._morts[:]
             if self._boiteOutils.variables["sceneChasse"] == 0 and self._nombre["Squirrel"] == 0:
                 self._boiteOutils.variables["sceneChasse"] = 1
-                self._nombre["SquirrelMinimal"] = 2
+                self._nombre["SquirrelMinimal"] = 3
                 positionsArbres = self._genererPositionsCachettes("base_out_atlas.png", 2, (832, 672, 32, 32))
                 positionsSapins = self._genererPositionsCachettes("base_out_atlas.png", 2, (800, 544, 32, 32))
                 self._parametresGeneration["Squirrel"] = {"typeAnimal":"Squirrel", "classe":Squirrel, "positionsCachettes":positionsArbres, "longueurSprite":32, "largeurSprite":32, "vitesseDeplacement":150}
