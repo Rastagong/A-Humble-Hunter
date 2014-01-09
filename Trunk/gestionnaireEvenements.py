@@ -33,7 +33,7 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
         b = ["BeliaRentree", "TomEtage", "ElieEtage", "ConversationEnfants", "TomHungry", "nutsOnTable", "escalierLibre", "fogRises", "JoueurVuWizards", "Wizards disappear"]
         c = ["RetourDuckGod", "RetourMaisonDream","DébutConversation", "JoueurSonneMaisonGods", "MusiqueThe", "DialogueVisiteur", "GodsAssis","NouvelleMission","MissionTerminee"]
         d = ["TeaServed","PasswordGiven1","BackRoomToOpen", "TeapotInHands", "TeapotFilled", "PasswordGiven2", "LastDoorToOpen","JoueurOrdreTea","JoueurServiteur"]
-        e = ["ParalysieGods1", "ParalysieGods2","KeyFound","CakeEaten"]
+        e = ["ParalysieGods1", "ParalysieGods2","KeyFound","CakeEaten","KeyForestFound"]
         return a + b + c + d + e
 
     def _getVariables(self):
@@ -48,6 +48,7 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
         self._evenements["concrets"]["Maison Dream"] = OrderedDict()
         self._evenements["concrets"]["Entree Maison Gods"] = OrderedDict()
         self._evenements["concrets"]["Maison Gods"] = OrderedDict()
+        self._evenements["concrets"]["Last Dream"] = OrderedDict()
         if NOM_CARTE_LANCEMENT == "Clairiere":
             self._evenements["concrets"]["Clairiere"]["Joueur"] = [ Joueur(self._jeu, self, 21, 39, 2, fichier="Chasseur.png"), (21, 39), "Bas", 2]
         elif NOM_CARTE_LANCEMENT == "CheminClairiere":
@@ -65,6 +66,8 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
         elif NOM_CARTE_LANCEMENT == "Entree Maison Gods":
             self._evenements["concrets"]["Entree Maison Gods"]["Joueur"] = [ Joueur(self._jeu, self, 9, 9, 2, fichier="Chasseur.png"), (9,9), "Haut", 2 ]
             self._evenements["concrets"]["Entree Maison Gods"]["DuckGod"] = [DuckGod(self._jeu, self, 9, 5, 2, "Droite"), (9, 5), "Bas"] #Starting point instruction
+        elif NOM_CARTE_LANCEMENT == "Last Dream":
+            self._evenements["concrets"]["Last Dream"]["Joueur"] = [Joueur(self._jeu, self, 8, 96, 2, fichier="Chasseur.png"), (8,96), "Bas", 2]
         j, self._positionJoueur = self._jeu.joueur, None
         self.registerPositionInitialeJoueur(NOM_CARTE_LANCEMENT)
         self._evenements["abstraits"]["Divers"] = OrderedDict()
@@ -131,6 +134,8 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
             self._evenements["concrets"]["Maison Gods"]["BlueBottle"] = [Bottle(self._jeu, self, "Blue"), (88,36), "Aucune"]
             self._evenements["concrets"]["Maison Gods"]["GreenBottle"] = [Bottle(self._jeu, self, "Green"), (87,36), "Aucune"]
             self._evenements["concrets"]["Maison Gods"]["Cake"] = [Cake(self._jeu, self), (100,35), "Aucune"]
+        elif nomCarte == "Last Dream" and nomCarte not in self._cartesChargees:
+            self._evenements["concrets"]["Last Dream"]["Key"] = [ForestKey(self._jeu, self), (8,69), "Aucune"]
         if nomCarte not in self._cartesChargees:
             self._cartesChargees.append(nomCarte)
 

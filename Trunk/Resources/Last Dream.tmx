@@ -18,6 +18,7 @@
  <tileset firstgid="2987" source="Terrain Tree 3.tsx"/>
  <tileset firstgid="2988" source="woodland_indoor_x3.tsx"/>
  <tileset firstgid="3036" source="woodland_indoor.tsx"/>
+ <tileset firstgid="3292" source="ForestKey.tsx"/>
  <layer name="Tile Layer 1" width="17" height="100">
   <data>
    <tile gid="119"/>
@@ -6296,7 +6297,7 @@
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
-   <tile gid="0"/>
+   <tile gid="3292"/>
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>

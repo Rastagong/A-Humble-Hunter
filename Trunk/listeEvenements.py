@@ -119,7 +119,7 @@ class Narrateur(Evenement):
     def __init__(self, jeu, gestionnaire):
         super().__init__(jeu, gestionnaire)
         self._penseePossible, self._etape, self._coefNoircisseur, self._alpha = InterrupteurInverse(self._boiteOutils.penseeAGerer), 0, 0, 255
-        self._messageBoutonInteraction, self._premiereMortChasse, self._traitement, etapeMax, i = False, False, dict(), 47, 0 
+        self._messageBoutonInteraction, self._premiereMortChasse, self._traitement, etapeMax, i = False, False, dict(), 54, 0 
         self._penseeMaisonGods = False
         while i <= etapeMax:
             self._traitement[i] = getattr(self, "_traiter"+str(i)) #On référence les fonctions de traitement dans un dico : elles ont pour nom _traiter0, _traiter1...
@@ -571,7 +571,7 @@ class Narrateur(Evenement):
     def _traiter42(self):
         self._gererSonsThe()
         self._boiteOutils.ajouterPensee("I say, this lime-flower tea has a unique savour.", faceset="DuckGod.png")
-        self._boiteOutils.ajouterPensee("Surprisingly, I do agree! Have you found a millenial tree?", faceset="Crow.png")
+        self._boiteOutils.ajouterPensee("Surprisingly, I do agree! Where did you find the flowers? Millenial tree?", faceset="Crow.png")
         self._boiteOutils.ajouterPensee("Something disturbs me... This is no lime-... Oh no, he didn't.", faceset="WizardGod.png", tempsLecture=0)
         self._etape += 1
 
@@ -581,15 +581,14 @@ class Narrateur(Evenement):
             self._boiteOutils.arreterSonEnFondu("Tea Music", 3000)
             self._boiteOutils.interrupteurs["MusiqueThe"].desactiver()
             self._boiteOutils.interrupteurs["ParalysieGods1"].activer()
-            self._boiteOutils.ajouterPensee("Well played, clever hunter, well played. This is some Devil Tea.", faceset="WizardGod.png")
-            self._boiteOutils.ajouterPensee("The Devil gave me some last week.", faceset="WizardGod.png")
-            self._boiteOutils.ajouterPensee("I'm afraid we're bound to fall asleep without any further notice.", faceset="WizardGod.png")
-            self._boiteOutils.ajouterPensee("We'll certainly have a nightmare too. Good luck to you, dear f...", faceset="WizardGod.png", tempsLecture=0)
+            self._boiteOutils.ajouterPensee("Well played, clever hunter, well played.", faceset="WizardGod.png")
+            self._boiteOutils.ajouterPensee("He served us some Devil Tea from the Heart of the Forest.", faceset="WizardGod.png")
+            self._boiteOutils.ajouterPensee("I use it, well to fool the unsuspecting men I encounter and punish them.", faceset="WizardGod.png")
+            self._boiteOutils.ajouterPensee("I'm afraid we won't be able to move or speak for a whi... ", faceset="WizardGod.png", tempsLecture=0)
             self._etape += 1
 
     def _traiter44(self):
         if self._penseePossible.voir():
-            self._boiteOutils.ajouterPensee("*loud snores*")
             self._boiteOutils.interrupteurs["ParalysieGods2"].activer()
             self._etape += 1
 
@@ -610,6 +609,66 @@ class Narrateur(Evenement):
                 self._etape += 1
 
     def _traiter47(self):
+        self._boiteOutils.ajouterPensee("So I fell asleep, and left this dream, at last...")
+        self._etape += 1
+
+    def _traiter48(self):
+        if self._penseePossible.voir():
+            self._boiteOutils.teleporterSurCarte("Last Dream", 8, 96, 2, "Bas")
+            Horloge.initialiser(id(self), "Noir", 1)
+            self._boiteOutils.ajouterTransformation(True, "Fog")
+            self._etape += 1
+
+    def _traiter49(self):
+        if self._gestionnaire.nomCarte == "Last Dream" and Horloge.sonner(id(self), "Noir"):
+            self._boiteOutils.joueurLibre.activer()
+            self._coefNoircisseur -= 1
+            self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
+            if self._coefNoircisseur == 1:
+                self._boiteOutils.retirerTransformation(True, "Noir")
+                self._etape += 1
+            else:
+                Horloge.initialiser(id(self), "Noir", 100)
+
+    def _traiter50(self):
+        self._boiteOutils.jouerSon("Crow Call", "Crow Call")
+        self._boiteOutils.ajouterPensee("I'm still here. You can't see me but I'm watching you.", faceset="Crow.png")
+        self._boiteOutils.ajouterPensee("Did you really think you could leave us like this?", faceset="Crow.png")
+        self._boiteOutils.ajouterPensee("You've impressed me, humble hunter. I offer you a gift.", faceset="Crow.png")
+        self._boiteOutils.ajouterPensee("Take that key. It will open the door to the Heart of the Forest.", faceset="Crow.png")
+        self._boiteOutils.ajouterPensee("You'll find something hidden there. An ancient weapon.", faceset="Crow.png")
+        self._boiteOutils.ajouterPensee("If you truly are as humble as you claim to be,", faceset="Crow.png")
+        self._boiteOutils.ajouterPensee("You'll never be hungry again. But be careful.", faceset="Crow.png")
+        self._boiteOutils.ajouterPensee("If you ever befriend the people from the Northern Plains,", faceset="Crow.png")
+        self._boiteOutils.ajouterPensee("then you are truly lost. I'll be watching you. Good luck.", faceset="Crow.png")
+        self._etape += 1
+
+    def _traiter51(self):
+        if self._gestionnaire.yJoueur == 2 and (self._gestionnaire.xJoueur >= 7 and self._gestionnaire.xJoueur <= 9) and self._boiteOutils.interrupteurs["KeyForestFound"].voir() is True:
+            self._boiteOutils.joueurLibre.desactiver()
+            self._coefNoircisseur = 1
+            self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
+            Horloge.initialiser(id(self), "Noir", 100)
+            self._etape += 1
+
+    def _traiter52(self):
+        if Horloge.sonner(id(self), "Noir"):
+            self._coefNoircisseur += 1
+            self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
+            if self._coefNoircisseur == 12:
+                self._boiteOutils.retirerTransformation(True, "Noir")
+                self._boiteOutils.retirerTransformation(True, "Fog")
+                self._boiteOutils.teleporterSurCarte("EtageMaison", 7, 3, 2, "Bas")
+                self._etape += 1
+            else:
+                Horloge.initialiser(id(self), "Noir", 100)
+
+    def _traiter53(self):
+        if self._gestionnaire.nomCarte == "EtageMaison":
+            self._boiteOutils.ajouterPensee("I was home, at last.")
+            self._etape += 1
+
+    def _traiter54(self):
         pass
 
     def onMortAnimal(self, typeAnimal, viaChasse=False):
@@ -1075,15 +1134,10 @@ class God(PNJ):
             self._etapeTraitement += 1
 
     def _gererParalysie(self):
-        if self._sleeping:
-            return
-        elif self._boiteOutils.interrupteurs["ParalysieGods2"].voir():
-            self._lancerTrajet("Aucune", False)
-            self._sleeping = True
-        else:
-            self._majInfosJoueur()
-            if self._joueurBouge[0]:
-                self._lancerTrajet(self._boiteOutils.regardVersPnj("Joueur", self._xTile, self._yTile), False)
+        self._sleeping = True
+        self._majInfosJoueur()
+        if self._joueurBouge[0]:
+            self._lancerTrajet(self._boiteOutils.regardVersPnj("Joueur", self._xTile, self._yTile), False)
 
     def _gererEtapeDuckGod1(self):
         self._invitesConversation()
@@ -1252,16 +1306,17 @@ class SpeakingDoor(EvenementConcret):
     def _interactionLastDoor(self):
         if self._boiteOutils.interrupteurs["KeyFound"].voir() is False and self._boiteOutils.interrupteurs["ParalysieGods2"].voir() is True:
             if self._passwordAsked is False:
-                self._boiteOutils.ajouterPensee("Look, mortal, I'm locked. And I doubt you have the key.", tempsLecture=0)
+                self._boiteOutils.ajouterPensee("Look, mortal, I'm locked. And I doubt my master gave you the key.", tempsLecture=0)
                 self._passwordAsked = True
             else:
-                self._boiteOutils.ajouterPensee("Why do you even come back? You don't have the key, it's pointless.", tempsLecture=0)
+                self._boiteOutils.ajouterPensee("Why do you even come back? It's pointless, my master won't give it to a man.", tempsLecture=0)
         elif self._boiteOutils.interrupteurs["KeyFound"].voir() is True:
             self._boiteOutils.ajouterPensee("What? You...you've found the key? Dammit. That was unexpected.", tempsLecture=0)
             Horloge.initialiser(id(self), "Ouverture", 2000)
 
     def traiter(self):
         if Horloge.sonner(id(self), "Ouverture"):
+            self._boiteOutils.jouerSon("DoorOpening", "Door Maison Gods Speaking")
             ouvrirPorte(self._boiteOutils, self._x, self._y)
 
 class Bottle(EvenementConcret):
@@ -1281,7 +1336,7 @@ class Bottle(EvenementConcret):
             elif self._couleur == "Green":
                 self._boiteOutils.ajouterPensee("The green bottle was filled with tiny blood-red petals. The label read:")
                 self._boiteOutils.ajouterPensee("“Devil Tea from the Heart of the Forest. To drink in emergency. Immediate effects.”", tempsLecture=0)
-        elif self._penseePossible.voir() is True and self._boiteOutils.interrupteurs["JoueurServiteur"].voir() is True and self._boiteOutils.interrupteurs["TeapotFilled"].voir() is False and self._boiteOutils.interrupteurs["TeapotInHands"].voir() is True:
+        elif self._boiteOutils.interrupteurs["JoueurServiteur"].voir() is True and self._boiteOutils.interrupteurs["TeapotFilled"].voir() is False and self._boiteOutils.interrupteurs["TeapotInHands"].voir() is True:
             if self._filling is False:
                 self._boiteOutils.jouerSon("BruitThe", "BruitTheFilling")
                 Horloge.initialiser(id(self), "Filling over", 3000)
@@ -1319,7 +1374,7 @@ class Cake(EvenementConcret):
             if self._cakeEaten is False:
                 self._boiteOutils.ajouterPensee("I saw a piece of strawberry cake. It looked delicious.")
             self._boiteOutils.ajouterPensee("There was a note nearby. It read:")
-            self._boiteOutils.ajouterPensee("“Eat me, then rest. You might reach a sweeter dream. Or a nightmare.”", tempsLecture=0)
+            self._boiteOutils.ajouterPensee("“To leave this dream, eat me, then rest.”", tempsLecture=0)
             self._boiteOutils.ajouterTransformation(True, "SplashText Cake", texte="Press Z again to eat the cake", antialias=True, position=(10,30), couleurTexte=(255,255,255), taille=30, alpha=255)
             Horloge.initialiser(id(self), "Splash", 3000)
             self._messagePrinted = True
@@ -1334,6 +1389,17 @@ class Cake(EvenementConcret):
     def traiter(self):
         if Horloge.sonner(id(self), "Splash"):
             self._boiteOutils.retirerTransformation(True, "SplashText Cake")
+
+class ForestKey(EvenementConcret):
+    def __init__(self, jeu, gestionnaire):
+        EvenementConcret.__init__(self, jeu, gestionnaire)
+        self._clePrise = False
+        
+    def _onJoueurInteractionQuelconque(self, x, y, c, direction):
+        if self._clePrise is False:
+            self._clePrise = True
+            self._boiteOutils.changerBloc(8, 68, 3, None, None, None, True, vide=True)
+            self._boiteOutils.interrupteurs["KeyForestFound"].activer()
 
 def fermerPorte(boiteOutils, x, y):
     boiteOutils.changerBloc(x, y, 3, "woodland_indoor_x3.png", (0,0,32,32), (0,0,0), True)
