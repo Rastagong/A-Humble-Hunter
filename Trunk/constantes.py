@@ -34,8 +34,10 @@ FENETRE["largeurFenetre"] = 384
 FENETRE["largeurFenetreReelle"] = 416
 FENETRE["couleurFenetre"] = (0,0,0) ##Couleur de fond de la fenêtre (hors zones spéciales comme tileset, outils...)
 FENETRE["titreFenetre"] = "A Humble Hunter"
-FENETRE["flagsFenetre"] = DOUBLEBUF#|FULLSCREEN|HWSURFACE
+FENETRE["flagsFenetre"] = DOUBLEBUF#|FULLSCREEN#|HWSURFACE
 FENETRE["forceDirectX"] = False
+FENETRE["positionX"] = 100
+FENETRE["positionY"] = 100
 
 VITESSE_PENSEE_PAR_DEFAUT = 40
 TAILLE_POLICE_PAR_DEFAUT = 16
@@ -48,7 +50,7 @@ VITESSE_DEPLACEMENT_FLECHE = 800
 NOMBRE_CANAUX_SONS = 50
 VOLUME_MUSIQUE = 1.0
 VOLUME_LONGUE_MUSIQUE = 1.0
-JEU_MUET = True
+JEU_MUET = False
 
 VITESSE_DEPLACEMENT_JOUEUR_PAR_DEFAUT = 170
 LIMITER_FPS = False

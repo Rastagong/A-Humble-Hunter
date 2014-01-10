@@ -119,14 +119,15 @@ class Narrateur(Evenement):
     def __init__(self, jeu, gestionnaire):
         super().__init__(jeu, gestionnaire)
         self._penseePossible, self._etape, self._coefNoircisseur, self._alpha = InterrupteurInverse(self._boiteOutils.penseeAGerer), 0, 0, 255
-        self._messageBoutonInteraction, self._premiereMortChasse, self._traitement, etapeMax, i = False, False, dict(), 54, 0 
+        self._messageBoutonInteraction, self._premiereMortChasse, self._traitement, etapeMax, i = False, False, dict(), 55, 0 
         self._penseeMaisonGods = False
         while i <= etapeMax:
             self._traitement[i] = getattr(self, "_traiter"+str(i)) #On référence les fonctions de traitement dans un dico : elles ont pour nom _traiter0, _traiter1...
             i += 1
         ###
-        if LANCEMENT_ULTERIEUR is True:
-            self._etape = 35
+        if LANCEMENT_ULTERIEUR:
+            etapeLancementUlterieur = {"EtageMaison":23, "Entree Maison Gods":35, "Last Dream":49}
+            self._setDepart, self._etape = False, etapeLancementUlterieur[NOM_CARTE_LANCEMENT]
 
     def traiter(self):
         etapeActuelle = self._etape
@@ -174,8 +175,8 @@ class Narrateur(Evenement):
             self._boiteOutils.retirerTransformation(True, "SplashText Arrow")
             self._boiteOutils.ajouterTransformation(True, "SplashText Interaction1", texte="Press Z to interact", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=self._alpha)
             self._boiteOutils.ajouterTransformation(True, "SplashText Interaction2", texte="Or W on an AZERTY keyboard", antialias=True, couleurTexte=(255,255,255), position=(10, 40), taille=20, alpha=self._alpha)
-            self._gestionnaire.evenements["abstraits"]["Divers"]["GestionnaireAnimaux"].nombre["SquirrelMinimal"] = 0 #On ne restaure plus les écureuils...
-            self._gestionnaire.evenements["abstraits"]["Divers"]["GestionnaireAnimaux"].restaurerMortsParFuite = True #Sauf quand ils meurent par fuite
+            self._gestionnaire.evenements["abstraits"]["GestionnaireAnimaux"].nombre["SquirrelMinimal"] = 0 #On ne restaure plus les écureuils...
+            self._gestionnaire.evenements["abstraits"]["GestionnaireAnimaux"].restaurerMortsParFuite = True #Sauf quand ils meurent par fuite
         if Horloge.sonner(id(self), "Début SplashText Titre"):
             Horloge.initialiser(id(self), "Fin SplashText Titre", 5000)
             self._boiteOutils.ajouterTransformation(True, "SplashText Titre1", texte="A", antialias=True, couleurTexte=(255,255,255), position=(10, 0))
@@ -226,8 +227,8 @@ class Narrateur(Evenement):
             self._boiteOutils.interrupteurs["Rires"].desactiver()
             self._boiteOutils.ajouterPensee("They froze when they saw me. They wanted to see what I'd caught.")
             self._boiteOutils.interrupteurs["JoueurEntre"].activer()
-            self._gestionnaire.evenements["abstraits"]["Divers"]["SignaleurJoueur"].ajouterSignaleur("InterieurMaison", "JoueurEntre2", (10,4))
-            self._gestionnaire.evenements["abstraits"]["Divers"]["SignaleurJoueur"].ajouterSignaleur("InterieurMaison", "JoueurEntre3", (6,4))
+            self._gestionnaire.evenements["abstraits"]["SignaleurJoueur"].ajouterSignaleur("InterieurMaison", "JoueurEntre2", (10,4))
+            self._gestionnaire.evenements["abstraits"]["SignaleurJoueur"].ajouterSignaleur("InterieurMaison", "JoueurEntre3", (6,4))
             Horloge.initialiser(id(self), "Attente squirrelPose", 15000)
             self._etape += 1
 
@@ -279,7 +280,7 @@ class Narrateur(Evenement):
 
     def _traiter16(self):
         if Horloge.sonner(id(self), "Discussion attente"):
-            self._boiteOutils.ajouterPensee("There might be one solution, but I don't dread to think of it..", faceset="Chasseur.png")
+            self._boiteOutils.ajouterPensee("There might be one solution, but I dread to think of it..", faceset="Chasseur.png")
             self._boiteOutils.ajouterPensee("I've never been in the heart of the forest. The path is long,", faceset="Chasseur.png")
             self._boiteOutils.ajouterPensee("the Old Door is locked, but who knows what kind of game I could find there.", faceset="Chasseur.png")
             self._boiteOutils.ajouterPensee("Don't you think about it. No man, hunter or prince, dares to enter there.", faceset="Belia.png")
@@ -329,6 +330,8 @@ class Narrateur(Evenement):
         self._etape += 1
 
     def _traiter23(self):
+        if LANCEMENT_ULTERIEUR:
+            self._coefNoircisseur = 12
         if self._penseePossible.voir():
             self._boiteOutils.teleporterJoueurSurPosition(7, 3, "Bas")
             self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur, permanente=True)
@@ -477,12 +480,15 @@ class Narrateur(Evenement):
 
     def _gererSonsThe(self):
         if self._boiteOutils.interrupteurs["MusiqueThe"].voir() is True:
-            if Horloge.sonner(id(self), "Tea time1"):
-                self._boiteOutils.jouerSon("BruitsRepas", "Bruits repas Gods1", fixe=True, xFixe=71, yFixe=42)
-                Horloge.initialiser(id(self), "Tea time1", random.randint(3000,10000))
-            if Horloge.sonner(id(self), "Tea time2"):
-                self._boiteOutils.jouerSon("BruitThe", "Bruits repas Gods2", fixe=True, xFixe=71, yFixe=42)
-                Horloge.initialiser(id(self), "Tea time2", random.randint(10000,20000))
+            if self._etape != 39:
+                if Horloge.sonner(id(self), "Tea time1"):
+                    self._boiteOutils.jouerSon("BruitsRepas", "Bruits repas Gods1", fixe=True, xFixe=71, yFixe=42)
+                    Horloge.initialiser(id(self), "Tea time1", random.randint(3000,10000))
+                if Horloge.sonner(id(self), "Tea time2"):
+                    self._boiteOutils.jouerSon("BruitThe", "Bruits repas Gods2", fixe=True, xFixe=71, yFixe=42)
+                    Horloge.initialiser(id(self), "Tea time2", random.randint(10000,20000))
+            else:
+                pass
 
     def _traiter36(self):
         self._gererSonsThe()
@@ -509,13 +515,13 @@ class Narrateur(Evenement):
         self._gererSonsThe()
         if self._penseePossible.voir():
             self._boiteOutils.interrupteurs["DialogueVisiteur"].activer()
+            self._boiteOutils.interrupteurs["MusiqueThe"].activer()
             self._placesDisponibles = [(69,42), (69,43), (73,43)]
             self._etape += 1
 
     def _traiter39(self):
         self._gererSonsThe()
         if (self._gestionnaire.xJoueur,self._gestionnaire.yJoueur) in self._placesDisponibles and self._boiteOutils.interrupteurs["GodsAssis"].voir() is True:
-            self._boiteOutils.interrupteurs["MusiqueThe"].activer()
             self._boiteOutils.ajouterPensee("So what are we to do with this peasant?", faceset="Crow.png")
             self._boiteOutils.ajouterPensee("He is a hunter. And he lives on our very own lands, Sir Crow,", faceset="DuckGod.png")
             self._boiteOutils.ajouterPensee("in the Realm of the Forest. He's been there for years.", faceset="DuckGod.png")
@@ -542,7 +548,6 @@ class Narrateur(Evenement):
             self._etape += 1
 
     def _traiter40(self):
-        self._gererSonsThe()
         if self._penseePossible.voir():
             if self._boiteOutils.interrupteurs["NouvelleMission"].voir() is False:
                 self._boiteOutils.ajouterPensee("Now “humble” hunter, come here, will you? I've got work for you.", faceset="WizardGod.png")
@@ -552,7 +557,6 @@ class Narrateur(Evenement):
             self._etape += 1
 
     def _traiter41(self):
-        self._gererSonsThe()
         if self._boiteOutils.interrupteurs["MissionTerminee"].voir() is True:
             if self._boiteOutils.variables["TeaGiven"] == "Green":
                 self._etape += 1
@@ -576,10 +580,10 @@ class Narrateur(Evenement):
         self._etape += 1
 
     def _traiter43(self):
-        self._gererSonsThe()
         if self._penseePossible.voir():
             self._boiteOutils.arreterSonEnFondu("Tea Music", 3000)
             self._boiteOutils.interrupteurs["MusiqueThe"].desactiver()
+            self._gestionnaire.evenements["concrets"]["Maison Gods"]["Bruiteur"][0]._pause = False
             self._boiteOutils.interrupteurs["ParalysieGods1"].activer()
             self._boiteOutils.ajouterPensee("Well played, clever hunter, well played.", faceset="WizardGod.png")
             self._boiteOutils.ajouterPensee("He served us some Devil Tea from the Heart of the Forest.", faceset="WizardGod.png")
@@ -616,12 +620,16 @@ class Narrateur(Evenement):
         if self._penseePossible.voir():
             self._boiteOutils.teleporterSurCarte("Last Dream", 8, 96, 2, "Bas")
             Horloge.initialiser(id(self), "Noir", 1)
-            self._boiteOutils.ajouterTransformation(True, "Fog")
             self._etape += 1
 
     def _traiter49(self):
+        if LANCEMENT_ULTERIEUR and self._setDepart is False:
+            Horloge.initialiser(id(self), "Noir", 1)
+            self._coefNoircisseur, self._setDepart = 12, True
+            self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
         if self._gestionnaire.nomCarte == "Last Dream" and Horloge.sonner(id(self), "Noir"):
             self._boiteOutils.joueurLibre.activer()
+            self._boiteOutils.ajouterTransformation(True, "Fog")
             self._coefNoircisseur -= 1
             self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
             if self._coefNoircisseur == 1:
@@ -644,8 +652,7 @@ class Narrateur(Evenement):
         self._etape += 1
 
     def _traiter51(self):
-        if self._gestionnaire.yJoueur == 2 and (self._gestionnaire.xJoueur >= 7 and self._gestionnaire.xJoueur <= 9) and self._boiteOutils.interrupteurs["KeyForestFound"].voir() is True:
-            self._boiteOutils.joueurLibre.desactiver()
+        if self._penseePossible.voir() and self._gestionnaire.yJoueur == 2 and (self._gestionnaire.xJoueur >= 7 and self._gestionnaire.xJoueur <= 9) and self._boiteOutils.interrupteurs["KeyForestFound"].voir() is True:
             self._coefNoircisseur = 1
             self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
             Horloge.initialiser(id(self), "Noir", 100)
@@ -656,19 +663,25 @@ class Narrateur(Evenement):
             self._coefNoircisseur += 1
             self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
             if self._coefNoircisseur == 12:
-                self._boiteOutils.retirerTransformation(True, "Noir")
-                self._boiteOutils.retirerTransformation(True, "Fog")
-                self._boiteOutils.teleporterSurCarte("EtageMaison", 7, 3, 2, "Bas")
+                self._boiteOutils.teleporterSurCarte("EtageMaison", 6, 3, 2, "Bas")
                 self._etape += 1
             else:
                 Horloge.initialiser(id(self), "Noir", 100)
 
     def _traiter53(self):
         if self._gestionnaire.nomCarte == "EtageMaison":
-            self._boiteOutils.ajouterPensee("I was home, at last.")
+            self._boiteOutils.retirerTransformation(True, "Noir")
+            self._boiteOutils.retirerTransformation(True, "Fog")
+            self._boiteOutils.joueurLibre.activer()
+            Horloge.initialiser(id(self), "Retour Maison", 3000)
             self._etape += 1
 
     def _traiter54(self):
+        if Horloge.sonner(id(self), "Retour Maison"):
+            self._boiteOutils.ajouterPensee("I was home, at last.")
+            self._etape += 1
+
+    def _traiter55(self):
         pass
 
     def onMortAnimal(self, typeAnimal, viaChasse=False):
@@ -677,7 +690,7 @@ class Narrateur(Evenement):
 
     def onChangementCarte(self, carteQuittee, carteEntree):
         if carteQuittee == "InterieurMaison" and carteEntree == "Maison Dream":
-            self._boiteOutils.arreterSonEnFondu("Forest Night", 3000)
+            self._boiteOutils.enleverInstanceSon("", "It's the night")
 
 class DuckGod(PNJ):
     def __init__(self, jeu, gestionnaire, x, y, c, directionDepart):
@@ -690,7 +703,8 @@ class DuckGod(PNJ):
         self._surPlace, self._poursuiteJoueur, self._attenteJoueur, self._premierMouvementJoueur = False, False, False, False
         ###
         if LANCEMENT_ULTERIEUR is True:
-            self._etapeTraitement = 15
+            etapeLancementUlterieur = {"Entree Maison Gods":15}
+            self._etapeTraitement = etapeLancementUlterieur.get(NOM_CARTE_LANCEMENT, 0) 
     
     def _ajusterPositionSource(self, enMarche, direction):
         self._positionSource.left, self._positionSource.top = 0, 0
@@ -992,7 +1006,7 @@ class Feu(PNJ):
 class Bruiteur(EvenementConcret):
     def __init__(self, jeu, gestionnaire):
         EvenementConcret.__init__(self, jeu, gestionnaire)
-        self._sonsLances, self._volume1, self._volume2 = False, VOLUME_MUSIQUE, 0.0
+        self._sonsLances, self._volume1, self._volume2, self._pause = False, VOLUME_MUSIQUE, 0.0, False
 
     def traiter(self):
         if self._sonsLances is False:
@@ -1000,9 +1014,9 @@ class Bruiteur(EvenementConcret):
             self._boiteOutils.jouerSon("TeaMusic", "Tea Music", volume=0, nombreEcoutes=0)
             self._sonsLances = True
         if self._gestionnaire.xJoueur < 59 and self._gestionnaire.yJoueur < 15:
-            self._volume1, self._volume2 = 1.0, 0
-        elif self._gestionnaire.xJoueur >= 67:
-            self._volume1, self._volume2 = 0, 1.0
+            self._volume1, self._volume2 = 1.0, 0.0
+        elif self._gestionnaire.xJoueur >= 67 or (self._gestionnaire.xJoueur > 59 and self._gestionnaire.yJoueur < 36):
+            self._volume1, self._volume2 = 0.0, 1.0
         else: #Zone de transition
             self._volume1 = 1.0 - ((self._gestionnaire.yJoueur - 30) / 10)
             distanceY = 41 - self._gestionnaire.yJoueur
@@ -1020,12 +1034,19 @@ class Bruiteur(EvenementConcret):
                 elif distanceX == 1:
                     self._volume2 = 0.9
         if not JEU_MUET:
+            print(self._pause,self._boiteOutils.interrupteurs["MusiqueThe"].voir() )
             if self._boiteOutils.interrupteurs["MusiqueThe"].voir() is False:
-                self._volume2 = 0
-            if self._boiteOutils.getVolumeInstance("Lava") != self._volume1: 
-                self._boiteOutils.changerVolumeInstance("Lava", self._volume1)
-            if self._boiteOutils.getVolumeInstance("Tea Music") != self._volume2: 
-                self._boiteOutils.changerVolumeInstance("Tea Music", self._volume2)
+                if self._pause is False:
+                    self._pause = True
+                    self._boiteOutils.arreterSonEnFondu("Tea Music", 3000)
+            else:
+                if self._pause is True:
+                    self._pause = False
+                    self._boiteOutils.jouerSon("TeaMusic", "Tea Music", volume=self._volume2, nombreEcoutes=0)
+                if self._boiteOutils.getVolumeInstance("Lava") != self._volume1: 
+                    self._boiteOutils.changerVolumeInstance("Lava", self._volume1)
+                if self._boiteOutils.getVolumeInstance("Tea Music") != self._volume2: 
+                    self._boiteOutils.changerVolumeInstance("Tea Music", self._volume2)
 
 class SkullRing(EvenementConcret):
     def __init__(self, jeu, gestionnaire):
@@ -1326,8 +1347,8 @@ class Bottle(EvenementConcret):
         self._penseePossible = InterrupteurInverse(self._boiteOutils.penseeAGerer)
 
     def _onJoueurInteractionQuelconque(self, x, y, c, direction):
-        if self._penseePossible.voir() and self._filling is False:
-            self._boiteOutils.ajouterTransformation(True, "SplashText Tea", texte="Press Z quickly to fill the teapot", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=255)
+        if self._penseePossible.voir() and self._filling is False and self._splash is False:
+            self._boiteOutils.ajouterTransformation(True, "SplashText Tea"+self._couleur, texte="Press Z quickly to fill the teapot", antialias=True, couleurTexte=(255,255,255), position=(10, 10), taille=30, alpha=255)
             Horloge.initialiser(id(self), "SplashText", 5000)
             self._splash = True
             if self._couleur == "Blue":
@@ -1347,8 +1368,9 @@ class Bottle(EvenementConcret):
         if self._filling:
             if Horloge.sonner(id(self), "Filling over"):
                 self._boiteOutils.interrupteurs["TeapotFilled"].activer()
-                self._boiteOutils.retirerTransformation(True, "SplashText Tea")
-                self._boiteOutils.ajouterTransformation(True, "SplashText Filled", texte="Teapot filled with the {0} bottle".format(self._couleur.lower()), antialias=True, couleurTexte=(255,255,255), position=(10,10), taille=30, alpha=255)
+                self._boiteOutils.retirerTransformation(True, "SplashText Tea"+self._couleur)
+                self._splash = True
+                self._boiteOutils.ajouterTransformation(True, "SplashText Filled"+self._couleur, texte="Teapot filled with the {0} bottle".format(self._couleur.lower()), antialias=True, couleurTexte=(255,255,255), position=(10,10), taille=30, alpha=255)
                 Horloge.arreterSonnerie(id(self), "Filling deadline")
                 Horloge.initialiser(id(self), "SplashText", 5000)
                 self._boiteOutils.variables["TeaGiven"] = self._couleur
@@ -1358,8 +1380,8 @@ class Bottle(EvenementConcret):
                 Horloge.arreterSonnerie(id(self), "Filling over")
         if self._splash:
             if Horloge.sonner(id(self), "SplashText"):
-                self._boiteOutils.retirerTransformation(True, "SplashText Tea")
-                self._boiteOutils.retirerTransformation(True, "SplashText Filled")
+                self._boiteOutils.retirerTransformation(True, "SplashText Tea"+self._couleur)
+                self._boiteOutils.retirerTransformation(True, "SplashText Filled"+self._couleur)
                 self._splash = False
 
 class Cake(EvenementConcret):
@@ -1573,7 +1595,7 @@ class Gibier(PNJ):
                 self._boiteOutils.supprimerPNJ(self._nom, self._c)
                 self._gestionnaire.ajouterEvenementATuer("concrets", self._jeu.carteActuelle.nom, self._nom)
                 self._gestionnaireAnimaux.onMortAnimal(self._typeAnimal)
-                self._gestionnaire.evenements["abstraits"]["Divers"]["Narrateur"].onMortAnimal(self._typeAnimal)
+                self._gestionnaire.evenements["abstraits"]["Narrateur"].onMortAnimal(self._typeAnimal)
         if self._animationMort is True and self._xTile == self._tileCadavre[0] and self._yTile == self._tileCadavre[1] and self._cadavreEnPlace is False:
             self._cadavreEnPlace = True
 
@@ -1590,7 +1612,7 @@ class Gibier(PNJ):
             self._finirDeplacementSP()
             self._trouverTileCadavre()
             self._gestionnaireAnimaux.onMortAnimal(self._typeAnimal, viaChasse=True)
-            self._gestionnaire.evenements["abstraits"]["Divers"]["Narrateur"].onMortAnimal(self._typeAnimal, viaChasse=True)
+            self._gestionnaire.evenements["abstraits"]["Narrateur"].onMortAnimal(self._typeAnimal, viaChasse=True)
             self._changerCouche(self._c-1)
             self._lancerTrajet(Rect(self._tileCadavre[0]*32, self._tileCadavre[1]*32, 32, 32), False, deplacementLibre=True)
             self._vulnerable, self._fuite, self._animationMort = False, False, True

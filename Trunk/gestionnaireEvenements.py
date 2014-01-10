@@ -58,7 +58,7 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
         elif NOM_CARTE_LANCEMENT == "InterieurMaison":
             self._evenements["concrets"]["InterieurMaison"]["Joueur"] = [ Joueur(self._jeu, self, 1, 4, 2, fichier="Chasseur.png"), (7, 13), "Haut", 2]
         elif NOM_CARTE_LANCEMENT == "EtageMaison":
-            self._evenements["concrets"]["EtageMaison"]["Joueur"] = [Joueur(self._jeu, self, 3, 5, 2, fichier="Chasseur.png"), (3,5), "Bas", 2]
+            self._evenements["concrets"]["EtageMaison"]["Joueur"] = [Joueur(self._jeu, self, 7, 3, 2, fichier="Chasseur.png"), (3,5), "Bas", 2]
         elif NOM_CARTE_LANCEMENT == "Maison Dream":
             #self._evenements["concrets"]["Maison Dream"]["Joueur"] = [ Joueur(self._jeu, self, 10, 18, 2, fichier="Chasseur.png"), (5,6), "Bas", 2]
             self._evenements["concrets"]["Maison Dream"]["Joueur"] = [ Joueur(self._jeu, self, 169, 37, 2, fichier="Chasseur.png"), (5,6), "Bas", 2]
@@ -70,15 +70,15 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
             self._evenements["concrets"]["Last Dream"]["Joueur"] = [Joueur(self._jeu, self, 8, 96, 2, fichier="Chasseur.png"), (8,96), "Bas", 2]
         j, self._positionJoueur = self._jeu.joueur, None
         self.registerPositionInitialeJoueur(NOM_CARTE_LANCEMENT)
-        self._evenements["abstraits"]["Divers"] = OrderedDict()
-        self._evenements["abstraits"]["Divers"]["ModulateurMusique"] = ModulateurMusique(self._jeu, self)
-        self._evenements["abstraits"]["Divers"]["LanceurMusique"] = LanceurMusique(self._jeu, self)
-        self._evenements["abstraits"]["Divers"]["AnimateurToucheAction"] = AnimateurToucheAction(self._jeu, self)
-        self._evenements["abstraits"]["Divers"]["LanceurFleches"] = LanceurFleches(self._jeu, self)
-        self._evenements["abstraits"]["Divers"]["Narrateur"] = Narrateur(self._jeu, self)
-        self._evenements["abstraits"]["Divers"]["GestionnaireAnimaux"] = GestionnaireAnimaux(self._jeu, self)
-        self._evenements["abstraits"]["Divers"]["SignaleurJoueur"] = SignaleurJoueur(self._jeu, self)
-        #self._evenements["abstraits"]["Divers"]["BruiteurPasJoueur"] = BruiteurPasJoueur(self._jeu, self)
+        self._evenements["abstraits"] = OrderedDict()
+        self._evenements["abstraits"]["ModulateurMusique"] = ModulateurMusique(self._jeu, self)
+        self._evenements["abstraits"]["LanceurMusique"] = LanceurMusique(self._jeu, self)
+        self._evenements["abstraits"]["AnimateurToucheAction"] = AnimateurToucheAction(self._jeu, self)
+        self._evenements["abstraits"]["LanceurFleches"] = LanceurFleches(self._jeu, self)
+        self._evenements["abstraits"]["Narrateur"] = Narrateur(self._jeu, self)
+        self._evenements["abstraits"]["GestionnaireAnimaux"] = GestionnaireAnimaux(self._jeu, self)
+        self._evenements["abstraits"]["SignaleurJoueur"] = SignaleurJoueur(self._jeu, self)
+        #self._evenements["abstraits"]["BruiteurPasJoueur"] = BruiteurPasJoueur(self._jeu, self)
 
     def chargerEvenements(self, nomCarte):
         if nomCarte == "Clairiere" and nomCarte not in self._cartesChargees:
@@ -94,16 +94,17 @@ class MonGestionnaireEvenements(GestionnaireEvenements):
             self._evenements["concrets"]["Maison"]["SortieCheminClairiere2"] = [Teleporteur(self._jeu, self, "CheminClairiere", 4, 29, 2, "Haut"), (15, 0), "Aucune"]
             self._evenements["concrets"]["Maison"]["SortieInterieurMaison"] = [Porte(self._jeu, self, "InterieurMaison", False, "HyptosisMaison.png", (64, 64, 32, 32), (64, 0, 32, 32), 3, 4, 2, 13, 3, 2, "Haut"), (3, 4), "Aucune"]
         elif nomCarte == "InterieurMaison"  and nomCarte not in self._cartesChargees:
-            self._evenements["concrets"]["InterieurMaison"]["SortieExterieur"] = [Teleporteur(self._jeu, self, "Maison", 3, 5, 2, "Bas"), (13, 3), "Aucune"]
+            #self._evenements["concrets"]["InterieurMaison"]["SortieExterieur"] = [Teleporteur(self._jeu, self, "Maison", 3, 5, 2, "Bas"), (13, 3), "Aucune"]
             self._evenements["concrets"]["InterieurMaison"]["SortieEtage"] = [Teleporteur(self._jeu, self, "EtageMaison", 1, 3, 2, "Bas"), (1, 3), "Aucune"]
-            self._evenements["concrets"]["InterieurMaison"]["Belia"] = [MembreFamille(Belia(self._jeu, self)), (7,6), "Bas"]
-            self._evenements["concrets"]["InterieurMaison"]["Tom"] = [MembreFamille(Enfant(self._jeu, self, "Tom", 1, 4, 2)), (1, 4), "Bas"]
-            self._evenements["concrets"]["InterieurMaison"]["Elie"] = [MembreFamille(Enfant(self._jeu, self, "Elie", 1, 8, 2)), (1, 8), "Bas"]
+            #self._evenements["concrets"]["InterieurMaison"]["Belia"] = [MembreFamille(Belia(self._jeu, self)), (7,6), "Bas"]
+            #self._evenements["concrets"]["InterieurMaison"]["Tom"] = [MembreFamille(Enfant(self._jeu, self, "Tom", 1, 4, 2)), (1, 4), "Bas"]
+            #self._evenements["concrets"]["InterieurMaison"]["Elie"] = [MembreFamille(Enfant(self._jeu, self, "Elie", 1, 8, 2)), (1, 8), "Bas"]
             self._evenements["concrets"]["InterieurMaison"]["TableSquirrel"] = [TableSquirrel(self._jeu, self), (5, 5), "Aucune"]
             self._evenements["concrets"]["InterieurMaison"]["TableNuts"] = [TableNuts(self._jeu, self, 7, 12), (7, 12), "Aucune"]
             self._evenements["concrets"]["InterieurMaison"]["TableNuts2"] = [TableNuts(self._jeu, self, 7, 13), (7, 13), "Aucune"]
         elif nomCarte == "EtageMaison" and nomCarte not in self._cartesChargees:
             self._evenements["concrets"]["EtageMaison"]["Sortie"] = [Teleporteur(self._jeu, self, "InterieurMaison", 1, 3, 2, "Bas", condition="escalierLibre"), (1,3), "Aucune" ]
+            self._evenements["concrets"]["InterieurMaison"]["SortieExterieur"] = [Teleporteur(self._jeu, self, "Maison", 3, 5, 2, "Bas"), (13, 3), "Aucune"]
         elif nomCarte == "Maison Dream" and nomCarte not in self._cartesChargees:
             self._evenements["concrets"]["Maison Dream"]["Feu"] = [Feu(self._jeu, self, 169, 34, 3), (169, 34), "Bas"]
             self._evenements["concrets"]["Maison Dream"]["VersMaisonGods"] = [Teleporteur(self._jeu, self, "Entree Maison Gods", 9, 9, 2, fonctionApres=annulerFog), (285,21), "Aucune"]
