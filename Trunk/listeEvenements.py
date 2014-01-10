@@ -1034,7 +1034,7 @@ class Bruiteur(EvenementConcret):
                 elif distanceX == 1:
                     self._volume2 = 0.9
         if not JEU_MUET:
-            print(self._pause,self._boiteOutils.interrupteurs["MusiqueThe"].voir() )
+            #print(self._pause,self._boiteOutils.interrupteurs["MusiqueThe"].voir() )
             if self._boiteOutils.interrupteurs["MusiqueThe"].voir() is False:
                 if self._pause is False:
                     self._pause = True

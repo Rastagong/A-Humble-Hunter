@@ -20,7 +20,7 @@ import pygame
 from pygame.locals import *
 
 NOM_CARTE_LANCEMENT = "Clairiere"
-LANCEMENT_ULTERIEUR = True
+LANCEMENT_ULTERIEUR = False
 if LANCEMENT_ULTERIEUR is True:
     NOM_CARTE_LANCEMENT = "Entree Maison Gods"
 DOSSIER_RESSOURCES = "Resources"
