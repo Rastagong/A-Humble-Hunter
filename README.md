@@ -19,9 +19,11 @@ Made with Python 3, Pygame and my own RPG engine, the Narro Engine (v0.3). Repo:
    If you don't find them there, you may try here for Windows: http://www.lfd.uci.edu/~gohlke/pythonlibs/#pygame.  
    For Linux, you'll have to look in the Mercurial repo: https://bitbucket.org/pygame/pygame/downloads.  
 
-2. Download a source release from the _Releases_ folder (coming soon).  
+2. Download the trunk of the Narro engine: https://github.com/Rastagong/narro.  
+   Download the trunk from of A Humble Hunter. Change the first line in _path.py so that it points towards the location of the Narro engine.
 
-3. Run "python play.py" to launch the game.
+3. Run "python play.py" to launch the game.  
+   You can change some settings in constantes.py. Set LANCEMENT_ULTERIEUR to False to start from the beginning.
 
 3\. License and attribution
 ---------------------
